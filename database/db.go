@@ -8,76 +8,145 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Database struct holds the path to the database and the database connection.
 type Database struct {
 	path string
 	db   *sql.DB
 }
 
+// exists checks if the database file exists.
+// Returns a boolean.
 func (d *Database) exists() bool {
 	_, err := os.Stat(d.path)
 	return !os.IsNotExist(err)
 }
 
-func (d *Database) SetupDatabase(path string) error {
+// SetupDatabase creates a new database object and opens the database at the given path.
+// If the database does not exist, it will create a new database with the default schema.
+// Returns a pointer to the database object and an error.
+func SetupDatabase(path string) (*Database, error) {
+	d := Database{}
 	d.path = path
 	err := d.open()
+
 	if err != nil {
-		return err
+		return nil, err
 	} else {
 		if !d.exists() {
-			fmt.Println("Warning: ", fmt.Sprintf("Database '%s' does not exist.", d.path), "Creating new database.")
-			return d.CreateDefaultDB()
+			fmt.Println("Warning: ", fmt.Sprintf("Database file '%s' does not exist.", d.path), "Creating empty file.")
+			return &d, d.createDefaultDB()
 
 		} else {
-			fmt.Println("Database exists")
-			return nil
+			fmt.Println("Database file exists already.")
+			return &d, nil
 		}
 	}
 }
 
+// open runs the sql open command on the database path and returns the error.
 func (d *Database) open() error {
-	var err error
-	d.db, err = sql.Open("sqlite3", d.path)
 
+	db, err := sql.Open("sqlite3", d.path)
+	if err == nil {
+		d.db = db
+	}
 	return err
 }
 
+// Close closes the database connection.
+// Should be deferred after opening the database.
 func (d *Database) Close() {
 	d.db.Close()
 }
 
-func (d *Database) CreateDefaultDB() error {
-	createCommand := `
+// runTransaction runs a transaction on the database.
+// It takes a map of commands and runs them in a transaction.
+// If any of the commands fail, it will rollback the transaction.
+// Returns an error.
+func (d *Database) runTransaction(statements map[string]string) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	for key, statement := range statements {
+		_, err := tx.Exec(statement)
+		if err != nil {
+			fmt.Printf("Error: Failed to execute command '%s': %v\nSQL: %s\n", key, err, statement)
+			fmt.Println("Rolling Back transaction.")
+			err := tx.Rollback()
+			if err != nil {
+				fmt.Println("Error: Failed to rollback transaction.", err)
+			} else {
+				fmt.Println("Transaction rolled back successfully.")
+			}
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+// createEmptyDB creates an empty database with the default schema.
+// Returns an error.
+func (d *Database) createEmptyDB() error {
+	statements := map[string]string{
+		"metadataTable": `
 		CREATE TABLE metadata (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        version TEXT NOT NULL);`,
 
-        version TEXT NOT NULL
-    	);
-	
-
+		"categoriesTable": `
 		CREATE TABLE categories (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-		name TEXT NOT NULL,
+		name TEXT NOT NULL, 
 		columns TEXT NOT NULL
-		);
+		)`,
 
-
+		"datatypesTable": `
 		CREATE TABLE datatypes (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
-
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-		)		
-		`
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		variable_type TEXT NOT NULL,
+		completion_value TEXT NOT NULL,
+		completion_sort TEXT NOT NULL, 
+		value_check TEXT NOT NULL
+		)`,
+	}
+	return d.runTransaction(statements)
+}
 
-	_, err := d.db.Exec(createCommand)
+// populateDB populates the database with the default values.
+// for now, it only inserts the current version of the database.
+// Returns an error.
+func (d *Database) populateDB() error {
+	currentVersion := "0.0.1"
+	statements := map[string]string{
+		"version": fmt.Sprintf(`INSERT INTO metadata (version) VALUES ('%s')`, currentVersion),
+	}
+	return d.runTransaction(statements)
+}
 
-	return err
+// createDefaultDB creates an empty database with the default schema and populates it with the default values.
+// it calls createEmptyDB and populateDB functions internally.
+// Returns an error.
+func (d *Database) createDefaultDB() error {
+	err := d.createEmptyDB()
+	if err != nil {
+		fmt.Println("Error: Failed to create empty database.", err)
+		return err
+	} else {
+		fmt.Println("Empty database created successfully.")
+		err := d.populateDB()
+		if err != nil {
+			fmt.Println("Error: Failed to populate database.", err)
+		} else {
+			fmt.Println("Database populated successfully.")
+		}
+		return err
+	}
 }
