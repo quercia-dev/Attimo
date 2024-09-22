@@ -114,7 +114,7 @@ func (d *Database) createEmptyDB() error {
 		variable_type TEXT NOT NULL,
 		completion_value TEXT NOT NULL,
 		completion_sort TEXT NOT NULL, 
-		value_check TEXT NOT NULL
+		value_check TEXT NOT NULL DEFAULT 'DEFAULT'
 		)`,
 	}
 	return d.runTransaction(statements)
@@ -127,6 +127,31 @@ func (d *Database) populateDB() error {
 	currentVersion := "0.0.1"
 	statements := map[string]string{
 		"version": fmt.Sprintf(`INSERT INTO metadata (version) VALUES ('%s')`, currentVersion),
+
+		"data types": `
+		INSERT INTO datatypes (name, variable_type, completion_value, completion_sort, value_check) VALUES
+		('Note', 'TEXT', 'none', 'frequency', 'DEFAULT'),
+		('created', 'DATETIME', 'DATE', 'NONE', 'DEFAULT'),
+		('updated', 'DATETIME', 'DATE', 'NONE', 'DEFAULT'),
+		('opened', 'DATETIME', 'DATE', 'NONE', 'DEFAULT'),
+		('closed', 'DATETIME', 'DATE', 'NONE', 'DEFAULT'),
+		('File', 'TEXT', 'FILE', 'NONE', 'DEFAULT'),
+		('Image', 'TEXT', 'FILE(IMAGE)', 'NONE', 'DEFAULT'),
+		('Location', 'TEXT', 'OTHERS', 'FREQUENCY', 'DEFAULT'),
+		('URL', 'TEXT', 'OTHERS', 'LENGTH', 'DEFAULT'),
+		('Email', 'TEXT', 'EMAIL', 'FREQUENCY', 'DEFAULT'),
+		('Phone', 'TEXT', 'PHONE', 'FREQUENCY', 'DEFAULT'),
+		('Cost (USD)', 'TEXT', 'NUMBER', 'NONE', 'DEFAULT'),
+		('Color', 'TEXT', 'COLOR', 'FREQUENCY', 'DEFAULT')`,
+
+		// dummy data for now to test the database
+		"categories": `
+		INSERT INTO categories (name, columns) VALUES
+		('General', 'created, updated, opened, closed, Note'),
+		('Files', 'created, updated, opened, closed, File, Image'),
+		('Contact', 'created, updated, opened, closed, Location, URL, Email, Phone'),
+		('Finance', 'created, updated, opened, closed, Cost'),
+		('Miscellaneous', 'created, updated, opened, closed, Color')`,
 	}
 	return d.runTransaction(statements)
 }
