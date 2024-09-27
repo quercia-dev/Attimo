@@ -11,31 +11,39 @@ import (
 
 // Database struct holds the path to the database and the GORM database connection.
 type Database struct {
-	Path string
-	DB   *gorm.DB
+	Path   string
+	DB     *gorm.DB
+	config *gorm.Config
 }
 
 // Metadata struct holds the metadata of the database.
 type Metadata struct {
 	gorm.Model
-	Version string
+	Version string `gorm:"not null"`
 }
 
 // Category struct holds the category information.
 type Category struct {
 	gorm.Model
-	Name    string
-	Columns json.RawMessage
+	Name    string          `gorm:"not null"`
+	Columns json.RawMessage `gorm:"not null"`
 }
 
 // Datatype struct holds the datatype information.
 type Datatype struct {
 	gorm.Model
-	Name            string
-	VariableType    string
-	CompletionValue string
-	CompletionSort  string
-	ValueCheck      string
+	Name         string `gorm:"not null"`
+	VariableType string `gorm:"not null"`
+	// CompletionValue is a string that determines how to complete the value of the field
+	// if the CompletionValue field is 'no', the value will not be completed and CompletionSort will be ignored
+	CompletionValue string `gorm:"not null"`
+	// CompletionSort is a string that determines how to sort the completion values
+	// if the CompletionSort field is 'no', the values will be displayed in the order they were provided by the CompletionValue field
+	CompletionSort string `gorm:"not null"`
+	// ValueCheck is a string that determines how to validate the value of the field
+	// if the ValueCheck field is empty, the value will be validated with the default validation function, taken from the VariableType field
+	// if the ValueCheck field is 'no', the value will not be validated
+	ValueCheck string `gorm:"not null"`
 }
 
 // SetupDatabase initializes a Database struct and opens the database at the given path.
@@ -50,15 +58,18 @@ func SetupDatabase(path string) (*Database, error) {
 		fmt.Println("Database file exists already.")
 	}
 
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+	d.config = &gorm.Config{}
+
+	db, err := gorm.Open(sqlite.Open(path), d.config)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to connect to database: %w", err)
+		return nil, fmt.Errorf("error: failed to connect to database: %w", err)
 	}
 
 	d.DB = db
+	d.config.Logger = d.DB.Logger.LogMode(3)
 
 	if err := d.createDefaultDB(); err != nil {
-		return nil, fmt.Errorf("Failed to create default DB: %w", err)
+		return nil, fmt.Errorf("error: failed to create default DB: %w", err)
 	}
 
 	fmt.Println("Database connection established correctly")
@@ -73,11 +84,11 @@ func (d *Database) Close() {
 
 func (d *Database) createDefaultDB() error {
 	if err := d.DB.AutoMigrate(&Metadata{}, &Category{}, &Datatype{}); err != nil {
-		return fmt.Errorf("Failed to migrate database: %w", err)
+		return fmt.Errorf("error: failed to migrate database: %w", err)
 	}
 
 	if err := d.populateDB(); err != nil {
-		return fmt.Errorf("Failed to populate database: %w", err)
+		return fmt.Errorf("error: failed to populate database: %w", err)
 	}
 
 	return nil
@@ -87,36 +98,29 @@ func (d *Database) populateDB() error {
 	currentVersion := "0.0.1"
 
 	if err := d.DB.Create(&Metadata{Version: currentVersion}).Error; err != nil {
-		return fmt.Errorf("Failed to insert version: %w", err)
+		return fmt.Errorf("error: Failed to insert version: %w", err)
+	}
+
+	// Populate the database with default datatypes
+	datatypes := []Datatype{
+		{Name: "Note", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: ""},
+		{Name: "Person", VariableType: "string", CompletionValue: "unique", CompletionSort: "frequency", ValueCheck: ""},
+		{Name: "Location", VariableType: "string", CompletionValue: "unique", CompletionSort: "last", ValueCheck: ""},
+		{Name: "URL", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: "URL"},
+		{Name: "Cost (EUR)", VariableType: "integer", CompletionValue: "no", CompletionSort: "", ValueCheck: ""},
+		{Name: "Deadline", VariableType: "time.Time", CompletionValue: "date", CompletionSort: "last", ValueCheck: ""},
+		{Name: "Rating", VariableType: "integer", CompletionValue: "{1,2,3,4,5}", CompletionSort: "frequency", ValueCheck: "in{1,2,3,4,5}"},
+		{Name: "Email", VariableType: "string", CompletionValue: "unique", CompletionSort: "", ValueCheck: "mail_ping"},
+		{Name: "Phone", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: "phone"},
+		{Name: "File", VariableType: "string", CompletionValue: "file", CompletionSort: "", ValueCheck: "file_exists"},
+	}
+
+	for _, datatype := range datatypes {
+		if err := d.DB.Create(&datatype).Error; err != nil {
+			return fmt.Errorf("error: Failed to insert datatype: %w", err)
+		}
 	}
 
 	fmt.Println("Database populated successfully.")
 	return nil
 }
-
-// runTransaction runs a transaction on the database.
-// It takes a map of commands and runs them in a transaction.
-// If any of the commands fail, it will rollback the transaction.
-// Returns an error.
-// func (d *Database) runTransaction(statements map[string]string) error {
-// 	tx, err := d.db.Begin()
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	for key, statement := range statements {
-// 		_, err := tx.Exec(statement)
-// 		if err != nil {
-// 			fmt.Printf("Error: Failed to execute command '%s': %v\nSQL: %s\n", key, err, statement)
-// 			fmt.Println("Rolling Back transaction.")
-// 			err := tx.Rollback()
-// 			if err != nil {
-// 				fmt.Println("Error: Failed to rollback transaction.", err)
-// 			} else {
-// 				fmt.Println("Transaction rolled back successfully.")
-// 			}
-// 			return err
-// 		}
-// 	}
-// 	return tx.Commit()
-// }
