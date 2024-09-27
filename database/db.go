@@ -1,152 +1,122 @@
 package database
 
 import (
-	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 
-	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-// Database struct holds the path to the database and the database connection.
+// Database struct holds the path to the database and the GORM database connection.
 type Database struct {
-	path string
-	db   *sql.DB
+	Path string
+	DB   *gorm.DB
 }
 
-// exists checks if the database file exists.
-// Returns a boolean.
-func (d *Database) exists() bool {
-	_, err := os.Stat(d.path)
-	return !os.IsNotExist(err)
+// Metadata struct holds the metadata of the database.
+type Metadata struct {
+	gorm.Model
+	Version string
 }
 
-// SetupDatabase creates a new database object and opens the database at the given path.
-// If the database does not exist, it will create a new database with the default schema.
+// Category struct holds the category information.
+type Category struct {
+	gorm.Model
+	Name    string
+	Columns json.RawMessage
+}
+
+// Datatype struct holds the datatype information.
+type Datatype struct {
+	gorm.Model
+	Name            string
+	VariableType    string
+	CompletionValue string
+	CompletionSort  string
+	ValueCheck      string
+}
+
+// SetupDatabase initializes a Database struct and opens the database at the given path.
+// If the DB does not exist, it will create a new database with the default schema.
 // Returns a pointer to the database object and an error.
 func SetupDatabase(path string) (*Database, error) {
-	d := Database{}
-	d.path = path
-	err := d.open()
+	d := &Database{Path: path}
 
-	if err != nil {
-		return nil, err
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		fmt.Printf("Warning: Database file '%s' does not exist. Creating empty file.\n", path)
 	} else {
-		if !d.exists() {
-			fmt.Println("Warning: ", fmt.Sprintf("Database file '%s' does not exist.", d.path), "Creating empty file.")
-			return &d, d.createDefaultDB()
-
-		} else {
-			fmt.Println("Database file exists already.")
-			return &d, nil
-		}
+		fmt.Println("Database file exists already.")
 	}
+
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("Failed to connect to database: %w", err)
+	}
+
+	d.DB = db
+
+	if err := d.createDefaultDB(); err != nil {
+		return nil, fmt.Errorf("Failed to create default DB: %w", err)
+	}
+
+	fmt.Println("Database connection established correctly")
+	return d, nil
 }
 
-// open runs the sql open command on the database path and returns the error.
-func (d *Database) open() error {
-
-	db, err := sql.Open("sqlite3", d.path)
-	if err == nil {
-		d.db = db
-	}
-	return err
-}
-
-// Close closes the database connection.
-// Should be deferred after opening the database.
+// Takes a pointer to a database and closes it
 func (d *Database) Close() {
-	d.db.Close()
+	sqlDB, _ := d.DB.DB()
+	sqlDB.Close()
+}
+
+func (d *Database) createDefaultDB() error {
+	if err := d.DB.AutoMigrate(&Metadata{}, &Category{}, &Datatype{}); err != nil {
+		return fmt.Errorf("Failed to migrate database: %w", err)
+	}
+
+	if err := d.populateDB(); err != nil {
+		return fmt.Errorf("Failed to populate database: %w", err)
+	}
+
+	return nil
+}
+
+func (d *Database) populateDB() error {
+	currentVersion := "0.0.1"
+
+	if err := d.DB.Create(&Metadata{Version: currentVersion}).Error; err != nil {
+		return fmt.Errorf("Failed to insert version: %w", err)
+	}
+
+	fmt.Println("Database populated successfully.")
+	return nil
 }
 
 // runTransaction runs a transaction on the database.
 // It takes a map of commands and runs them in a transaction.
 // If any of the commands fail, it will rollback the transaction.
 // Returns an error.
-func (d *Database) runTransaction(statements map[string]string) error {
-	tx, err := d.db.Begin()
-	if err != nil {
-		return err
-	}
-
-	for key, statement := range statements {
-		_, err := tx.Exec(statement)
-		if err != nil {
-			fmt.Printf("Error: Failed to execute command '%s': %v\nSQL: %s\n", key, err, statement)
-			fmt.Println("Rolling Back transaction.")
-			err := tx.Rollback()
-			if err != nil {
-				fmt.Println("Error: Failed to rollback transaction.", err)
-			} else {
-				fmt.Println("Transaction rolled back successfully.")
-			}
-			return err
-		}
-	}
-	return tx.Commit()
-}
-
-// createEmptyDB creates an empty database with the default schema.
-// Returns an error.
-func (d *Database) createEmptyDB() error {
-	statements := map[string]string{
-		"metadataTable": `
-		CREATE TABLE metadata (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        version TEXT NOT NULL);`,
-
-		"categoriesTable": `
-		CREATE TABLE categories (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		name TEXT NOT NULL, 
-		columns TEXT NOT NULL
-		)`,
-
-		"datatypesTable": `
-		CREATE TABLE datatypes (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		variable_type TEXT NOT NULL,
-		completion_value TEXT NOT NULL,
-		completion_sort TEXT NOT NULL, 
-		value_check TEXT NOT NULL
-		)`,
-	}
-	return d.runTransaction(statements)
-}
-
-// populateDB populates the database with the default values.
-// for now, it only inserts the current version of the database.
-// Returns an error.
-func (d *Database) populateDB() error {
-	currentVersion := "0.0.1"
-	statements := map[string]string{
-		"version": fmt.Sprintf(`INSERT INTO metadata (version) VALUES ('%s')`, currentVersion),
-	}
-	return d.runTransaction(statements)
-}
-
-// createDefaultDB creates an empty database with the default schema and populates it with the default values.
-// it calls createEmptyDB and populateDB functions internally.
-// Returns an error.
-func (d *Database) createDefaultDB() error {
-	err := d.createEmptyDB()
-	if err != nil {
-		fmt.Println("Error: Failed to create empty database.", err)
-		return err
-	} else {
-		fmt.Println("Empty database created successfully.")
-		err := d.populateDB()
-		if err != nil {
-			fmt.Println("Error: Failed to populate database.", err)
-		} else {
-			fmt.Println("Database populated successfully.")
-		}
-		return err
-	}
-}
+// func (d *Database) runTransaction(statements map[string]string) error {
+// 	tx, err := d.db.Begin()
+// 	if err != nil {
+// 		return err
+// 	}
+//
+// 	for key, statement := range statements {
+// 		_, err := tx.Exec(statement)
+// 		if err != nil {
+// 			fmt.Printf("Error: Failed to execute command '%s': %v\nSQL: %s\n", key, err, statement)
+// 			fmt.Println("Rolling Back transaction.")
+// 			err := tx.Rollback()
+// 			if err != nil {
+// 				fmt.Println("Error: Failed to rollback transaction.", err)
+// 			} else {
+// 				fmt.Println("Transaction rolled back successfully.")
+// 			}
+// 			return err
+// 		}
+// 	}
+// 	return tx.Commit()
+// }
