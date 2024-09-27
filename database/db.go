@@ -32,7 +32,9 @@ type Category struct {
 // Datatype struct holds the datatype information.
 type Datatype struct {
 	gorm.Model
-	Name         string `gorm:"not null"`
+	Name string `gorm:"not null"`
+	// VariableType is a string that determines the type of the field
+	// if the VariableType field is empty, the value will be stored as a string
 	VariableType string `gorm:"not null"`
 	// CompletionValue is a string that determines how to complete the value of the field
 	// if the CompletionValue field is 'no', the value will not be completed and CompletionSort will be ignored
@@ -87,17 +89,21 @@ func (d *Database) createDefaultDB() error {
 		return fmt.Errorf("error: failed to migrate database: %w", err)
 	}
 
-	if err := d.populateDB(); err != nil {
-		return fmt.Errorf("error: failed to populate database: %w", err)
+	tx := d.DB.Begin()
+	err := populateDB(tx)
+	if err != nil {
+		tx.Rollback()
+		return err
 	}
+	tx.Commit()
 
 	return nil
 }
 
-func (d *Database) populateDB() error {
+func populateDB(tx *gorm.DB) error {
 	currentVersion := "0.0.1"
 
-	if err := d.DB.Create(&Metadata{Version: currentVersion}).Error; err != nil {
+	if err := tx.Create(&Metadata{Version: currentVersion}).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert version: %w", err)
 	}
 
@@ -116,11 +122,10 @@ func (d *Database) populateDB() error {
 	}
 
 	for _, datatype := range datatypes {
-		if err := d.DB.Create(&datatype).Error; err != nil {
+		if err := tx.Create(&datatype).Error; err != nil {
 			return fmt.Errorf("error: Failed to insert datatype: %w", err)
 		}
 	}
 
-	fmt.Println("Database populated successfully.")
 	return nil
 }
