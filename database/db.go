@@ -29,6 +29,11 @@ type Category struct {
 	Columns json.RawMessage `gorm:"not null"`
 }
 
+const (
+	// DefaultVersion is the default version of the database.
+	currentVersion = "0.0.1"
+)
+
 // Datatype struct holds the datatype information.
 type Datatype struct {
 	gorm.Model
@@ -101,20 +106,22 @@ func (d *Database) createDefaultDB() error {
 }
 
 func populateDB(tx *gorm.DB) error {
-	currentVersion := "0.0.1"
 
 	if err := tx.Create(&Metadata{Version: currentVersion}).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert version: %w", err)
 	}
-
+	timeType := "time.Time"
 	// Populate the database with default datatypes
 	datatypes := []Datatype{
+		{Name: "Opened", VariableType: timeType, CompletionValue: "date", CompletionSort: "last", ValueCheck: ""},
+		{Name: "Closed", VariableType: timeType, CompletionValue: "date", CompletionSort: "last", ValueCheck: ""},
 		{Name: "Note", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: ""},
+		{Name: "Project", VariableType: "string", CompletionValue: "unique", CompletionSort: "last", ValueCheck: ""},
 		{Name: "Person", VariableType: "string", CompletionValue: "unique", CompletionSort: "frequency", ValueCheck: ""},
 		{Name: "Location", VariableType: "string", CompletionValue: "unique", CompletionSort: "last", ValueCheck: ""},
 		{Name: "URL", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: "URL"},
 		{Name: "Cost (EUR)", VariableType: "integer", CompletionValue: "no", CompletionSort: "", ValueCheck: ""},
-		{Name: "Deadline", VariableType: "time.Time", CompletionValue: "date", CompletionSort: "last", ValueCheck: ""},
+		{Name: "Deadline", VariableType: timeType, CompletionValue: "date", CompletionSort: "last", ValueCheck: ""},
 		{Name: "Rating", VariableType: "integer", CompletionValue: "{1,2,3,4,5}", CompletionSort: "frequency", ValueCheck: "in{1,2,3,4,5}"},
 		{Name: "Email", VariableType: "string", CompletionValue: "unique", CompletionSort: "", ValueCheck: "mail_ping"},
 		{Name: "Phone", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: "phone"},
