@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 
@@ -24,9 +23,9 @@ type Metadata struct {
 
 // Category struct holds the category information.
 type Category struct {
-	gorm.Model
-	Name    string          `gorm:"not null"`
-	Columns json.RawMessage `gorm:"not null"`
+	Name string
+	// contains a list of numerical GORM UID for the rows of the datatypes
+	ColumnsID []int
 }
 
 const (
@@ -73,7 +72,6 @@ func SetupDatabase(path string) (*Database, error) {
 	}
 
 	d.DB = db
-	d.config.Logger = d.DB.Logger.LogMode(3)
 
 	if err := d.createDefaultDB(); err != nil {
 		return nil, fmt.Errorf("error: failed to create default DB: %w", err)
@@ -90,7 +88,7 @@ func (d *Database) Close() {
 }
 
 func (d *Database) createDefaultDB() error {
-	if err := d.DB.AutoMigrate(&Metadata{}, &Category{}, &Datatype{}); err != nil {
+	if err := d.DB.AutoMigrate(&Metadata{}, &Datatype{}); err != nil {
 		return fmt.Errorf("error: failed to migrate database: %w", err)
 	}
 
@@ -128,10 +126,8 @@ func populateDB(tx *gorm.DB) error {
 		{Name: "File", VariableType: "string", CompletionValue: "file", CompletionSort: "", ValueCheck: "file_exists"},
 	}
 
-	for _, datatype := range datatypes {
-		if err := tx.Create(&datatype).Error; err != nil {
-			return fmt.Errorf("error: Failed to insert datatype: %w", err)
-		}
+	if err := tx.Create(&datatypes).Error; err != nil {
+		return fmt.Errorf("error: Failed to insert datatypes: %w", err)
 	}
 
 	return nil
