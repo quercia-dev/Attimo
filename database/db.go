@@ -58,10 +58,12 @@ type Datatype struct {
 func SetupDatabase(path string) (*Database, error) {
 	d := &Database{Path: path}
 
+	fileExists := true
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		fmt.Printf("Warning: Database file '%s' does not exist. Creating empty file.\n", path)
+		fileExists = false
+		fmt.Printf("Warning: Database file '%s' does not exist. Creating a new database.\n", path)
 	} else {
-		fmt.Println("Database file exists already.")
+		fmt.Println("Database file already exists.")
 	}
 
 	d.config = &gorm.Config{}
@@ -73,8 +75,11 @@ func SetupDatabase(path string) (*Database, error) {
 
 	d.DB = db
 
-	if err := d.createDefaultDB(); err != nil {
-		return nil, fmt.Errorf("error: failed to create default DB: %w", err)
+	if !fileExists {
+		if err := d.createDefaultDB(); err != nil {
+			return nil, fmt.Errorf("error: failed to create default DB: %w", err)
+		}
+		fmt.Println("New database created with default schema.")
 	}
 
 	fmt.Println("Database connection established correctly")
