@@ -6,16 +6,19 @@ import (
 	"net/url"
 	"os"
 	"regexp"
-	"strconv"
 	"time"
 )
 
-/// ValueCheck switch cases
+func printTypeError(value interface{}, typeName string) (n int, err error) {
+	return fmt.Printf("%v needs to be a %s", value, typeName)
+}
+
+// / ValueCheck switch cases
 func (dt *Datatype) ValidateValue(value interface{}) bool {
 	switch dt.ValueCheck {
-	case "URL": 
+	case "URL":
 		return validateURL(value)
-	case "in{1,2,3,4,5}":
+	case "in{1,2,3,4,5}": // TEMP
 		return validateInRange(value, 1, 5)
 	case "mail_ping":
 		return validateEmail(value)
@@ -30,11 +33,11 @@ func (dt *Datatype) ValidateValue(value interface{}) bool {
 	}
 }
 
-///rejects empty http:// and relative urls like /foo/bar
+// /rejects empty http:// and relative urls like /foo/bar
 func validateURL(value interface{}) bool {
 	str, ok := value.(string)
 	if !ok {
-		fmt.Printf("%v needs to be string type")
+
 		return false
 	}
 	u, err := url.Parse(str)
@@ -44,29 +47,29 @@ func validateURL(value interface{}) bool {
 func validateInRange(value interface{}, min, max int) bool {
 	i, ok := value.(int) //assert value is an integer
 	if !ok {
-		fmt.Printf("%v needs to be int type")
+		printTypeError(value, "int")
 		return false
 	}
-	return ok && i >= min && i <= max 
+	return ok && i >= min && i <= max
 }
 
 func validateEmail(value interface{}) bool {
 	email, ok := value.(string)
 	if !ok {
-		fmt.Printf("%v needs to be string type")
+		printTypeError(value, "string")
 		return false
 	}
-	_, err := mail.ParseAddress(email) 
+	_, err := mail.ParseAddress(email)
 	return err == nil
 }
 
 func validatePhone(value interface{}) bool {
 	number, ok := value.(string)
 	if !ok {
-		fmt.Printf("%v needs to be string type")
+		printTypeError(value, "string")
 		return false
 	}
-	re := regexp.MustCompile('^[0-9]+$')
+	re := regexp.MustCompile(`^[0-9]+$`)
 	return re.MatchString(number) && len(number) >= 7 && len(number) <= 15
 }
 
@@ -74,7 +77,7 @@ func validateFileExists(value interface{}) bool {
 	path, ok := value.(string)
 
 	if !ok {
-		fmt.Printf("%v needs to be string type")
+		printTypeError(value, "string")
 		return false
 	}
 	_, err := os.Stat(path)
@@ -84,7 +87,7 @@ func validateFileExists(value interface{}) bool {
 func validateDate(value interface{}) bool {
 	date, ok := value.(string)
 	if !ok {
-		fmt.Printf("%v needs to be a string type")
+		printTypeError(value, "string")
 		return false
 	}
 	layout := "DD-MM-YYYY"
