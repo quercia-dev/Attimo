@@ -121,51 +121,40 @@ func populateDB(tx *gorm.DB) error {
 	}
 
 	datatypes := GetDefaultDatatypes()
-
 	if err := tx.Create(&datatypes).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert datatypes: %w", err)
 	}
 
 	categories := GetDefaultCategories()
-
 	for _, cat := range categories {
 		// creates a new empty table inside the tx *gorm.DB with the structure of the Category struct
-		err := tx.Table(cat.Name).AutoMigrate(&Category{})
-
-		if err != nil {
-			return fmt.Errorf("error: Failed to create table: %w", err)
+		if err := tx.Table(cat.Name).AutoMigrate(&Category{}); err != nil {
+			return fmt.Errorf("error: Failed to create table %s: %w", cat.Name, err)
 		}
 
 		for _, colID := range cat.ColumnsID {
 			datatype, err := RetrieveDatatype(tx, colID)
 			if err != nil {
-				return fmt.Errorf("error: Failed to retrieve datatype: %w", err)
+				return fmt.Errorf("error: Failed to retrieve datatype %d for category %s: %w", colID, cat.Name, err)
 			}
 
-			fmt.Println("Datatype retrieved by row ID:", colID)
-			fmt.Println(datatype)
-
-			tableName := cat.Name
-
-			columnName := datatype.Name
+			if datatype.VariableType == "" {
+				return fmt.Errorf("error: Datatype %d has empty VariableType", colID)
+			}
 
 			datatypeS, err := DatabaseDatatype(datatype.VariableType)
 			if err != nil {
-				return fmt.Errorf("error: Failed to convert datatype: %w", err)
+				return fmt.Errorf("error: Failed to convert datatype for column %s in category %s: %w", datatype.Name, cat.Name, err)
 			}
 
-			err = CheckValidIdentifier(tableName, columnName, datatypeS)
+			err = CheckValidIdentifier(cat.Name, datatype.Name, datatypeS)
 			if err != nil {
 				return fmt.Errorf("error: Failed to check identifier: %w", err)
 			}
 
-			command := fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", tableName, columnName, datatypeS)
-
-			tx = tx.Exec(command)
-			err = tx.Error
-
-			if err != nil {
-				return fmt.Errorf("error: Failed to insert column: %w", err)
+			command := fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", cat.Name, datatype.Name, datatypeS)
+			if err := tx.Exec(command).Error; err != nil {
+				return fmt.Errorf("error: Failed to add column %s to category %s: %w", datatype.Name, cat.Name, err)
 			}
 		}
 

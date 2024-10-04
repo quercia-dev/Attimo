@@ -19,11 +19,11 @@ func GetDefaultDatatypes() []Datatype {
 		// 7
 		{Name: "URL", VariableType: "string", CompletionValue: "no", CompletionSort: "default", ValueCheck: "URL"},
 		// 8
-		{Name: "Cost (EUR)", VariableType: "integer", CompletionValue: "no", CompletionSort: "default", ValueCheck: "default"},
+		{Name: "Cost", VariableType: "int", CompletionValue: "no", CompletionSort: "default", ValueCheck: "default"},
 		// 9
 		{Name: "Deadline", VariableType: timeType, CompletionValue: "date", CompletionSort: "last", ValueCheck: "default"},
 		// 10
-		{Name: "Rating", VariableType: "integer", CompletionValue: "{1,2,3,4,5}", CompletionSort: "frequency", ValueCheck: "default"},
+		{Name: "Rating", VariableType: "int", CompletionValue: "{1,2,3,4,5}", CompletionSort: "frequency", ValueCheck: "default"},
 		// 11
 		{Name: "Email", VariableType: "string", CompletionValue: "unique", CompletionSort: "default", ValueCheck: "mail_ping"},
 		// 12

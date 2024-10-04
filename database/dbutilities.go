@@ -20,11 +20,19 @@ func RetrieveMetadata(d *gorm.DB) (*Metadata, error) {
 // RetrieveDatatype retrieves a datatype from the database by index.
 // Returns a pointer to the row as a Datatype struct and an error.
 func RetrieveDatatype(d *gorm.DB, index int) (*Datatype, error) {
-	var datatype *Datatype
-	if err := d.Find(&datatype, index).Error; err != nil {
-		return nil, fmt.Errorf("error: Failed to get datatype: %w", err)
+	var datatype Datatype
+	// Assuming index is the primary key of the Datatype table
+	result := d.First(&datatype, index)
+
+	if result.Error != nil {
+		// Check if the error is because no record was found
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("error: No datatype found with index %d", index)
+		}
+		return nil, fmt.Errorf("error: Failed to get datatype with index %d: %w", index, result.Error)
 	}
-	return datatype, nil
+
+	return &datatype, nil
 }
 
 func DatabaseDatatype(goDatatype string) (string, error) {
