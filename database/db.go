@@ -43,8 +43,8 @@ const (
 type Datatype struct {
 	gorm.Model
 	Name string `gorm:"not null"`
-	// VariableType is a string that determines the type of the field
-	// if the VariableType field is empty, the value will be stored as a string
+	// VariableType is a string that determines the type of the field in go
+	// the VariableType field cannot be empty
 	VariableType string `gorm:"not null"`
 	// CompletionValue is a string that determines how to complete the value of the field
 	// if the CompletionValue field is 'no', the value will not be completed and CompletionSort will be ignored
@@ -119,46 +119,14 @@ func populateDB(tx *gorm.DB) error {
 	if err := tx.Create(&Metadata{Version: currentVersion}).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert version: %w", err)
 	}
-	timeType := "time.Time"
-	// Populate the database with default datatypes
-	datatypes := []Datatype{
-		// 1
-		{Name: "Opened", VariableType: timeType, CompletionValue: "date", CompletionSort: "last", ValueCheck: ""},
-		// 2
-		{Name: "Closed", VariableType: timeType, CompletionValue: "date", CompletionSort: "last", ValueCheck: ""},
-		// 3
-		{Name: "Note", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: ""},
-		// 4
-		{Name: "Project", VariableType: "string", CompletionValue: "unique", CompletionSort: "last", ValueCheck: ""},
-		// 5
-		{Name: "Person", VariableType: "string", CompletionValue: "unique", CompletionSort: "frequency", ValueCheck: ""},
-		// 6
-		{Name: "Location", VariableType: "string", CompletionValue: "unique", CompletionSort: "last", ValueCheck: ""},
-		// 7
-		{Name: "URL", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: "URL"},
-		// 8
-		{Name: "Cost (EUR)", VariableType: "integer", CompletionValue: "no", CompletionSort: "", ValueCheck: ""},
-		// 9
-		{Name: "Deadline", VariableType: timeType, CompletionValue: "date", CompletionSort: "last", ValueCheck: ""},
-		// 10
-		{Name: "Rating", VariableType: "integer", CompletionValue: "{1,2,3,4,5}", CompletionSort: "frequency", ValueCheck: "in{1,2,3,4,5}"},
-		// 11
-		{Name: "Email", VariableType: "string", CompletionValue: "unique", CompletionSort: "", ValueCheck: "mail_ping"},
-		// 12
-		{Name: "Phone", VariableType: "string", CompletionValue: "no", CompletionSort: "", ValueCheck: "phone"},
-		// 13
-		{Name: "File", VariableType: "string", CompletionValue: "file", CompletionSort: "", ValueCheck: "file_exists"},
-	}
+
+	datatypes := GetDefaultDatatypes()
 
 	if err := tx.Create(&datatypes).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert datatypes: %w", err)
 	}
 
-	categories := []CategoryTemplate{
-		{Name: "General", ColumnsID: []int{1, 2, 3, 4, 6, 13}},
-		{Name: "Contact", ColumnsID: []int{1, 2, 3, 11, 12, 13}},
-		{Name: "Financial", ColumnsID: []int{1, 2, 3, 6, 8}},
-	}
+	categories := GetDefaultCategories()
 
 	for _, cat := range categories {
 		// creates a new empty table inside the tx *gorm.DB with the structure of the Category struct
@@ -168,10 +136,34 @@ func populateDB(tx *gorm.DB) error {
 			return fmt.Errorf("error: Failed to create table: %w", err)
 		}
 
-		// for each int in cat.ColumnsID, insert a column named after the ID int
 		for _, colID := range cat.ColumnsID {
-			columnName := fmt.Sprintf("Column%d", colID)
-			err := tx.Exec("ALTER TABLE ? ADD COLUMN ? INTEGER", gorm.Expr(cat.Name), gorm.Expr(columnName)).Error
+			datatype, err := RetrieveDatatype(tx, colID)
+			if err != nil {
+				return fmt.Errorf("error: Failed to retrieve datatype: %w", err)
+			}
+
+			fmt.Println("Datatype retrieved by row ID:", colID)
+			fmt.Println(datatype)
+
+			tableName := cat.Name
+
+			columnName := datatype.Name
+
+			datatypeS, err := DatabaseDatatype(datatype.VariableType)
+			if err != nil {
+				return fmt.Errorf("error: Failed to convert datatype: %w", err)
+			}
+
+			err = CheckValidIdentifier(tableName, columnName, datatypeS)
+			if err != nil {
+				return fmt.Errorf("error: Failed to check identifier: %w", err)
+			}
+
+			command := fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", tableName, columnName, datatypeS)
+
+			tx = tx.Exec(command)
+			err = tx.Error
+
 			if err != nil {
 				return fmt.Errorf("error: Failed to insert column: %w", err)
 			}
