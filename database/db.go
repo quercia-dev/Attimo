@@ -121,12 +121,12 @@ func populateDB(tx *gorm.DB) error {
 		return fmt.Errorf("error: Failed to insert version: %w", err)
 	}
 
-	datatypes := GetDefaultDatatypes()
+	datatypes := getDefaultDatatypes()
 	if err := tx.Create(&datatypes).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert datatypes: %w", err)
 	}
 
-	return addCategories(tx, GetDefaultCategories())
+	return addCategories(tx, getDefaultCategories())
 }
 
 func addCategories(tx *gorm.DB, categories []CategoryTemplate) error {
@@ -147,7 +147,7 @@ func addCategories(tx *gorm.DB, categories []CategoryTemplate) error {
 // addColumns adds columns to the category table, based on the columnsID field of the CategoryTemplate struct.
 func addColumns(tx *gorm.DB, cat CategoryTemplate) error {
 	for _, colID := range cat.ColumnsID {
-		datatype, err := RetrieveDatatype(tx, colID)
+		datatype, err := getDatatype(tx, colID)
 		if err != nil {
 			return fmt.Errorf("error: Failed to retrieve datatype %d for category %s: %w", colID, cat.Name, err)
 		}
@@ -156,12 +156,12 @@ func addColumns(tx *gorm.DB, cat CategoryTemplate) error {
 			return fmt.Errorf("error: Datatype %d has empty VariableType", colID)
 		}
 
-		datatypeS, err := DatabaseDatatype(datatype.VariableType)
+		datatypeS, err := toDBdatatype(datatype.VariableType)
 		if err != nil {
 			return fmt.Errorf("error: Failed to convert datatype for column %s in category %s: %w", datatype.Name, cat.Name, err)
 		}
 
-		err = CheckValidIdentifier(cat.Name, datatype.Name, datatypeS)
+		err = testValidIdentifier(cat.Name, datatype.Name, datatypeS)
 		if err != nil {
 			return fmt.Errorf("error: Failed to check identifier: %w", err)
 		}
