@@ -37,13 +37,13 @@ func RetrieveDatatype(d *gorm.DB, index int) (*Datatype, error) {
 
 func DatabaseDatatype(goDatatype string) (string, error) {
 	switch goDatatype {
-	case "int":
+	case IntType:
 		return "INTEGER", nil
-	case "string":
+	case StringType:
 		return "TEXT", nil
-	case "bool":
+	case BoolType:
 		return "TEXT", nil
-	case "time.Time":
+	case TimeType:
 		return "TEXT", nil
 	default:
 		return "", fmt.Errorf("error: unknown %s datatype", goDatatype)
