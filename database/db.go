@@ -1,177 +1,164 @@
 package database
 
 import (
-	"database/sql"
 	"fmt"
 	"os"
 
-	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
-// Database struct holds the path to the database and the database connection.
+// Database struct holds the path to the database and the GORM database connection.
 type Database struct {
-	path string
-	db   *sql.DB
+	Path   string
+	DB     *gorm.DB
+	config *gorm.Config
 }
 
-// exists checks if the database file exists.
-// Returns a boolean.
-func (d *Database) exists() bool {
-	_, err := os.Stat(d.path)
-	return !os.IsNotExist(err)
+// Metadata struct holds the metadata of the database.
+type Metadata struct {
+	gorm.Model
+	Version string `gorm:"not null"`
 }
 
-// SetupDatabase creates a new database object and opens the database at the given path.
-// If the database does not exist, it will create a new database with the default schema.
+// Category struct holds the category information.
+type Category struct {
+	gorm.Model
+}
+
+// CategoryTemplate struct holds the category information.
+// Not used in db but as a way to store the definition of category tables
+type CategoryTemplate struct {
+	Name string
+	// contains a list of numerical GORM UID for the rows of the datatypes
+	ColumnsID []int
+}
+
+const (
+	// DefaultVersion is the default version of the database.
+	currentVersion = "0.0.1"
+)
+
+// Datatype struct holds the datatype information.
+type Datatype struct {
+	gorm.Model
+	Name string `gorm:"not null"`
+	// VariableType is a string that determines the type of the field in go
+	// the VariableType field cannot be empty
+	VariableType string `gorm:"not null"`
+	// CompletionValue is a string that determines how to complete the value of the field
+	// if the CompletionValue field is 'no', the value will not be completed and CompletionSort will be ignored
+	CompletionValue string `gorm:"not null"`
+	// CompletionSort is a string that determines how to sort the completion values
+	// if the CompletionSort field is 'no', the values will be displayed in the order they were provided by the CompletionValue field
+	CompletionSort string `gorm:"not null"`
+	// ValueCheck is a string that determines how to validate the value of the field
+	// if the ValueCheck field is empty, the value will be validated with the default validation function, taken from the VariableType field
+	// if the ValueCheck field is 'no', the value will not be validated
+	ValueCheck string `gorm:"not null"`
+}
+
+// SetupDatabase initializes a Database struct and opens the database at the given path.
+// If the DB does not exist, it will create a new database with the default schema.
 // Returns a pointer to the database object and an error.
 func SetupDatabase(path string) (*Database, error) {
-	d := Database{}
-	d.path = path
-	err := d.open()
+	d := &Database{Path: path}
 
-	if err != nil {
-		return nil, err
+	fileExists := true
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		fileExists = false
+		fmt.Printf("Warning: Database file '%s' does not exist. Creating a new database.\n", path)
 	} else {
-		if !d.exists() {
-			fmt.Println("Warning: ", fmt.Sprintf("Database file '%s' does not exist.", d.path), "Creating empty file.")
-			return &d, d.createDefaultDB()
+		fmt.Println("Database file already exists.")
+	}
 
-		} else {
-			fmt.Println("Database file exists already.")
-			return &d, nil
+	d.config = &gorm.Config{}
+
+	db, err := gorm.Open(sqlite.Open(path), d.config)
+	if err != nil {
+		return nil, fmt.Errorf("error: failed to connect to database: %w", err)
+	}
+
+	d.DB = db
+
+	if !fileExists {
+		if err := d.createDefaultDB(); err != nil {
+			return nil, fmt.Errorf("error: failed to create default DB: %w", err)
 		}
+		fmt.Println("New database created with default schema.")
 	}
+
+	fmt.Println("Database connection established correctly")
+	return d, nil
 }
 
-// open runs the sql open command on the database path and returns the error.
-func (d *Database) open() error {
-
-	db, err := sql.Open("sqlite3", d.path)
-	if err == nil {
-		d.db = db
-	}
-	return err
-}
-
-// Close closes the database connection.
-// Should be deferred after opening the database.
+// Takes a pointer to a database and closes it
 func (d *Database) Close() {
-	d.db.Close()
+	sqlDB, _ := d.DB.DB()
+	sqlDB.Close()
 }
 
-// runTransaction runs a transaction on the database.
-// It takes a map of commands and runs them in a transaction.
-// If any of the commands fail, it will rollback the transaction.
-// Returns an error.
-func (d *Database) runTransaction(statements map[string]string) error {
-	tx, err := d.db.Begin()
-	if err != nil {
-		return err
-	}
-
-	for key, statement := range statements {
-		_, err := tx.Exec(statement)
-		if err != nil {
-			fmt.Printf("Error: Failed to execute command '%s': %v\nSQL: %s\n", key, err, statement)
-			fmt.Println("Rolling Back transaction.")
-			err := tx.Rollback()
-			if err != nil {
-				fmt.Println("Error: Failed to rollback transaction.", err)
-			} else {
-				fmt.Println("Transaction rolled back successfully.")
-			}
-			return err
-		}
-	}
-	return tx.Commit()
-}
-
-// createEmptyDB creates an empty database with the default schema.
-// Returns an error.
-func (d *Database) createEmptyDB() error {
-	statements := map[string]string{
-		"metadataTable": `
-		CREATE TABLE metadata (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        version TEXT NOT NULL);`,
-
-		"categoriesTable": `
-		CREATE TABLE categories (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		name TEXT NOT NULL, 
-		columns TEXT NOT NULL
-		)`,
-
-		"datatypesTable": `
-		CREATE TABLE datatypes (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		variable_type TEXT NOT NULL,
-		completion_value TEXT NOT NULL,
-		completion_sort TEXT NOT NULL, 
-		value_check TEXT NOT NULL DEFAULT 'DEFAULT'
-		)`,
-	}
-	return d.runTransaction(statements)
-}
-
-// populateDB populates the database with the default values.
-// for now, it only inserts the current version of the database.
-// Returns an error.
-func (d *Database) populateDB() error {
-	currentVersion := "0.0.1"
-	statements := map[string]string{
-		"version": fmt.Sprintf(`INSERT INTO metadata (version) VALUES ('%s')`, currentVersion),
-
-		"data types": `
-		INSERT INTO datatypes (name, variable_type, completion_value, completion_sort, value_check) VALUES
-		('Note', 'TEXT', 'none', 'frequency', 'DEFAULT'),
-		('created', 'DATETIME', 'DATE', 'NONE', 'DEFAULT'),
-		('updated', 'DATETIME', 'DATE', 'NONE', 'DEFAULT'),
-		('opened', 'DATETIME', 'DATE', 'NONE', 'DEFAULT'),
-		('closed', 'DATETIME', 'DATE', 'NONE', 'DEFAULT'),
-		('File', 'TEXT', 'FILE', 'NONE', 'DEFAULT'),
-		('Image', 'TEXT', 'FILE(IMAGE)', 'NONE', 'DEFAULT'),
-		('Location', 'TEXT', 'OTHERS', 'FREQUENCY', 'DEFAULT'),
-		('URL', 'TEXT', 'OTHERS', 'LENGTH', 'DEFAULT'),
-		('Email', 'TEXT', 'EMAIL', 'FREQUENCY', 'DEFAULT'),
-		('Phone', 'TEXT', 'PHONE', 'FREQUENCY', 'DEFAULT'),
-		('Cost (USD)', 'TEXT', 'NUMBER', 'NONE', 'DEFAULT'),
-		('Color', 'TEXT', 'COLOR', 'FREQUENCY', 'DEFAULT')`,
-
-		// dummy data for now to test the database
-		"categories": `
-		INSERT INTO categories (name, columns) VALUES
-		('General', 'created, updated, opened, closed, Note'),
-		('Files', 'created, updated, opened, closed, File, Image'),
-		('Contact', 'created, updated, opened, closed, Location, URL, Email, Phone'),
-		('Finance', 'created, updated, opened, closed, Cost'),
-		('Miscellaneous', 'created, updated, opened, closed, Color')`,
-	}
-	return d.runTransaction(statements)
-}
-
-// createDefaultDB creates an empty database with the default schema and populates it with the default values.
-// it calls createEmptyDB and populateDB functions internally.
-// Returns an error.
 func (d *Database) createDefaultDB() error {
-	err := d.createEmptyDB()
+	if err := d.DB.AutoMigrate(&Metadata{}, &Datatype{}); err != nil {
+		return fmt.Errorf("error: failed to migrate database: %w", err)
+	}
+
+	tx := d.DB.Begin()
+	err := populateDB(tx)
 	if err != nil {
-		fmt.Println("Error: Failed to create empty database.", err)
-		return err
-	} else {
-		fmt.Println("Empty database created successfully.")
-		err := d.populateDB()
-		if err != nil {
-			fmt.Println("Error: Failed to populate database.", err)
-		} else {
-			fmt.Println("Database populated successfully.")
-		}
+		tx.Rollback()
 		return err
 	}
+	tx.Commit()
+
+	return nil
+}
+
+func populateDB(tx *gorm.DB) error {
+
+	if err := tx.Create(&Metadata{Version: currentVersion}).Error; err != nil {
+		return fmt.Errorf("error: Failed to insert version: %w", err)
+	}
+
+	datatypes := GetDefaultDatatypes()
+	if err := tx.Create(&datatypes).Error; err != nil {
+		return fmt.Errorf("error: Failed to insert datatypes: %w", err)
+	}
+
+	categories := GetDefaultCategories()
+	for _, cat := range categories {
+		// creates a new empty table inside the tx *gorm.DB with the structure of the Category struct
+		if err := tx.Table(cat.Name).AutoMigrate(&Category{}); err != nil {
+			return fmt.Errorf("error: Failed to create table %s: %w", cat.Name, err)
+		}
+
+		for _, colID := range cat.ColumnsID {
+			datatype, err := RetrieveDatatype(tx, colID)
+			if err != nil {
+				return fmt.Errorf("error: Failed to retrieve datatype %d for category %s: %w", colID, cat.Name, err)
+			}
+
+			if datatype.VariableType == "" {
+				return fmt.Errorf("error: Datatype %d has empty VariableType", colID)
+			}
+
+			datatypeS, err := DatabaseDatatype(datatype.VariableType)
+			if err != nil {
+				return fmt.Errorf("error: Failed to convert datatype for column %s in category %s: %w", datatype.Name, cat.Name, err)
+			}
+
+			err = CheckValidIdentifier(cat.Name, datatype.Name, datatypeS)
+			if err != nil {
+				return fmt.Errorf("error: Failed to check identifier: %w", err)
+			}
+
+			command := fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", cat.Name, datatype.Name, datatypeS)
+			if err := tx.Exec(command).Error; err != nil {
+				return fmt.Errorf("error: Failed to add column %s to category %s: %w", datatype.Name, cat.Name, err)
+			}
+		}
+
+	}
+
+	return nil
 }
