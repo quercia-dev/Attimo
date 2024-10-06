@@ -114,51 +114,62 @@ func (d *Database) createDefaultDB() error {
 	return nil
 }
 
+// populateDB populates the database with the default schema.
 func populateDB(tx *gorm.DB) error {
 
 	if err := tx.Create(&Metadata{Version: currentVersion}).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert version: %w", err)
 	}
 
-	datatypes := GetDefaultDatatypes()
+	datatypes := getDefaultDatatypes()
 	if err := tx.Create(&datatypes).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert datatypes: %w", err)
 	}
 
-	categories := GetDefaultCategories()
+	return addCategories(tx, getDefaultCategories())
+}
+
+func addCategories(tx *gorm.DB, categories []CategoryTemplate) error {
 	for _, cat := range categories {
 		// creates a new empty table inside the tx *gorm.DB with the structure of the Category struct
 		if err := tx.Table(cat.Name).AutoMigrate(&Category{}); err != nil {
 			return fmt.Errorf("error: Failed to create table %s: %w", cat.Name, err)
 		}
 
-		for _, colID := range cat.ColumnsID {
-			datatype, err := RetrieveDatatype(tx, colID)
-			if err != nil {
-				return fmt.Errorf("error: Failed to retrieve datatype %d for category %s: %w", colID, cat.Name, err)
-			}
+		err := addColumns(tx, cat)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-			if datatype.VariableType == "" {
-				return fmt.Errorf("error: Datatype %d has empty VariableType", colID)
-			}
-
-			datatypeS, err := DatabaseDatatype(datatype.VariableType)
-			if err != nil {
-				return fmt.Errorf("error: Failed to convert datatype for column %s in category %s: %w", datatype.Name, cat.Name, err)
-			}
-
-			err = CheckValidIdentifier(cat.Name, datatype.Name, datatypeS)
-			if err != nil {
-				return fmt.Errorf("error: Failed to check identifier: %w", err)
-			}
-
-			command := fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", cat.Name, datatype.Name, datatypeS)
-			if err := tx.Exec(command).Error; err != nil {
-				return fmt.Errorf("error: Failed to add column %s to category %s: %w", datatype.Name, cat.Name, err)
-			}
+// addColumns adds columns to the category table, based on the columnsID field of the CategoryTemplate struct.
+func addColumns(tx *gorm.DB, cat CategoryTemplate) error {
+	for _, colID := range cat.ColumnsID {
+		datatype, err := getDatatype(tx, colID)
+		if err != nil {
+			return fmt.Errorf("error: Failed to retrieve datatype %d for category %s: %w", colID, cat.Name, err)
 		}
 
-	}
+		if datatype.VariableType == "" {
+			return fmt.Errorf("error: Datatype %d has empty VariableType", colID)
+		}
 
+		datatypeS, err := toDBdatatype(datatype.VariableType)
+		if err != nil {
+			return fmt.Errorf("error: Failed to convert datatype for column %s in category %s: %w", datatype.Name, cat.Name, err)
+		}
+
+		err = testValidIdentifier(cat.Name, datatype.Name, datatypeS)
+		if err != nil {
+			return fmt.Errorf("error: Failed to check identifier: %w", err)
+		}
+
+		command := fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", cat.Name, datatype.Name, datatypeS)
+		if err := tx.Exec(command).Error; err != nil {
+			return fmt.Errorf("error: Failed to add column %s to category %s: %w", datatype.Name, cat.Name, err)
+		}
+	}
 	return nil
 }
