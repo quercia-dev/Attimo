@@ -55,7 +55,7 @@ func ComposeArguments(args ...string) string {
 	return builder.String()
 }
 
-func GetDefaultDatatypes() []Datatype {
+func getDefaultDatatypes() []Datatype {
 	// Populate the database with default datatypes
 	return []Datatype{
 		// 1
@@ -95,7 +95,7 @@ func GetDefaultDatatypes() []Datatype {
 	}
 }
 
-func GetDefaultCategories() []CategoryTemplate {
+func getDefaultCategories() []CategoryTemplate {
 	return []CategoryTemplate{
 		{Name: "General", ColumnsID: []int{1, 2, 3, 4, 6, 13}},
 		{Name: "Contact", ColumnsID: []int{1, 2, 3, 11, 12, 13}},
