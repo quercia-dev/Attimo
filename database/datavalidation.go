@@ -90,7 +90,7 @@ func validateDate(value interface{}) bool {
 		printTypeError(value, "string")
 		return false
 	}
-	layout := "DD-MM-YYYY"
+	layout := "02-01-2006"
 	_, err := time.Parse(layout, date)
 	return err == nil
 }

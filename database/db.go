@@ -104,7 +104,7 @@ func (d *Database) createDefaultDB() error {
 	}
 
 	tx := d.DB.Begin()
-	err := populateDB(tx)
+	err := populateDefaultDB(tx)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -115,7 +115,7 @@ func (d *Database) createDefaultDB() error {
 }
 
 // populateDB populates the database with the default schema.
-func populateDB(tx *gorm.DB) error {
+func populateDefaultDB(tx *gorm.DB) error {
 
 	if err := tx.Create(&Metadata{Version: currentVersion}).Error; err != nil {
 		return fmt.Errorf("error: Failed to insert version: %w", err)
