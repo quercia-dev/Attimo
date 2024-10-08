@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"net/mail"
 	"net/url"
 	"os"
@@ -9,8 +8,8 @@ import (
 	"time"
 )
 
-func printTypeError(value interface{}, typeName string) (n int, err error) {
-	return fmt.Printf("%v needs to be a %s", value, typeName)
+func logTypeError(value interface{}, typeName string) {
+	WarningLogger.Printf("%v needs to be a %s", value, typeName)
 }
 
 // / ValueCheck switch cases
@@ -37,7 +36,7 @@ func (dt *Datatype) ValidateValue(value interface{}) bool {
 func validateURL(value interface{}) bool {
 	str, ok := value.(string)
 	if !ok {
-
+		logTypeError(value, "string")
 		return false
 	}
 	u, err := url.Parse(str)
@@ -47,7 +46,7 @@ func validateURL(value interface{}) bool {
 func validateInRange(value interface{}, min, max int) bool {
 	i, ok := value.(int) //assert value is an integer
 	if !ok {
-		printTypeError(value, "int")
+		logTypeError(value, "int")
 		return false
 	}
 	return ok && i >= min && i <= max
@@ -56,7 +55,7 @@ func validateInRange(value interface{}, min, max int) bool {
 func validateEmail(value interface{}) bool {
 	email, ok := value.(string)
 	if !ok {
-		printTypeError(value, "string")
+		logTypeError(value, "string")
 		return false
 	}
 	_, err := mail.ParseAddress(email)
@@ -66,7 +65,7 @@ func validateEmail(value interface{}) bool {
 func validatePhone(value interface{}) bool {
 	number, ok := value.(string)
 	if !ok {
-		printTypeError(value, "string")
+		logTypeError(value, "string")
 		return false
 	}
 	re := regexp.MustCompile(`^[0-9]+$`)
@@ -77,7 +76,7 @@ func validateFileExists(value interface{}) bool {
 	path, ok := value.(string)
 
 	if !ok {
-		printTypeError(value, "string")
+		logTypeError(value, "string")
 		return false
 	}
 	_, err := os.Stat(path)
@@ -87,7 +86,7 @@ func validateFileExists(value interface{}) bool {
 func validateDate(value interface{}) bool {
 	date, ok := value.(string)
 	if !ok {
-		printTypeError(value, "string")
+		logTypeError(value, "string")
 		return false
 	}
 	layout := "02-01-2006"

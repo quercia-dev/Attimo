@@ -67,28 +67,28 @@ func SetupDatabase(path string) (*Database, error) {
 	fileExists := true
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		fileExists = false
-		fmt.Printf("Warning: Database file '%s' does not exist. Creating a new database.\n", path)
+		WarningLogger.Printf("Database file '%s' does not exist. Creating a new database.", path)
 	} else {
-		fmt.Println("Database file already exists.")
+		InfoLogger.Println("Database file already exists.")
 	}
 
 	d.config = &gorm.Config{}
 
 	db, err := gorm.Open(sqlite.Open(path), d.config)
 	if err != nil {
-		return nil, fmt.Errorf("error: failed to connect to database: %w", err)
+		return nil, LogError("failed to connect to database: %w", err)
 	}
 
 	d.DB = db
 
 	if !fileExists {
 		if err := d.createDefaultDB(); err != nil {
-			return nil, fmt.Errorf("error: failed to create default DB: %w", err)
+			return nil, LogError("failed to create default DB: %w", err)
 		}
-		fmt.Println("New database created with default schema.")
+		InfoLogger.Println("New database created with default schema.")
 	}
 
-	fmt.Println("Database connection established correctly")
+	InfoLogger.Println("Database connection established correctly")
 	return d, nil
 }
 
@@ -100,7 +100,7 @@ func (d *Database) Close() {
 
 func (d *Database) createDefaultDB() error {
 	if err := d.DB.AutoMigrate(&Metadata{}, &Datatype{}); err != nil {
-		return fmt.Errorf("error: failed to migrate database: %w", err)
+		return LogError("failed to migrate database: %w", err)
 	}
 
 	tx := d.DB.Begin()
@@ -118,12 +118,12 @@ func (d *Database) createDefaultDB() error {
 func populateDefaultDB(tx *gorm.DB) error {
 
 	if err := tx.Create(&Metadata{Version: currentVersion}).Error; err != nil {
-		return fmt.Errorf("error: Failed to insert version: %w", err)
+		return LogError("Failed to insert version: %w", err)
 	}
 
 	datatypes := getDefaultDatatypes()
 	if err := tx.Create(&datatypes).Error; err != nil {
-		return fmt.Errorf("error: Failed to insert datatypes: %w", err)
+		return LogError("Failed to insert datatypes: %w", err)
 	}
 
 	return addCategories(tx, getDefaultCategories())
@@ -133,7 +133,7 @@ func addCategories(tx *gorm.DB, categories []CategoryTemplate) error {
 	for _, cat := range categories {
 		// creates a new empty table inside the tx *gorm.DB with the structure of the Category struct
 		if err := tx.Table(cat.Name).AutoMigrate(&Category{}); err != nil {
-			return fmt.Errorf("error: Failed to create table %s: %w", cat.Name, err)
+			return LogError(fmt.Sprintf("Failed to create table %s", cat.Name), err)
 		}
 
 		err := addColumns(tx, cat)
@@ -149,26 +149,26 @@ func addColumns(tx *gorm.DB, cat CategoryTemplate) error {
 	for _, colID := range cat.ColumnsID {
 		datatype, err := getDatatype(tx, colID)
 		if err != nil {
-			return fmt.Errorf("error: Failed to retrieve datatype %d for category %s: %w", colID, cat.Name, err)
+			return LogError(fmt.Sprintf("Failed to retrieve datatype %d for category %s", colID, cat.Name), err)
 		}
 
 		if datatype.VariableType == "" {
-			return fmt.Errorf("error: Datatype %d has empty VariableType", colID)
+			return LogError(fmt.Sprintf("Datatype %d has empty VariableType", colID), fmt.Errorf("empty variable type"))
 		}
 
 		datatypeS, err := toDBdatatype(datatype.VariableType)
 		if err != nil {
-			return fmt.Errorf("error: Failed to convert datatype for column %s in category %s: %w", datatype.Name, cat.Name, err)
+			return LogError(fmt.Sprintf("Failed to convert datatype for column %s in category %s", datatype.Name, cat.Name), err)
 		}
 
 		err = testValidIdentifier(cat.Name, datatype.Name, datatypeS)
 		if err != nil {
-			return fmt.Errorf("error: Failed to check identifier: %w", err)
+			return LogError("Failed to check identifier", err)
 		}
 
 		command := fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s", cat.Name, datatype.Name, datatypeS)
 		if err := tx.Exec(command).Error; err != nil {
-			return fmt.Errorf("error: Failed to add column %s to category %s: %w", datatype.Name, cat.Name, err)
+			return LogError(fmt.Sprintf("Failed to add column %s to category %s", datatype.Name, cat.Name), err)
 		}
 	}
 	return nil

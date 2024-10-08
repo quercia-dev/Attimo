@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -9,6 +10,13 @@ import (
 )
 
 func main() {
+
+	// set up logging
+	logDir := filepath.Join(".", "logs")
+	if err := database.InitLogging(logDir); err != nil {
+		log.Fatalf("failed to init logging: %v", err)
+	}
+
 	dbFolder := filepath.Join(".", "test")
 	dbPath := filepath.Join(dbFolder, "central_storage.db")
 
