@@ -67,9 +67,9 @@ func SetupDatabase(path string) (*Database, error) {
 	fileExists := true
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		fileExists = false
-		WarningLogger.Printf("Database file '%s' does not exist. Creating a new database.", path)
+		SafeLog("Database file '%s' does not exist. Creating a new database.", path)
 	} else {
-		InfoLogger.Println("Database file already exists.")
+		SafeLog("Database file already exists.")
 	}
 
 	d.config = &gorm.Config{}
@@ -85,10 +85,10 @@ func SetupDatabase(path string) (*Database, error) {
 		if err := d.createDefaultDB(); err != nil {
 			return nil, LogError("failed to create default DB: %w", err)
 		}
-		InfoLogger.Println("New database created with default schema.")
+		SafeLog("New database created with default schema.")
 	}
 
-	InfoLogger.Println("Database connection established correctly")
+	SafeLog("Database connection established correctly")
 	return d, nil
 }
 

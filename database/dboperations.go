@@ -17,12 +17,23 @@ func (d *Database) AddRow(categoryName string, data RowData) error {
 		}
 	}()
 
+	// Check if the table exists
+	if !tx.Migrator().HasTable(categoryName) {
+		tx.Rollback()
+		return fmt.Errorf("table %s does not exist", categoryName)
+	}
+
 	// Get the table schema
-	var dest interface{}
-	columns, err := tx.Table(categoryName).Migrator().ColumnTypes(dest)
+	columns, err := tx.Table(categoryName).Migrator().ColumnTypes(&struct{}{})
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("failed to get column types for table %s: %w", categoryName, err)
+	}
+
+	// Debug: Print column information
+	fmt.Printf("Columns for table %s:\n", categoryName)
+	for _, col := range columns {
+		fmt.Printf("  Name: %s, Type: %s\n", col.Name(), col.DatabaseTypeName())
 	}
 
 	// Create a map to store validated data
@@ -51,12 +62,18 @@ func (d *Database) AddRow(categoryName string, data RowData) error {
 		}
 
 		// Validate the value
-		if !datatype.ValidateValue(value) {
+		if !datatype.ValidateCheck(value) {
 			tx.Rollback()
 			return fmt.Errorf("invalid value for column %s: %v", columnName, value)
 		}
 
 		validatedData[columnName] = value
+	}
+
+	// Debug: Print column names and their respective values before inserting
+	fmt.Printf("Inserting row into table %s with the following values:\n", categoryName)
+	for colName, val := range validatedData {
+		fmt.Printf("  Column: %s, Value: %v\n", colName, val)
 	}
 
 	// Create the row

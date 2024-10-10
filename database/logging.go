@@ -70,6 +70,7 @@ func logArgsError(args []string, expected int) {
 		fmt.Printf("Expected %d arguments, got %d: %v", expected, len(args), args)
 	}
 }
+
 // logUnrecognizedType logs a warning message when a value is not of a recognized type
 // It uses the global WarningLogger if it is not nil, otherwise it uses fmt.Printf
 // The message is in the format: "Unrecognized type: %v"
@@ -78,5 +79,13 @@ func logUnrecognizedType(value interface{}) {
 		WarningLogger.Printf("Unrecognized type: %v", value)
 	} else {
 		fmt.Printf("Unrecognized type: %v", value)
+	}
+}
+
+func SafeLog(format string, v ...interface{}) {
+	if WarningLogger != nil {
+		WarningLogger.Printf(format, v...)
+	} else {
+		fmt.Printf(format+"\n", v...)
 	}
 }
