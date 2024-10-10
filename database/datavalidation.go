@@ -5,31 +5,84 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
 )
 
-func logTypeError(value interface{}, typeName string) {
-	WarningLogger.Printf("%v needs to be a %s", value, typeName)
+// SplitType splits the type into the type and a list of string parameters
+// "IN(1,2,4,4)" -> "IN", ["1", "2", "3", "4"]
+// Uses the first open parenthesis to split the string,
+// and then splits the parameters by commas until the penultimate character
+func SplitStringArgument(input string) (string, []string) {
+	openParenIndex := strings.Index(input, "(")
+	if openParenIndex == -1 {
+		// No parameters
+		return input, nil
+	}
+
+	typeName := strings.TrimSpace(input[:openParenIndex])
+	paramsString := input[openParenIndex+1 : len(input)-1]
+	params := strings.Split(paramsString, ",")
+
+	for i, param := range params {
+		params[i] = strings.TrimSpace(param)
+	}
+
+	return typeName, params
 }
 
 // / ValueCheck switch cases
-func (dt *Datatype) ValidateValue(value interface{}) bool {
-	switch dt.ValueCheck {
-	case "URL":
+func (dt *Datatype) ValidateCheck(value interface{}) bool {
+
+	typeS, args := SplitStringArgument(dt.ValueCheck)
+
+	switch typeS {
+	case nonemptyCheck:
+		return validateNonempty(value)
+	case RangeCheck:
+		return validateInRange(value, args)
+	case SetCheck:
+		return validateSet(value, args)
+	case NoCheck:
+		return true
+	case URLCheck:
 		return validateURL(value)
-	case "in{1,2,3,4,5}": // TEMP
-		return validateInRange(value, 1, 5)
-	case "mail_ping":
+	case MailCheck:
 		return validateEmail(value)
-	case "phone":
+	case PhoneCheck:
 		return validatePhone(value)
-	case "file_exists":
+	case FileCheck:
 		return validateFileExists(value)
-	case "date":
+	case DateCheck:
 		return validateDate(value)
 	default:
+		WarningLogger.Printf("Unknown validation type: %s", typeS)
 		return false
 	}
+}
+
+func validateNonempty(value interface{}) bool {
+	str, ok := value.(string)
+	if !ok {
+		logTypeError(value, "string")
+		return false
+	}
+	return str != ""
+}
+
+func validateSet(value interface{}, args []string) bool {
+	str, ok := value.(string)
+	if !ok {
+		logTypeError(value, "string")
+		return false
+	}
+	for _, arg := range args {
+		if str == arg {
+			return true
+		}
+	}
+	return false
 }
 
 // /rejects empty http:// and relative urls like /foo/bar
@@ -43,13 +96,27 @@ func validateURL(value interface{}) bool {
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
-func validateInRange(value interface{}, min, max int) bool {
-	i, ok := value.(int) //assert value is an integer
+func validateInRange(value interface{}, args []string) bool {
+	if args == nil || len(args) != 2 {
+		logArgsError(args, 2)
+		return false
+	}
+	i, ok := value.(int)
 	if !ok {
 		logTypeError(value, "int")
 		return false
 	}
-	return ok && i >= min && i <= max
+	min, err := strconv.Atoi(args[0])
+	if err != nil {
+		WarningLogger.Printf("Failed to parse min value: %v", err)
+		return false
+	}
+	max, err := strconv.Atoi(args[1])
+	if err != nil {
+		WarningLogger.Printf("Failed to parse max value: %v", err)
+		return false
+	}
+	return i >= min && i <= max
 }
 
 func validateEmail(value interface{}) bool {

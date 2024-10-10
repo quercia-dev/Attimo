@@ -48,3 +48,25 @@ func LogError(context string, err error) error {
 	}
 	return nil
 }
+
+// logTypeError logs a warning message when a value is not of the expected type
+// It uses the global WarningLogger if it is not nil, otherwise it uses fmt.Printf
+// The message is in the format: "%v needs to be a %s"
+func logTypeError(value interface{}, typeName string) {
+	if WarningLogger != nil {
+		WarningLogger.Printf("%v needs to be a %s", value, typeName)
+	} else {
+		fmt.Printf("%v needs to be a %s", value, typeName)
+	}
+}
+
+// logArgsError logs a warning message when the number of arguments is not as expected
+// It uses the global WarningLogger if it is not nil, otherwise it uses fmt.Printf
+// The message is in the format: "Expected %d arguments, got %d: %v"
+func logArgsError(args []string, expected int) {
+	if WarningLogger != nil {
+		WarningLogger.Printf("Expected %d arguments, got %d: %v", expected, len(args), args)
+	} else {
+		fmt.Printf("Expected %d arguments, got %d: %v", expected, len(args), args)
+	}
+}
