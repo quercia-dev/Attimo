@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"net/mail"
 	"net/url"
 	"os"
@@ -36,6 +37,7 @@ func SplitStringArgument(input string) (string, []string) {
 func (dt *Datatype) ValidateCheck(value interface{}) bool {
 
 	typeS, args := SplitStringArgument(dt.ValueCheck)
+	fmt.Println(typeS, args)
 
 	switch typeS {
 	case nonemptyCheck:
@@ -43,7 +45,7 @@ func (dt *Datatype) ValidateCheck(value interface{}) bool {
 	case RangeCheck:
 		return validateInRange(value, args)
 	case SetCheck:
-		return validateSet(value, args)
+		return validateInSet(value, args)
 	case NoCheck:
 		return true
 	case URLCheck:
@@ -57,7 +59,7 @@ func (dt *Datatype) ValidateCheck(value interface{}) bool {
 	case DateCheck:
 		return validateDate(value)
 	default:
-		WarningLogger.Printf("Unknown validation type: %s", typeS)
+		logUnrecognizedType(dt.ValueCheck)
 		return false
 	}
 }
@@ -71,7 +73,7 @@ func validateNonempty(value interface{}) bool {
 	return str != ""
 }
 
-func validateSet(value interface{}, args []string) bool {
+func validateInSet(value interface{}, args []string) bool {
 	str, ok := value.(string)
 	if !ok {
 		logTypeError(value, "string")
