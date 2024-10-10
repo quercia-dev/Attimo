@@ -31,19 +31,28 @@ func TestValidateInRange(t *testing.T) {
 	tests := []struct {
 		name  string
 		input interface{}
-		min   int
-		max   int
+		args  []string
 		want  bool
 	}{
-		{"Valid - in range", 3, 1, 5, true},
-		{"Invalid - below range", 0, 1, 5, false},
-		{"Invalid - above range", 6, 1, 5, false},
-		{"Invalid - wrong type", "3", 1, 5, false},
-	}
+		{"Valid - in range", 3, []string{"1", "5"}, true},
+		{"Valid - at lower bound", 1, []string{"1", "5"}, true},
+		{"Valid - at upper bound", 5, []string{"1", "5"}, true},
+		{"Valid - negative range", -3, []string{"-5", "-1"}, true},
+		{"Valid - single value", 3, []string{"3", "3"}, true},
 
+		{"Invalid - empty args", 3, []string{}, false},
+		{"Invalid - lower number of args", 3, []string{"1"}, false},
+		{"Invalid - higher number of args", 3, []string{"1", "2", "3"}, false},
+
+		{"Invalid - below range", 0, []string{"1", "10"}, false},
+		{"Invalid - above range", 6, []string{"-1", "5"}, false},
+		{"Invalid - wrong type", "3", []string{"1", "3"}, false},
+		{"Invalid - missing arguments", 3, []string{"1"}, false},
+		{"Invalid - empty string", "", []string{"1", "3"}, false},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, validateInRange(tt.input, tt.min, tt.max), "validateInRange(%v, %v, %v) should return %v", tt.input, tt.min, tt.max, tt.want)
+			assert.Equal(t, tt.want, validateInRange(tt.input, tt.args), "validateInRange(%v) should return %v", tt.input, tt.want)
 		})
 	}
 }
@@ -130,7 +139,7 @@ func TestValidateDate(t *testing.T) {
 	}
 }
 
-func TestDatatype_ValidateValue(t *testing.T) {
+func TestDatatypeValidateCheck(t *testing.T) {
 	tmpfile, err := os.CreateTemp("", "example")
 	assert.NoError(t, err, "Failed to create temporary file")
 	defer os.Remove(tmpfile.Name())
@@ -142,7 +151,7 @@ func TestDatatype_ValidateValue(t *testing.T) {
 		want       bool
 	}{
 		{"URL check", "URL", "https://example.com", true},
-		{"Range check", "in{1,2,3,4,5}", 3, true},
+		{"Range check", "in(1,2,3,4,5)", 3, true},
 		{"Email check", "mail_ping", "test@example.com", true},
 		{"Phone check", "phone", "1234567890", true},
 		{"File check", "file_exists", tmpfile.Name(), true},
@@ -153,7 +162,7 @@ func TestDatatype_ValidateValue(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dt := &Datatype{ValueCheck: tt.valueCheck}
-			assert.Equal(t, tt.want, dt.ValidateValue(tt.input), "Datatype.ValidateValue(%v) with ValueCheck=%v should return %v", tt.input, tt.valueCheck, tt.want)
+			assert.Equal(t, tt.want, dt.ValidateCheck(tt.input), "Datatype.ValidateCheck(%v) with ValueCheck=%v should return %v", tt.input, tt.valueCheck, tt.want)
 		})
 	}
 }
