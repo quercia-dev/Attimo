@@ -57,6 +57,27 @@ func TestValidateInRange(t *testing.T) {
 	}
 }
 
+func TestValidateInSet(t *testing.T) {
+	tests := []struct {
+		name  string
+		input interface{}
+		args  []string
+		want  bool
+	}{
+		{"Valid - in set", "foo", []string{"foo", "bar", "baz"}, true},
+		{"Valid - first in set", "foo", []string{"foo", "bar", "baz"}, true},
+		{"Valid - last in set", "baz", []string{"foo", "bar", "baz"}, true},
+		{"Valid - single value", "foo", []string{"foo"}, true},
+		{"Valid - empty set", "foo", []string{}, false},
+		{"Valid - empty string", "", []string{"foo", "bar", "baz"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, validateInSet(tt.input, tt.args), "validateInSet(%v) should return %v", tt.input, tt.want)
+		})
+	}
+}
+
 func TestValidateEmail(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -139,7 +160,7 @@ func TestValidateDate(t *testing.T) {
 	}
 }
 
-func TestDatatypeValidateCheck(t *testing.T) {
+func TestValidateCheck(t *testing.T) {
 	tmpfile, err := os.CreateTemp("", "example")
 	assert.NoError(t, err, "Failed to create temporary file")
 	defer os.Remove(tmpfile.Name())
@@ -150,12 +171,13 @@ func TestDatatypeValidateCheck(t *testing.T) {
 		input      interface{}
 		want       bool
 	}{
-		{"URL check", "URL", "https://example.com", true},
-		{"Range check", "in(1,2,3,4,5)", 3, true},
-		{"Email check", "mail_ping", "test@example.com", true},
-		{"Phone check", "phone", "1234567890", true},
-		{"File check", "file_exists", tmpfile.Name(), true},
-		{"Date check", "date", "01-01-2024", true},
+		{"URL check", URLCheck, "https://example.com", true},
+		{"Set check", SetCheck + "(ABS,Sd,sdasd,sad asd,2312)", "2312", true},
+		{"Range check", RangeCheck + "(1,5)", 3, true},
+		{"Email check", MailCheck, "test@example.com", true},
+		{"Phone check", PhoneCheck, "1234567890", true},
+		{"File check", FileCheck, tmpfile.Name(), true},
+		{"Date check", DateCheck, "01-01-2024", true},
 		{"Invalid check type", "invalid_check", "any value", false},
 	}
 
