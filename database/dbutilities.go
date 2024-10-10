@@ -68,3 +68,24 @@ func testValidIdentifier(types ...string) error {
 	}
 	return nil
 }
+
+// Helper function to check if a column is part of gorm.Model
+func isGormModelColumn(columnName string) bool {
+	gormColumns := []string{"id", "created_at", "updated_at", "deleted_at"}
+	for _, c := range gormColumns {
+		if columnName == c {
+			return true
+		}
+	}
+	return false
+}
+
+// Helper function to get datatype by column name
+func getDatatypeByName(tx *gorm.DB, columnName string) (*Datatype, error) {
+	var datatype Datatype
+	result := tx.Where("name = ?", columnName).First(&datatype)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &datatype, nil
+}
