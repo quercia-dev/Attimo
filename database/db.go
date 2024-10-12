@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -63,6 +64,12 @@ type Datatype struct {
 // Returns a pointer to the database object and an error.
 func SetupDatabase(path string) (*Database, error) {
 	d := &Database{Path: path}
+
+	// Check if the directory exists
+	dir := filepath.Dir(path)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return nil, fmt.Errorf("directory does not exist: %v", err)
+	}
 
 	fileExists := true
 	if _, err := os.Stat(path); os.IsNotExist(err) {
