@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"net/mail"
 	"net/url"
 	"os"
@@ -37,7 +36,6 @@ func SplitStringArgument(input string) (string, []string) {
 func (dt *Datatype) ValidateCheck(value interface{}) bool {
 
 	typeS, args := SplitStringArgument(dt.ValueCheck)
-	fmt.Println(typeS, args)
 
 	switch typeS {
 	case nonemptyCheck:

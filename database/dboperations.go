@@ -2,86 +2,97 @@ package database
 
 import (
 	"fmt"
+	"strings"
 )
 
 // RowData: map of column names to their values
 type RowData map[string]interface{}
 
-// AddRow adds a new row to the specified category table
+// AddRow adds a new row to the specified category table with SQL
 func (d *Database) AddRow(categoryName string, data RowData) error {
+	sqlDB, err := d.DB.DB()
+	if err != nil {
+		return fmt.Errorf("failed to get database connection: %w", err)
+	}
+
 	// Start a transaction
-	tx := d.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+	tx, err := sqlDB.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
 
 	// Check if the table exists
-	if !tx.Migrator().HasTable(categoryName) {
-		tx.Rollback()
+	var count int
+	err = tx.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", categoryName).Scan(&count)
+	if err != nil {
+		return fmt.Errorf("failed to check if table exists: %w", err)
+	}
+	if count == 0 {
 		return fmt.Errorf("table %s does not exist", categoryName)
 	}
 
 	// Get the table schema
-	columns, err := tx.Table(categoryName).Migrator().ColumnTypes(&struct{}{})
+	rows, err := tx.Query(fmt.Sprintf("PRAGMA table_info(%s)", categoryName))
 	if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to get column types for table %s: %w", categoryName, err)
+		return fmt.Errorf("failed to get table info: %w", err)
 	}
+	defer rows.Close()
 
-	// Debug: Print column information
-	fmt.Printf("Columns for table %s:\n", categoryName)
-	for _, col := range columns {
-		fmt.Printf("  Name: %s, Type: %s\n", col.Name(), col.DatabaseTypeName())
-	}
+	var columns []string
+	var placeholders []string
+	var values []interface{}
 
-	// Create a map to store validated data
-	validatedData := make(map[string]interface{})
+	for rows.Next() {
+		var cid int
+		var name, type_ string
+		var notnull, pk int
+		var dflt_value interface{}
+		if err := rows.Scan(&cid, &name, &type_, &notnull, &dflt_value, &pk); err != nil {
+			return fmt.Errorf("failed to scan column info: %w", err)
+		}
 
-	// Validate each column's data
-	for _, column := range columns {
-		columnName := column.Name()
-
-		// Skip the gorm.Model columns
-		if isGormModelColumn(columnName) {
+		if isGormModelColumn(name) {
 			continue
 		}
 
-		value, exists := data[columnName]
+		value, exists := data[name]
 		if !exists {
-			tx.Rollback()
-			return fmt.Errorf("missing value for column %s", columnName)
+			return fmt.Errorf("missing value for column %s", name)
 		}
 
 		// Get the datatype for this column
-		datatype, err := getDatatypeByName(tx, columnName)
+		datatype, err := getDatatypeByName(d.DB, name)
 		if err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to get datatype for column %s: %w", columnName, err)
+			return fmt.Errorf("failed to get datatype for column %s: %w", name, err)
 		}
 
 		// Validate the value
 		if !datatype.ValidateCheck(value) {
-			tx.Rollback()
-			return fmt.Errorf("invalid value for column %s: %v", columnName, value)
+			return fmt.Errorf("invalid value for column %s: %v", name, value)
 		}
 
-		validatedData[columnName] = value
+		columns = append(columns, name)
+		placeholders = append(placeholders, "?")
+		values = append(values, value)
 	}
 
-	// Debug: Print column names and their respective values before inserting
-	fmt.Printf("Inserting row into table %s with the following values:\n", categoryName)
-	for colName, val := range validatedData {
-		fmt.Printf("  Column: %s, Value: %v\n", colName, val)
+	// Prepare the INSERT statement
+	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
+		categoryName,
+		strings.Join(columns, ", "),
+		strings.Join(placeholders, ", "))
+
+	// Execute the INSERT statement
+	_, err = tx.Exec(query, values...)
+	if err != nil {
+		return fmt.Errorf("failed to insert row: %w", err)
 	}
 
-	// Create the row
-	result := tx.Table(categoryName).Create(validatedData)
-	if result.Error != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to insert row into %s: %w", categoryName, result.Error)
+	// Commit the transaction
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return tx.Commit().Error
+	return nil
 }
