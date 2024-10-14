@@ -2,97 +2,86 @@ package database
 
 import (
 	"fmt"
-	"strings"
+
+	"gorm.io/gorm"
 )
 
 // RowData: map of column names to their values
 type RowData map[string]interface{}
 
-// AddRow adds a new row to the specified category table with SQL
+// CategoryModel is a generic model for category tables
+type CategoryModel struct {
+	gorm.Model
+	Fields map[string]interface{} `gorm:"-"` // Ignore this field in GORM
+}
+
+// AddRow adds a new row to the specified category table using GORM
 func (d *Database) AddRow(categoryName string, data RowData) error {
-	sqlDB, err := d.DB.DB()
-	if err != nil {
-		return fmt.Errorf("failed to get database connection: %w", err)
-	}
-
-	// Start a transaction
-	tx, err := sqlDB.Begin()
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer tx.Rollback()
-
 	// Check if the table exists
-	var count int
-	err = tx.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", categoryName).Scan(&count)
-	if err != nil {
-		return fmt.Errorf("failed to check if table exists: %w", err)
-	}
-	if count == 0 {
+	if !d.DB.Migrator().HasTable(categoryName) {
 		return fmt.Errorf("table %s does not exist", categoryName)
 	}
 
-	// Get the table schema
-	rows, err := tx.Query(fmt.Sprintf("PRAGMA table_info(%s)", categoryName))
-	if err != nil {
-		return fmt.Errorf("failed to get table info: %w", err)
-	}
-	defer rows.Close()
+	// Create a new instance of the category model
+	model := &CategoryModel{}
 
-	var columns []string
-	var placeholders []string
-	var values []interface{}
+	// Transaction to insert
+	err := d.DB.Transaction(func(tx *gorm.DB) error {
 
-	for rows.Next() {
-		var cid int
-		var name, type_ string
-		var notnull, pk int
-		var dflt_value interface{}
-		if err := rows.Scan(&cid, &name, &type_, &notnull, &dflt_value, &pk); err != nil {
-			return fmt.Errorf("failed to scan column info: %w", err)
-		}
-
-		if isGormModelColumn(name) {
-			continue
-		}
-
-		value, exists := data[name]
-		if !exists {
-			return fmt.Errorf("missing value for column %s", name)
-		}
-
-		// Get the datatype for this column
-		datatype, err := getDatatypeByName(d.DB, name)
+		columnTypes, err := tx.Migrator().ColumnTypes(categoryName)
 		if err != nil {
-			return fmt.Errorf("failed to get datatype for column %s: %w", name, err)
+			return fmt.Errorf("failed to get column types: %w", err)
 		}
 
-		// Validate the value
-		if !datatype.ValidateCheck(value) {
-			return fmt.Errorf("invalid value for column %s: %v", name, value)
+		for _, column := range columnTypes {
+			columnName := column.Name()
+
+			// Skip gorm.Model fields as they're handled automatically
+			if isGormModelColumn(columnName) {
+				continue
+			}
+
+			value, exists := data[columnName]
+			if !exists {
+				return fmt.Errorf("missing value for column %s", columnName)
+			}
+
+			// Get the datatype for this column
+			datatype, err := getDatatypeByName(tx, columnName)
+			if err != nil {
+				return fmt.Errorf("failed to get datatype for column %s: %w", columnName, err)
+			}
+
+			// Validate the value
+			if !datatype.ValidateCheck(value) {
+				return fmt.Errorf("invalid value for column %s: %v", columnName, value)
+			}
+
+			model.setField(columnName, value)
+		}
+		// Create the new row
+		result := tx.Table(categoryName).Create(model)
+		if result.Error != nil {
+			return fmt.Errorf("failed to insert row: %w", result.Error)
 		}
 
-		columns = append(columns, name)
-		placeholders = append(placeholders, "?")
-		values = append(values, value)
+		// If the insertion was successful, update the Fields in the database
+		for fieldName, fieldValue := range model.Fields {
+			if err := tx.Table(categoryName).Where("id = ?", model.ID).Update(fieldName, fieldValue).Error; err != nil {
+				return fmt.Errorf("failed to update field %s: %w", fieldName, err)
+			}
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+// SetField sets a field in the CategoryModel dynamically
+func (m *CategoryModel) setField(name string, value interface{}) {
+	if m.Fields == nil {
+		m.Fields = make(map[string]interface{})
 	}
-
-	// Prepare the INSERT statement
-	query := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
-		categoryName,
-		strings.Join(columns, ", "),
-		strings.Join(placeholders, ", "))
-
-	// Execute the INSERT statement
-	_, err = tx.Exec(query, values...)
-	if err != nil {
-		return fmt.Errorf("failed to insert row: %w", err)
-	}
-
-	// Commit the transaction
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
-	}
-
-	return nil
+	m.Fields[name] = value
 }

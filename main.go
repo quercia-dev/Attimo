@@ -62,6 +62,17 @@ func main() {
 			},
 		},
 		{
+			category: "General",
+			data: database.RowData{
+				"Opened":   currentTime,
+				"Closed":   currentTime,
+				"Note":     "General note",
+				"Project":  "Project",
+				"Location": "Location",
+				"File":     dbPath,
+			},
+		},
+		{
 			category: "Contact",
 			data: database.RowData{
 				"Opened": currentTime,
