@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 
 	database "Attimo/database"
 )
@@ -42,4 +43,56 @@ func main() {
 		return
 	}
 	defer db.Close()
+
+	// Test data insertion
+	currentTime := time.Now().Format("02-01-2006")
+	testData := []struct {
+		category string
+		data     database.RowData
+	}{
+		{
+			category: "General",
+			data: database.RowData{
+				"Opened":   currentTime,
+				"Closed":   currentTime,
+				"Note":     "Test General note",
+				"Project":  "Test Project",
+				"Location": "Test Location",
+				"File":     dbPath,
+			},
+		},
+		{
+			category: "General",
+			data: database.RowData{
+				"Opened":   currentTime,
+				"Closed":   currentTime,
+				"Note":     "General note",
+				"Project":  "Project",
+				"Location": "Location",
+				"File":     dbPath,
+			},
+		},
+		{
+			category: "Contact",
+			data: database.RowData{
+				"Opened": currentTime,
+				"Closed": currentTime,
+				"Note":   "Test Contact note",
+				"Email":  "test@example.com",
+				"Phone":  "1234567890",
+				"File":   dbPath,
+			},
+		},
+	}
+
+	for _, test := range testData {
+		err := db.AddRow(test.category, test.data)
+		if err != nil {
+			fmt.Printf("Error adding row to %s: %v\n", test.category, err)
+		} else {
+			fmt.Printf("Successfully added row to %s\n", test.category)
+		}
+	}
+
+	fmt.Println("Database setup and test data insertion complete.")
 }

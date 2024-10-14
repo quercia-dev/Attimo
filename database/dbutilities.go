@@ -69,15 +69,9 @@ func testValidIdentifier(types ...string) error {
 	return nil
 }
 
-// Helper function to check if a column is part of gorm.Model
+// isGormModelColumn checks if the given column name is part of gorm.Model
 func isGormModelColumn(columnName string) bool {
-	gormColumns := []string{"id", "created_at", "updated_at", "deleted_at"}
-	for _, c := range gormColumns {
-		if columnName == c {
-			return true
-		}
-	}
-	return false
+	return columnName == "id" || columnName == "created_at" || columnName == "updated_at" || columnName == "deleted_at"
 }
 
 // Helper function to get datatype by column name

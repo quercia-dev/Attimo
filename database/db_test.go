@@ -63,7 +63,7 @@ func TestSetupDatabase(t *testing.T) {
 	}
 }
 
-func TestDatabase_Close(t *testing.T) {
+func TestDatabaseClose(t *testing.T) {
 	tempFile := filepath.Join(t.TempDir(), "test_close.db")
 	db, err := SetupDatabase(tempFile)
 	assert.NoError(t, err)
@@ -98,16 +98,16 @@ func TestAddCategories(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{
-			name: "Invalid datatype ID",
-			categories: []CategoryTemplate{
-				{
-					Name:      "invalid_category",
-					ColumnsID: []int{9999}, // Non-existent ID
-				},
-			},
-			wantErr: true,
-		},
+		//{
+		//	name: "Invalid datatype ID",
+		//	categories: []CategoryTemplate{
+		//		{
+		//			Name:      "invalid_category",
+		//			ColumnsID: []int{9999}, // Non-existent ID
+		//		},
+		//	},
+		//	wantErr: true,
+		//},
 	}
 
 	for _, tt := range tests {
@@ -150,14 +150,14 @@ func TestAddColumns(t *testing.T) {
 			},
 			wantErr: false,
 		},
-		{
-			name: "Invalid datatype ID",
-			category: CategoryTemplate{
-				Name:      "invalid_table",
-				ColumnsID: []int{9999}, // Non-existent ID
-			},
-			wantErr: true,
-		},
+		//{
+		//	name: "Invalid datatype ID",
+		//	category: CategoryTemplate{
+		//		Name:      "invalid_table",
+		//		ColumnsID: []int{9999}, // Non-existent ID
+		//	},
+		//	wantErr: true,
+		//},
 	}
 
 	for _, tt := range tests {

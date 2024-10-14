@@ -14,6 +14,10 @@ var (
 	ErrorLogger   *log.Logger
 )
 
+const (
+	TypeMismatch = " %v is not %s"
+)
+
 func InitLogging(logDir string) error {
 	// Create log directory if it doesn't exist
 	if err := os.MkdirAll(logDir, 0755); err != nil { //0755 is the permissions for mkdir
@@ -39,53 +43,32 @@ func InitLogging(logDir string) error {
 	return nil
 }
 
-// LogError logs an error and returns it wrapped with additional context
-func LogError(context string, err error) error {
-	if err != nil {
-		wrappedErr := fmt.Errorf("%s: %w", context, err)
-		ErrorLogger.Println(wrappedErr)
-		return wrappedErr
-	}
-	return nil
-}
-
-// logTypeError logs a warning message when a value is not of the expected type
-// It uses the global WarningLogger if it is not nil, otherwise it uses fmt.Printf
-// The message is in the format: "%v needs to be a %s"
-func logTypeError(value interface{}, typeName string) {
-	if WarningLogger != nil {
-		WarningLogger.Printf("%v needs to be a %s", value, typeName)
+func LogInfo(format string, v ...interface{}) error {
+	if InfoLogger != nil {
+		InfoLogger.Printf(format, v...)
+		return nil
 	} else {
-		fmt.Printf("%v needs to be a %s", value, typeName)
+		_, err := fmt.Printf(format+"\n", v...)
+		return err
 	}
 }
 
-// logArgsError logs a warning message when the number of arguments is not as expected
-// It uses the global WarningLogger if it is not nil, otherwise it uses fmt.Printf
-// The message is in the format: "Expected %d arguments, got %d: %v"
-func logArgsError(args []string, expected int) {
-	if WarningLogger != nil {
-		WarningLogger.Printf("Expected %d arguments, got %d: %v", expected, len(args), args)
-	} else {
-		fmt.Printf("Expected %d arguments, got %d: %v", expected, len(args), args)
-	}
-}
-
-// logUnrecognizedType logs a warning message when a value is not of a recognized type
-// It uses the global WarningLogger if it is not nil, otherwise it uses fmt.Printf
-// The message is in the format: "Unrecognized type: %v"
-func logUnrecognizedType(value interface{}) {
-	if WarningLogger != nil {
-		WarningLogger.Printf("Unrecognized type: %v", value)
-	} else {
-		fmt.Printf("Unrecognized type: %v", value)
-	}
-}
-
-func SafeLog(format string, v ...interface{}) {
+func LogWarn(format string, v ...interface{}) error {
 	if WarningLogger != nil {
 		WarningLogger.Printf(format, v...)
+		return nil
 	} else {
-		fmt.Printf(format+"\n", v...)
+		_, err := fmt.Printf(format+"\n", v...)
+		return err
+	}
+}
+
+func LogErr(format string, v ...interface{}) error {
+	if ErrorLogger != nil {
+		ErrorLogger.Printf(format, v...)
+		return nil
+	} else {
+		_, err := fmt.Printf(format+"\n", v...)
+		return err
 	}
 }

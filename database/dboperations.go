@@ -2,86 +2,86 @@ package database
 
 import (
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 // RowData: map of column names to their values
 type RowData map[string]interface{}
 
-// AddRow adds a new row to the specified category table
-func (d *Database) AddRow(categoryName string, data RowData) error {
-	// Start a transaction
-	tx := d.DB.Begin()
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
-		}
-	}()
+// CategoryModel is a generic model for category tables
+type CategoryModel struct {
+	gorm.Model
+	Fields map[string]interface{} `gorm:"-"` // Ignore this field in GORM
+}
 
+// AddRow adds a new row to the specified category table using GORM
+func (d *Database) AddRow(categoryName string, data RowData) error {
 	// Check if the table exists
-	if !tx.Migrator().HasTable(categoryName) {
-		tx.Rollback()
+	if !d.DB.Migrator().HasTable(categoryName) {
 		return fmt.Errorf("table %s does not exist", categoryName)
 	}
 
-	// Get the table schema
-	columns, err := tx.Table(categoryName).Migrator().ColumnTypes(&struct{}{})
-	if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to get column types for table %s: %w", categoryName, err)
-	}
+	// Create a new instance of the category model
+	model := &CategoryModel{}
 
-	// Debug: Print column information
-	fmt.Printf("Columns for table %s:\n", categoryName)
-	for _, col := range columns {
-		fmt.Printf("  Name: %s, Type: %s\n", col.Name(), col.DatabaseTypeName())
-	}
+	// Transaction to insert
+	err := d.DB.Transaction(func(tx *gorm.DB) error {
 
-	// Create a map to store validated data
-	validatedData := make(map[string]interface{})
-
-	// Validate each column's data
-	for _, column := range columns {
-		columnName := column.Name()
-
-		// Skip the gorm.Model columns
-		if isGormModelColumn(columnName) {
-			continue
-		}
-
-		value, exists := data[columnName]
-		if !exists {
-			tx.Rollback()
-			return fmt.Errorf("missing value for column %s", columnName)
-		}
-
-		// Get the datatype for this column
-		datatype, err := getDatatypeByName(tx, columnName)
+		columnTypes, err := tx.Migrator().ColumnTypes(categoryName)
 		if err != nil {
-			tx.Rollback()
-			return fmt.Errorf("failed to get datatype for column %s: %w", columnName, err)
+			return fmt.Errorf("failed to get column types: %w", err)
 		}
 
-		// Validate the value
-		if !datatype.ValidateCheck(value) {
-			tx.Rollback()
-			return fmt.Errorf("invalid value for column %s: %v", columnName, value)
+		for _, column := range columnTypes {
+			columnName := column.Name()
+
+			// Skip gorm.Model fields as they're handled automatically
+			if isGormModelColumn(columnName) {
+				continue
+			}
+
+			value, exists := data[columnName]
+			if !exists {
+				return fmt.Errorf("missing value for column %s", columnName)
+			}
+
+			// Get the datatype for this column
+			datatype, err := getDatatypeByName(tx, columnName)
+			if err != nil {
+				return fmt.Errorf("failed to get datatype for column %s: %w", columnName, err)
+			}
+
+			// Validate the value
+			if !datatype.ValidateCheck(value) {
+				return fmt.Errorf("invalid value for column %s: %v", columnName, value)
+			}
+
+			model.setField(columnName, value)
+		}
+		// Create the new row
+		result := tx.Table(categoryName).Create(model)
+		if result.Error != nil {
+			return fmt.Errorf("failed to insert row: %w", result.Error)
 		}
 
-		validatedData[columnName] = value
-	}
+		// If the insertion was successful, update the Fields in the database
+		for fieldName, fieldValue := range model.Fields {
+			if err := tx.Table(categoryName).Where("id = ?", model.ID).Update(fieldName, fieldValue).Error; err != nil {
+				return fmt.Errorf("failed to update field %s: %w", fieldName, err)
+			}
+		}
 
-	// Debug: Print column names and their respective values before inserting
-	fmt.Printf("Inserting row into table %s with the following values:\n", categoryName)
-	for colName, val := range validatedData {
-		fmt.Printf("  Column: %s, Value: %v\n", colName, val)
-	}
+		return nil
+	})
 
-	// Create the row
-	result := tx.Table(categoryName).Create(validatedData)
-	if result.Error != nil {
-		tx.Rollback()
-		return fmt.Errorf("failed to insert row into %s: %w", categoryName, result.Error)
-	}
+	return err
+}
 
-	return tx.Commit().Error
+// SetField sets a field in the CategoryModel dynamically
+func (m *CategoryModel) setField(name string, value interface{}) {
+	if m.Fields == nil {
+		m.Fields = make(map[string]interface{})
+	}
+	m.Fields[name] = value
 }
