@@ -1,6 +1,7 @@
 package database
 
 import (
+	log "Attimo/logging"
 	"net/mail"
 	"net/url"
 	"os"
@@ -57,7 +58,7 @@ func (dt *Datatype) ValidateCheck(value interface{}) bool {
 	case DateCheck:
 		return validateDate(value)
 	default:
-		LogErr("Unrecognized type: %v", dt.ValueCheck)
+		log.LogErr("Unrecognized type: %v", dt.ValueCheck)
 		return false
 	}
 }
@@ -65,7 +66,7 @@ func (dt *Datatype) ValidateCheck(value interface{}) bool {
 func validateNonempty(value interface{}) bool {
 	str, ok := value.(string)
 	if !ok {
-		LogInfo(TypeMismatch, value, "string")
+		log.LogInfo(log.TypeMismatch, value, "string")
 		return false
 	}
 	return str != ""
@@ -74,7 +75,7 @@ func validateNonempty(value interface{}) bool {
 func validateInSet(value interface{}, args []string) bool {
 	str, ok := value.(string)
 	if !ok {
-		LogInfo(TypeMismatch, value, "string")
+		log.LogInfo(log.TypeMismatch, value, "string")
 		return false
 	}
 	for _, arg := range args {
@@ -89,7 +90,7 @@ func validateInSet(value interface{}, args []string) bool {
 func validateURL(value interface{}) bool {
 	str, ok := value.(string)
 	if !ok {
-		LogInfo(" %v is not a string", value)
+		log.LogInfo(" %v is not a string", value)
 		return false
 	}
 	u, err := url.Parse(str)
@@ -98,22 +99,22 @@ func validateURL(value interface{}) bool {
 
 func validateInRange(value interface{}, args []string) bool {
 	if args == nil || len(args) != 2 {
-		LogInfo("args are not exactly 2 in length: %v", args)
+		log.LogInfo("args are not exactly 2 in length: %v", args)
 		return false
 	}
 	i, ok := value.(int)
 	if !ok {
-		LogInfo(TypeMismatch, value, "int")
+		log.LogInfo(log.TypeMismatch, value, "int")
 		return false
 	}
 	min, err := strconv.Atoi(args[0])
 	if err != nil {
-		LogInfo(TypeMismatch, args[0], "int")
+		log.LogInfo(log.TypeMismatch, args[0], "int")
 		return false
 	}
 	max, err := strconv.Atoi(args[1])
 	if err != nil {
-		LogInfo(TypeMismatch, args[1], "int")
+		log.LogInfo(log.TypeMismatch, args[1], "int")
 		return false
 	}
 	return i >= min && i <= max
@@ -122,7 +123,7 @@ func validateInRange(value interface{}, args []string) bool {
 func validateEmail(value interface{}) bool {
 	email, ok := value.(string)
 	if !ok {
-		LogInfo(TypeMismatch, value, "string")
+		log.LogInfo(log.TypeMismatch, value, "string")
 		return false
 	}
 	_, err := mail.ParseAddress(email)
@@ -132,7 +133,7 @@ func validateEmail(value interface{}) bool {
 func validatePhone(value interface{}) bool {
 	number, ok := value.(string)
 	if !ok {
-		LogInfo(TypeMismatch, value, "string")
+		log.LogInfo(log.TypeMismatch, value, "string")
 		return false
 	}
 	re := regexp.MustCompile(`^[0-9]+$`)
@@ -143,7 +144,7 @@ func validateFileExists(value interface{}) bool {
 	path, ok := value.(string)
 
 	if !ok {
-		LogInfo(TypeMismatch, value, "string")
+		log.LogInfo(log.TypeMismatch, value, "string")
 		return false
 	}
 	_, err := os.Stat(path)
@@ -153,7 +154,7 @@ func validateFileExists(value interface{}) bool {
 func validateDate(value interface{}) bool {
 	date, ok := value.(string)
 	if !ok {
-		LogInfo(TypeMismatch, value, "string")
+		log.LogInfo(log.TypeMismatch, value, "string")
 		return false
 	}
 	layout := "02-01-2006"
