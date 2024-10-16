@@ -250,3 +250,103 @@ func TestDeleteRow_NonexistentCategory(t *testing.T) {
 	err = db.DeleteRow("NonexistentCategory", map[string]interface{}{"Field": "value"})
 	assert.Error(t, err, "Expected error when deleting from nonexistent category")
 }
+
+func TestEditRow(t *testing.T) {
+	// Set up test database
+	tempDir := t.TempDir()
+	dbPath := filepath.Join(tempDir, "test.db")
+
+	db, err := SetupDatabase(dbPath)
+	if err != nil {
+		t.Fatalf("Failed to set up database: %v", err)
+	}
+	defer func() {
+		db.Close()
+		os.Remove(dbPath)
+	}()
+
+	currentTime := time.Now().Format("02-01-2006")
+
+	// Helper function to add a test row
+	addTestRow := func(categoryName string, data RowData) error {
+		return db.AddRow(categoryName, data)
+	}
+
+	// Test cases
+	tests := []struct {
+		name          string
+		categoryName  string
+		setupData     RowData
+		editCondition map[string]interface{}
+		editData      RowData
+		wantErr       bool
+	}{
+		{
+			name:         "Edit existing General row",
+			categoryName: "General",
+			setupData: RowData{
+				"Opened":   currentTime,
+				"Closed":   currentTime,
+				"Note":     "Test note",
+				"Project":  "Test Project",
+				"Location": "Test Location",
+				"File":     dbPath,
+			},
+			editCondition: map[string]interface{}{"Project": "Test Project"},
+			editData: RowData{
+				"Project": "Edited Project",
+			},
+			wantErr: false,
+		},
+		{
+			name:         "Edit non-existent Contact row",
+			categoryName: "Contact",
+			setupData: RowData{
+				"Opened": currentTime,
+				"Closed": currentTime,
+				"Note":   "Test contact note",
+				"Email":  "test@example.com",
+				"Phone":  "1234567890",
+				"File":   dbPath,
+			},
+			editCondition: map[string]interface{}{"Email": "nonexistent@example.com"},
+			editData: RowData{
+				"Email": "one@two.com",
+			},
+			wantErr: true,
+		},
+		{
+			name:         "Edit Financial row with multiple conditions",
+			categoryName: "Financial",
+			setupData: RowData{
+				"Opened":   currentTime,
+				"Closed":   currentTime,
+				"Note":     "Test financial note",
+				"Location": "Test Location",
+				"Cost_EUR": "100.50",
+			},
+			editCondition: map[string]interface{}{"Location": "Test Location", "Cost_EUR": "100.50"},
+			editData: RowData{
+				"Cost_EUR": "200.00",
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Setup: Add a test row
+			err := addTestRow(tt.categoryName, tt.setupData)
+			assert.NoError(t, err, "Failed to add test row")
+
+			// Perform edit
+			err = db.EditRow(tt.categoryName, tt.editCondition, tt.editData)
+
+			if tt.wantErr {
+				assert.Error(t, err, "Expected an error but got none")
+			} else {
+				assert.NoError(t, err, "Unexpected error")
+			}
+		})
+	}
+}
