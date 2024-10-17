@@ -11,21 +11,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	testDbPath = "test.db"
+)
+
 func TestAddRow(t *testing.T) {
 	// Set up test database
 	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
+	dbPath := filepath.Join(tempDir, testDbPath)
 
 	db, err := SetupDatabase(dbPath)
 	if err != nil {
-		t.Fatalf("Failed to set up database: %v", err)
+		t.Fatalf(dbSetupErrorString, err)
 	}
 	defer func() {
 		db.Close()
 		os.Remove(dbPath)
 	}()
 
-	currentTime := time.Now().Format("02-01-2006")
+	currentTime := time.Now().Format(dateFormat)
 
 	// Test cases
 	tests := []struct {
@@ -125,13 +129,13 @@ func TestAddRow(t *testing.T) {
 	}
 }
 
-func TestAddRow_NonexistentCategory(t *testing.T) {
+func TestAddRowNonexistentCategory(t *testing.T) {
 	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
+	dbPath := filepath.Join(tempDir, testDbPath)
 
 	db, err := SetupDatabase(dbPath)
 	if err != nil {
-		t.Fatalf("Failed to set up database: %v", err)
+		t.Fatalf(dbSetupErrorString, err)
 	}
 	defer func() {
 		db.Close()
@@ -147,18 +151,18 @@ func TestAddRow_NonexistentCategory(t *testing.T) {
 func TestDeleteRow(t *testing.T) {
 	// Set up test database
 	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
+	dbPath := filepath.Join(tempDir, testDbPath)
 
 	db, err := SetupDatabase(dbPath)
 	if err != nil {
-		t.Fatalf("Failed to set up database: %v", err)
+		t.Fatalf(dbSetupErrorString, err)
 	}
 	defer func() {
 		db.Close()
 		os.Remove(dbPath)
 	}()
 
-	currentTime := time.Now().Format("02-01-2006")
+	currentTime := time.Now().Format(dateFormat)
 
 	// Helper function to add a test row
 	addTestRow := func(categoryName string, data RowData) error {
@@ -234,13 +238,13 @@ func TestDeleteRow(t *testing.T) {
 	}
 }
 
-func TestDeleteRow_NonexistentCategory(t *testing.T) {
+func TestDeleteRowNonexistentCategory(t *testing.T) {
 	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
+	dbPath := filepath.Join(tempDir, testDbPath)
 
 	db, err := SetupDatabase(dbPath)
 	if err != nil {
-		t.Fatalf("Failed to set up database: %v", err)
+		t.Fatalf(dbSetupErrorString, err)
 	}
 	defer func() {
 		db.Close()
@@ -258,14 +262,14 @@ func TestEditRow(t *testing.T) {
 
 	db, err := SetupDatabase(dbPath)
 	if err != nil {
-		t.Fatalf("Failed to set up database: %v", err)
+		t.Fatalf(dbSetupErrorString, err)
 	}
 	defer func() {
 		db.Close()
 		os.Remove(dbPath)
 	}()
 
-	currentTime := time.Now().Format("02-01-2006")
+	currentTime := time.Now().Format(dateFormat)
 
 	// Helper function to add a test row
 	addTestRow := func(categoryName string, data RowData) error {
