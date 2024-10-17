@@ -12,7 +12,15 @@ import (
 )
 
 const (
-	testDbPath = "test.db"
+	testDbPath        string = "test.db"
+	testNote          string = "Test note"
+	testNoteFinancial string = testNote + " Financial"
+	testNoteContact   string = testNote + " Contact"
+
+	testLocation string = "Test Location"
+	testProject  string = "Test Project"
+	testEmail    string = "test@example.com"
+	testPhone    string = "1234567890"
 )
 
 func TestAddRow(t *testing.T) {
@@ -44,9 +52,9 @@ func TestAddRow(t *testing.T) {
 			data: RowData{
 				"Opened":   currentTime,
 				"Closed":   currentTime,
-				"Note":     "Test note",
-				"Project":  "Test Project",
-				"Location": "Test Location",
+				"Note":     testNote,
+				"Project":  testProject,
+				"Location": testLocation,
 				"File":     dbPath, // Using the test db path as a file that exists
 			},
 			wantErr: false,
@@ -57,9 +65,9 @@ func TestAddRow(t *testing.T) {
 			data: RowData{
 				"Opened": currentTime,
 				"Closed": currentTime,
-				"Note":   "Test contact note",
-				"Email":  "test@example.com",
-				"Phone":  "1234567890",
+				"Note":   testNote,
+				"Email":  testEmail,
+				"Phone":  testPhone,
 				"File":   dbPath,
 			},
 			wantErr: false,
@@ -70,7 +78,7 @@ func TestAddRow(t *testing.T) {
 			data: RowData{
 				"Opened": currentTime,
 				"Closed": currentTime,
-				"Note":   "Test contact note",
+				"Note":   testNoteContact,
 				"Email":  "not-an-email",
 				"Phone":  "1234567890",
 				"File":   dbPath,
@@ -83,8 +91,8 @@ func TestAddRow(t *testing.T) {
 			data: RowData{
 				"Opened":   currentTime,
 				"Closed":   currentTime,
-				"Note":     "Test financial note",
-				"Location": "Test Location",
+				"Note":     testNoteFinancial,
+				"Location": testLocation,
 				// Missing Cost_EUR
 			},
 			wantErr: true,
@@ -183,12 +191,12 @@ func TestDeleteRow(t *testing.T) {
 			setupData: RowData{
 				"Opened":   currentTime,
 				"Closed":   currentTime,
-				"Note":     "Test note",
-				"Project":  "Test Project",
-				"Location": "Test Location",
+				"Note":     testNote,
+				"Project":  testProject,
+				"Location": testLocation,
 				"File":     dbPath,
 			},
-			deleteCondition: map[string]interface{}{"Project": "Test Project"},
+			deleteCondition: map[string]interface{}{"Project": testProject},
 			wantErr:         false,
 		},
 		{
@@ -197,9 +205,9 @@ func TestDeleteRow(t *testing.T) {
 			setupData: RowData{
 				"Opened": currentTime,
 				"Closed": currentTime,
-				"Note":   "Test contact note",
-				"Email":  "test@example.com",
-				"Phone":  "1234567890",
+				"Note":   testNoteContact,
+				"Email":  testEmail,
+				"Phone":  testPhone,
 				"File":   dbPath,
 			},
 			deleteCondition: map[string]interface{}{"Email": "nonexistent@example.com"},
@@ -211,11 +219,11 @@ func TestDeleteRow(t *testing.T) {
 			setupData: RowData{
 				"Opened":   currentTime,
 				"Closed":   currentTime,
-				"Note":     "Test financial note",
-				"Location": "Test Location",
+				"Note":     testNoteFinancial,
+				"Location": testLocation,
 				"Cost_EUR": "100.50",
 			},
-			deleteCondition: map[string]interface{}{"Location": "Test Location", "Cost_EUR": "100.50"},
+			deleteCondition: map[string]interface{}{"Location": testLocation, "Cost_EUR": "100.50"},
 			wantErr:         false,
 		},
 	}
@@ -258,7 +266,7 @@ func TestDeleteRowNonexistentCategory(t *testing.T) {
 func TestEditRow(t *testing.T) {
 	// Set up test database
 	tempDir := t.TempDir()
-	dbPath := filepath.Join(tempDir, "test.db")
+	dbPath := filepath.Join(tempDir, testDbPath)
 
 	db, err := SetupDatabase(dbPath)
 	if err != nil {
@@ -291,12 +299,12 @@ func TestEditRow(t *testing.T) {
 			setupData: RowData{
 				"Opened":   currentTime,
 				"Closed":   currentTime,
-				"Note":     "Test note",
-				"Project":  "Test Project",
-				"Location": "Test Location",
+				"Note":     testNote,
+				"Project":  testProject,
+				"Location": testLocation,
 				"File":     dbPath,
 			},
-			editCondition: map[string]interface{}{"Project": "Test Project"},
+			editCondition: map[string]interface{}{"Project": testProject},
 			editData: RowData{
 				"Project": "Edited Project",
 			},
@@ -308,9 +316,9 @@ func TestEditRow(t *testing.T) {
 			setupData: RowData{
 				"Opened": currentTime,
 				"Closed": currentTime,
-				"Note":   "Test contact note",
-				"Email":  "test@example.com",
-				"Phone":  "1234567890",
+				"Note":   testNoteContact,
+				"Email":  testEmail,
+				"Phone":  testPhone,
 				"File":   dbPath,
 			},
 			editCondition: map[string]interface{}{"Email": "nonexistent@example.com"},
@@ -325,11 +333,11 @@ func TestEditRow(t *testing.T) {
 			setupData: RowData{
 				"Opened":   currentTime,
 				"Closed":   currentTime,
-				"Note":     "Test financial note",
-				"Location": "Test Location",
+				"Note":     testNoteFinancial,
+				"Location": testLocation,
 				"Cost_EUR": "100.50",
 			},
-			editCondition: map[string]interface{}{"Location": "Test Location", "Cost_EUR": "100.50"},
+			editCondition: map[string]interface{}{"Location": testLocation, "Cost_EUR": "100.50"},
 			editData: RowData{
 				"Cost_EUR": "200.00",
 			},
