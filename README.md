@@ -1,17 +1,23 @@
 \image
 
-Attimo is personal productivity app to store all your personal lists and records of activities in a single, easy to access place. 
+Attimo is a personal productivity app designed to store all your lists and records of activities in a single, easy-to-access place. It helps you track, manage, and connect various aspects of your daily life, providing insights into your habits and time management.
 
 # Project mission
 
-In our daily life we are bombarded with useful information: where to go, what to do, what you liked, which movie to watch next... it can get overwhelming to remember all this, and sometimes one wishes they could extend their memory. 
+In our daily life we are bombarded with information: places to go, things to do, food you enjoyed, which movie to watch next... it can get really overwhelming to keep track of everything. Attimo acts as an extension of your memory, allowing you to record and organize information easily. 
 
-Whether you need to remember some information, or would like to record some task, Attimo provides you with the tools to define a list, a _schema_ and quickly add new information with this structure. 
+Whether it's keeping track of tasks or storing bits of information, Attimo provides you with the tools to define a list, a _schema_ and quickly add new information with this structure. With everything stored in one place, you’ll have a better understanding of your habits, helping you optimize your time and actions.
+
+## Key Features
+- Custom Lists & Schemas: Create structured lists to suit your needs—whether it’s for tasks, notes, or records.
+- Habit Tracking: Use Attimo to visualize patterns and behaviors in your daily activities.
+- Simple & Lightweight: Built to be intuitive and accessible, Attimo avoids unnecessary complexity.
 
 ## Coming soon
 
-- [ ] GUI :: using WAILS with JS as a layer on top of GO
+- [ ] GUI :: Wails with JS as a layer on top of GO
 - [ ] Calendar :: jumping back and forth from table and calendar view.
+- [ ] Import :: import various formats data straight into the app (smartwatch, school calendar schedule, ...) 
 
 ## About:
 **Is this just a table editor?**
