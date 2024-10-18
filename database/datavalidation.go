@@ -157,7 +157,7 @@ func validateDate(value interface{}) bool {
 		log.LogInfo(log.TypeMismatch, value, "string")
 		return false
 	}
-	layout := "02-01-2006"
+	layout := dateFormat
 	_, err := time.Parse(layout, date)
 	return err == nil
 }

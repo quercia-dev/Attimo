@@ -5,6 +5,9 @@ import (
 )
 
 const (
+	dateFormat         string = "02-01-2006"
+	dbSetupErrorString string = "Failed to set up database: %v"
+
 	// Datatype constants define behavior of the database in inserting and editing the data
 	// by design choice, there is no default value for the behavior of the datatypes
 
