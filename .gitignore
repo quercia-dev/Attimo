@@ -1,0 +1,9 @@
+# Files
+.DS_Store
+.vscode
+
+# Testing
+test/
+
+# Logging
+logs/
