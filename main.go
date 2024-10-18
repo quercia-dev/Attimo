@@ -6,11 +6,18 @@ import (
 	"path/filepath"
 
 	database "Attimo/database"
+	log "Attimo/logging"
 )
 
 func main() {
 
 	// set up logging
+	logDir := filepath.Join(".", "logs")
+	if err := log.InitLogging(logDir); err != nil {
+		fmt.Println("Error: could not initialize logging.", err)
+		return
+	}
+
 	dbFolder := filepath.Join(".", "test")
 	dbPath := filepath.Join(dbFolder, "central_storage.db")
 
