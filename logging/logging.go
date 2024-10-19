@@ -32,9 +32,9 @@ func InitLogging(logDir string) error {
 	}
 
 	// Create multi-writers to file/terminal
-	infoWriter := io.MultiWriter(os.Stdout, logFile)
-	warningWriter := io.MultiWriter(os.Stdout, logFile)
-	errorWriter := io.MultiWriter(os.Stdout, logFile)
+	infoWriter := io.Writer(logFile)
+	warningWriter := io.Writer(logFile)
+	errorWriter := io.Writer(logFile)
 
 	InfoLogger = log.New(infoWriter, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	WarningLogger = log.New(warningWriter, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
