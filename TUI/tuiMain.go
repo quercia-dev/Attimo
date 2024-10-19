@@ -13,6 +13,11 @@ const (
 	closeItem  = "CLOSE"
 	agendaItem = "AGENDA"
 	editItem   = "EDIT"
+
+	openShortcut   = "o"
+	closeShortcut  = "c"
+	agendaShortcut = "a"
+	editShortcut   = "e"
 )
 
 type model struct {
@@ -25,10 +30,10 @@ func InitialModel() model {
 	return model{
 		menuItems: []string{openItem, closeItem, agendaItem, editItem},
 		shortcuts: map[string]string{
-			openItem:   "o",
-			closeItem:  "c",
-			agendaItem: "a",
-			editItem:   "e",
+			openShortcut:   openItem,
+			closeShortcut:  closeItem,
+			agendaShortcut: agendaItem,
+			editShortcut:   editItem,
 		},
 	}
 }
@@ -45,6 +50,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// TODO: Handle quitting through control
 			log.LogInfo("Quitting TUI")
 			return m, tea.Quit
+
 		case key.Matches(msg, DefaultKeyMap.Up):
 			if m.cursor > 0 {
 				m.cursor--
@@ -61,6 +67,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		default:
 			log.LogInfo("Key press: %s", msg.String())
+			if _, exists := m.shortcuts[msg.String()]; exists {
+				// Here you would handle the selection
+				log.LogInfo("Selected shortcut item: %s", m.shortcuts[msg.String()])
+				return m, tea.Quit
+			}
 		}
 	}
 	return m, nil

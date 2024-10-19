@@ -17,7 +17,7 @@ type KeyMap struct {
 
 var DefaultKeyMap = KeyMap{
 	Quit: key.NewBinding(
-		key.WithKeys("q", "esc"),
+		key.WithKeys("q", "esc", "ctrl+c"),
 		key.WithHelp("q/esc", "quit"),
 	),
 
