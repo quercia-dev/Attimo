@@ -1,10 +1,18 @@
 package tui
 
 import (
+	log "Attimo/logging"
 	"fmt"
-	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+)
+
+const (
+	openItem   = "OPEN"
+	closeItem  = "CLOSE"
+	agendaItem = "AGENDA"
+	editItem   = "EDIT"
 )
 
 type model struct {
@@ -15,11 +23,12 @@ type model struct {
 
 func InitialModel() model {
 	return model{
-		menuItems: []string{"OPEN", "CLOSE", "AGENDA", "EDIT"},
+		menuItems: []string{openItem, closeItem, agendaItem, editItem},
 		shortcuts: map[string]string{
-			"CLOSE":  "#",
-			"AGENDA": "#",
-			"EDIT":   "#",
+			openItem:   "o",
+			closeItem:  "c",
+			agendaItem: "a",
+			editItem:   "e",
 		},
 	}
 }
@@ -31,23 +40,27 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
+		switch {
+		case key.Matches(msg, DefaultKeyMap.Quit):
+			// TODO: Handle quitting through control
+			log.LogInfo("Quitting TUI")
 			return m, tea.Quit
-		case "up", "k":
+		case key.Matches(msg, DefaultKeyMap.Up):
 			if m.cursor > 0 {
 				m.cursor--
 			}
-		case "down", "j":
+			log.LogInfo("Cursor up")
+		case key.Matches(msg, DefaultKeyMap.Down):
 			if m.cursor < len(m.menuItems)-1 {
 				m.cursor++
 			}
-		case "enter", " ":
+			log.LogInfo("Cursor down")
+		case key.Matches(msg, DefaultKeyMap.Enter):
 			// Here you would handle the selection
+			log.LogInfo("Selected item: %s", m.menuItems[m.cursor])
 			return m, tea.Quit
-		case "s":
-			// Handle settings
-			return m, nil
+		default:
+			log.LogInfo("Key press: %s", msg.String())
 		}
 	}
 	return m, nil
@@ -55,9 +68,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	s := "\n  INITIAL SCREEN / INITIAL BUTTONS\n\n"
-
-	// Settings button in top right
-	s += strings.Repeat(" ", 60) + "[S] SETTINGS\n\n"
 
 	// Menu items
 	for i, item := range m.menuItems {

@@ -42,8 +42,7 @@ func main() {
 	log.LogInfo("Starting TUI")
 	p := tea.NewProgram(TUI.InitialModel())
 	if _, err := p.Run(); err != nil {
-		log.LogErr("Error running TUI", err)
-		return
+		log.LogErr("Error running TUI: %v", err)
 	}
 
 }
