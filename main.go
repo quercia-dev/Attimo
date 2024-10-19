@@ -5,8 +5,11 @@ import (
 	"os"
 	"path/filepath"
 
-	database "Attimo/database"
 	log "Attimo/logging"
+
+	TUI "Attimo/TUI"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 func main() {
@@ -36,11 +39,11 @@ func main() {
 		os.Remove(dbPath)
 	}
 
-	db, err := database.SetupDatabase(dbPath)
-
-	if err != nil {
-		fmt.Printf("Error: could not create db object. %v\n", err)
+	log.LogInfo("Starting TUI")
+	p := tea.NewProgram(TUI.InitialModel())
+	if _, err := p.Run(); err != nil {
+		log.LogErr("Error running TUI", err)
 		return
 	}
-	defer db.Close()
+
 }
