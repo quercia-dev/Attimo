@@ -4,6 +4,7 @@
         "datatypes",
         "gorm",
         "lipgloss",
-        "textinput"
+        "textinput",
+        "logsmodel"
     ]
 }

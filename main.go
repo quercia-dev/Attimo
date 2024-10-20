@@ -13,10 +13,10 @@ import (
 )
 
 func main() {
+	LogsModel := TUI.LogsModel()
 
 	// set up logging
-	logDir := filepath.Join(".", "logs")
-	if err := log.InitLogging(logDir); err != nil {
+	if err := log.InitLoggingWithWriter(&LogsModel); err != nil {
 		fmt.Println("Error: could not initialize logging.", err)
 		return
 	}
@@ -41,9 +41,7 @@ func main() {
 
 	log.LogInfo("Starting TUI")
 
-	values := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
-
-	p := tea.NewProgram(TUI.TableModel("Select an item", values))
+	p := tea.NewProgram(&LogsModel)
 	if _, err := p.Run(); err != nil {
 		log.LogErr("Error running TUI: %v", err)
 	}

@@ -70,7 +70,7 @@ func (dt *Datatype) ValidateCheck(value interface{}) bool {
 func validateNonempty(value interface{}) bool {
 	str, ok := value.(string)
 	if !ok {
-		log.LogInfo(log.TypeMismatch, value, "string")
+		log.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	return str != ""
@@ -79,7 +79,7 @@ func validateNonempty(value interface{}) bool {
 func validateInSet(value interface{}, args []string) bool {
 	str, ok := value.(string)
 	if !ok {
-		log.LogInfo(log.TypeMismatch, value, "string")
+		log.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	for _, arg := range args {
@@ -108,17 +108,17 @@ func validateInRange(value interface{}, args []string) bool {
 	}
 	i, ok := value.(int)
 	if !ok {
-		log.LogInfo(log.TypeMismatch, value, "int")
+		log.LogInfo(TypeMismatch, value, "int")
 		return false
 	}
 	min, err := strconv.Atoi(args[0])
 	if err != nil {
-		log.LogInfo(log.TypeMismatch, args[0], "int")
+		log.LogInfo(TypeMismatch, args[0], "int")
 		return false
 	}
 	max, err := strconv.Atoi(args[1])
 	if err != nil {
-		log.LogInfo(log.TypeMismatch, args[1], "int")
+		log.LogInfo(TypeMismatch, args[1], "int")
 		return false
 	}
 	return i >= min && i <= max
@@ -127,7 +127,7 @@ func validateInRange(value interface{}, args []string) bool {
 func validateEmail(value interface{}) bool {
 	email, ok := value.(string)
 	if !ok {
-		log.LogInfo(log.TypeMismatch, value, "string")
+		log.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	_, err := mail.ParseAddress(email)
@@ -137,7 +137,7 @@ func validateEmail(value interface{}) bool {
 func validatePhone(value interface{}) bool {
 	number, ok := value.(string)
 	if !ok {
-		log.LogInfo(log.TypeMismatch, value, "string")
+		log.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	re := regexp.MustCompile(`^[0-9]+$`)
@@ -148,7 +148,7 @@ func validateFileExists(value interface{}) bool {
 	path, ok := value.(string)
 
 	if !ok {
-		log.LogInfo(log.TypeMismatch, value, "string")
+		log.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	_, err := os.Stat(path)
@@ -158,7 +158,7 @@ func validateFileExists(value interface{}) bool {
 func validateDate(value interface{}) bool {
 	date, ok := value.(string)
 	if !ok {
-		log.LogInfo(log.TypeMismatch, value, "string")
+		log.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	layout := dateFormat
