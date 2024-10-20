@@ -146,7 +146,7 @@ func (m selectionModel) handleChoice() tea.Cmd {
 }
 
 func (m selectionModel) View() string {
-	style := getBoxStyle()
+	style := getBoxStyle(false, 100)
 
 	var sb strings.Builder
 
@@ -162,9 +162,9 @@ func (m selectionModel) View() string {
 		paddedValue := m.filtered[i] + strings.Repeat(" ", m.maxWidth-utf8.RuneCountInString(m.filtered[i]))
 
 		if i == m.cursorPos {
-			sb.WriteString("> " + paddedValue)
+			sb.WriteString(CURSOR + paddedValue)
 		} else {
-			sb.WriteString("  " + paddedValue)
+			sb.WriteString(NOTCURSOR + paddedValue)
 		}
 
 		// Add newline if not the last visible item

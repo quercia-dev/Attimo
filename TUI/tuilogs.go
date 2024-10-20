@@ -6,6 +6,7 @@ import (
 	log "Attimo/logging"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -16,6 +17,9 @@ type logsmodel struct {
 	logs  []string
 	index int
 	count int
+
+	width  int
+	height int
 }
 
 func (m *logsmodel) Write(p []byte) (n int, err error) {
@@ -45,10 +49,36 @@ func (m logsmodel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			log.LogInfo("Quitting TUI logs")
 			return m, tea.Quit
 		}
+		return m, nil
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+		return m, nil
 	}
 	return m, nil
 }
 
+// View renders the logs
+// handles wrapping and padding
 func (m logsmodel) View() string {
-	return strings.Join(m.logs, "\n")
+	logStyle := getLogStyle()
+
+	var result []string
+
+	for _, log := range m.logs {
+		wrapped := lipgloss.NewStyle().Width(m.width).Render(log)
+
+		lines := strings.Split(wrapped, "\n")
+		result = append(result, lines...)
+	}
+
+	totalLines := len(result)
+	if totalLines < m.height {
+		padding := m.height - totalLines
+		for i := 0; i < padding; i++ {
+			result = append(result, "") // Add empty lines for padding
+		}
+	}
+
+	return logStyle.Render(strings.Join(result, "\n"))
 }
