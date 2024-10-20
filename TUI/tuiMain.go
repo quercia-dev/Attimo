@@ -6,6 +6,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -20,14 +21,14 @@ const (
 	editShortcut   = "e"
 )
 
-type model struct {
+type mainMenu struct {
 	menuItems []string
 	cursor    int
 	shortcuts map[string]string
 }
 
-func InitialModel() model {
-	return model{
+func MainModel() mainMenu {
+	return mainMenu{
 		menuItems: []string{openItem, closeItem, agendaItem, editItem},
 		shortcuts: map[string]string{
 			openShortcut:   openItem,
@@ -38,11 +39,11 @@ func InitialModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m mainMenu) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -77,8 +78,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() string {
-	s := "\n  INITIAL SCREEN / INITIAL BUTTONS\n\n"
+func (m mainMenu) View() string {
+	s := "\n\n\n"
+
+	var style = lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("63"))
 
 	// Menu items
 	for i, item := range m.menuItems {
@@ -86,16 +91,16 @@ func (m model) View() string {
 		if m.cursor == i {
 			cursor = ">"
 		}
-
+		n := 20
 		// Add number prefix and format menu item
-		menuText := fmt.Sprintf("%s %d. %s", cursor, i+1, item)
+		menuText := fmt.Sprintf("%-*s", n, fmt.Sprintf("%s %d. %s", cursor, i+1, item))
 
 		// Add shortcut if exists
 		if shortcut, exists := m.shortcuts[item]; exists {
 			menuText = fmt.Sprintf("%-40s %s", menuText, shortcut)
 		}
 
-		s += fmt.Sprintf("  %s\n", menuText)
+		s += fmt.Sprintf("%s\n", style.Render(menuText))
 	}
 
 	// Quick open note

@@ -4,6 +4,10 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 )
 
+const (
+	hardQuitKey = "ctrl+c"
+)
+
 type KeyMap struct {
 	Quit key.Binding
 
