@@ -2,6 +2,7 @@ package tui
 
 import (
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -26,7 +27,7 @@ var DefaultKeyMap = KeyMap{
 	),
 
 	Enter: key.NewBinding(
-		key.WithKeys("enter", " "),
+		key.WithKeys("enter"),
 		key.WithHelp("enter/space", "confirm"),
 	),
 
@@ -46,4 +47,10 @@ var DefaultKeyMap = KeyMap{
 		key.WithKeys("h", "left"),
 		key.WithHelp("←/h", "move left"),
 	),
+}
+
+func getBoxStyle() lipgloss.Style {
+	return lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("63")).Padding(1, 1)
 }

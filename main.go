@@ -40,7 +40,10 @@ func main() {
 	}
 
 	log.LogInfo("Starting TUI")
-	p := tea.NewProgram(TUI.MainModel())
+
+	values := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
+
+	p := tea.NewProgram(TUI.TableModel("Select an item", values))
 	if _, err := p.Run(); err != nil {
 		log.LogErr("Error running TUI: %v", err)
 	}
