@@ -23,23 +23,21 @@ func (d *Database) AddRow(categoryName string, data RowData) error {
 
 	model := &CategoryModel{}
 
-	err := d.DB.Transaction(func(tx *gorm.DB) error {
+	return d.WithTransaction(func(tx *gorm.DB) error {
 		if err := d.populateModel(tx, categoryName, data, model); err != nil {
-			return err
+			return fmt.Errorf("failed to populate model: %w", err)
 		}
 
 		if err := d.insertRow(tx, categoryName, model); err != nil {
-			return err
+			return fmt.Errorf("failed to insert row: %w", err)
 		}
 
 		if err := d.updateFields(tx, categoryName, model); err != nil {
-			return err
+			return fmt.Errorf("failed to update fields: %w", err)
 		}
 
 		return nil
 	})
-
-	return err
 }
 
 func (d *Database) DeleteRow(categoryName string, condition map[string]interface{}) error {
@@ -47,8 +45,9 @@ func (d *Database) DeleteRow(categoryName string, condition map[string]interface
 		return err
 	}
 
-	err := d.DB.Transaction(func(tx *gorm.DB) error {
+	return d.WithTransaction(func(tx *gorm.DB) error {
 		result := tx.Table(categoryName).Where(condition).Delete(&CategoryModel{})
+
 		if result.Error != nil {
 			return fmt.Errorf("failed to delete row: %w", result.Error)
 		}
@@ -59,19 +58,17 @@ func (d *Database) DeleteRow(categoryName string, condition map[string]interface
 
 		return nil
 	})
-
-	return err
 }
 
 func (d *Database) EditRow(categoryName string, condition map[string]interface{}, data RowData) error {
 	if err := d.validateTable(categoryName); err != nil {
-		return err
+		return fmt.Errorf("table validation failed: %w", err)
 	}
 
-	err := d.DB.Transaction(func(tx *gorm.DB) error {
+	return d.WithTransaction(func(tx *gorm.DB) error {
 		// First, validate the data
 		if err := d.validateGivenFields(tx, categoryName, data); err != nil {
-			return err
+			return fmt.Errorf("field validation failed: %w", err)
 		}
 
 		// Check if the row exists before attempting updates
@@ -83,17 +80,16 @@ func (d *Database) EditRow(categoryName string, condition map[string]interface{}
 			return fmt.Errorf("no rows found matching the condition in table %s", categoryName)
 		}
 
-		// Update each field
+		// Update each field individually to ensure proper type handling
+		query := tx.Table(categoryName).Where(condition)
 		for field, value := range data {
-			if err := tx.Table(categoryName).Where(condition).Update(field, value).Error; err != nil {
+			if err := query.Update(field, value).Error; err != nil {
 				return fmt.Errorf("failed to update field %s: %w", field, err)
 			}
 		}
 
 		return nil
 	})
-
-	return err
 }
 
 // validateField validates a single field value against its datatype

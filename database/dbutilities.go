@@ -83,3 +83,17 @@ func getDatatypeByName(tx *gorm.DB, columnName string) (*Datatype, error) {
 	}
 	return &datatype, nil
 }
+
+func (d *Database) WithTransaction(fn func(*gorm.DB) error) error {
+	tx := d.DB.Begin()
+	if tx.Error != nil {
+		return fmt.Errorf("failed to begin transaction: %w", tx.Error)
+	}
+
+	if err := fn(tx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
