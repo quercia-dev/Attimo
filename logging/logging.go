@@ -14,9 +14,17 @@ var (
 	ErrorLogger   *log.Logger
 )
 
-const (
-	TypeMismatch = " %v is not %s"
-)
+func InitLoggingWithWriter(w io.Writer) error {
+	if w == nil {
+		return fmt.Errorf("writer cannot be nil")
+	}
+
+	InfoLogger = log.New(w, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+	WarningLogger = log.New(w, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
+	ErrorLogger = log.New(w, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+
+	return nil
+}
 
 func InitLogging(logDir string) error {
 	// Create log directory if it doesn't exist
@@ -31,7 +39,6 @@ func InitLogging(logDir string) error {
 		return fmt.Errorf("failed to open log file: %w", err)
 	}
 
-	// Create multi-writers to file/terminal
 	infoWriter := io.Writer(logFile)
 	warningWriter := io.Writer(logFile)
 	errorWriter := io.Writer(logFile)

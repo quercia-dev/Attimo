@@ -11,6 +11,10 @@ import (
 	"time"
 )
 
+const (
+	TypeMismatch = " %v is not %s"
+)
+
 // SplitType splits the type into the type and a list of string parameters
 // "IN(1,2,4,4)" -> "IN", ["1", "2", "3", "4"]
 // Uses the first open parenthesis to split the string,
