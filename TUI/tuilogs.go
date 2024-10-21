@@ -5,6 +5,7 @@ import (
 
 	log "Attimo/logging"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -45,7 +46,7 @@ func (m logsmodel) Init() tea.Cmd {
 func (m logsmodel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if msg.String() == hardQuitKey {
+		if key.Matches(msg, DefaultKeyMap.Quit) {
 			log.LogInfo("Quitting TUI logs")
 			return m, tea.Quit
 		}

@@ -84,10 +84,9 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case msg.String() == hardQuitKey:
+		case key.Matches(msg, DefaultKeyMap.HardQuit):
 			log.LogInfo("Quitting TUI")
 			return m, tea.Quit
-
 		case key.Matches(msg, DefaultKeyMap.Enter):
 			m.handleChoice()
 			return m, tea.Quit
