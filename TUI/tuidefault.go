@@ -129,3 +129,17 @@ func getFractionInt(width int, fraction float32) int {
 
 	return int(math.Round(float64(width) * float64(fraction)))
 }
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
