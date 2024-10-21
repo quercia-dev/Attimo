@@ -43,9 +43,9 @@ func InitLogging(logDir string) error {
 	warningWriter := io.Writer(logFile)
 	errorWriter := io.Writer(logFile)
 
-	InfoLogger = log.New(infoWriter, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	WarningLogger = log.New(warningWriter, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
-	ErrorLogger = log.New(errorWriter, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+	InfoLogger = log.New(infoWriter, "INFO: ", log.Ldate|log.Ltime)
+	WarningLogger = log.New(warningWriter, "WARNING: ", log.Ldate|log.Ltime)
+	ErrorLogger = log.New(errorWriter, "ERROR: ", log.Ldate|log.Ltime)
 
 	return nil
 }
