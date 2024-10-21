@@ -1,14 +1,21 @@
 package tui
 
 import (
+	"math"
+
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/lipgloss"
 )
 
 const (
-	hardQuitKey = "ctrl+c"
-	CURSOR      = "❯❯❯"
-	NOTCURSOR   = "   "
+	hardQuitKey    = "ctrl+c"
+	CURSOR         = "❯❯❯"
+	NOTCURSOR      = "   "
+	alluringString = "...? 🤔"
+	DOWNCURSOR     = "▼ ▼ ▼"
+	UPCURSOR       = "▲ ▲ ▲"
+
+	quitMessage = "Quitting TUI"
 )
 
 type KeyMap struct {
@@ -80,7 +87,32 @@ func getBoxStyle(selected bool, width int) lipgloss.Style {
 	return style
 }
 
+func getSingleBoxStyle(width int) lipgloss.Style {
+	style := lipgloss.NewStyle().
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("63")).
+		AlignHorizontal(lipgloss.Center).
+		Width(width)
+
+	return style
+}
+
 func getLogStyle() lipgloss.Style {
 	return lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#cd00cd"))
+}
+
+func getFractionInt(width int, fraction float32) int {
+	if width < 0 {
+		width = 0
+	}
+
+	if fraction < 0 {
+		fraction = 0
+	}
+	if fraction > 1 {
+		fraction = 1
+	}
+
+	return int(math.Round(float64(width) * float64(fraction)))
 }

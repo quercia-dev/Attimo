@@ -16,16 +16,20 @@ const (
 )
 
 type selectionModel struct {
-	prompt     string
-	userInput  textinput.Model
-	values     []string
-	filtered   []string
-	cursorPos  int
+	prompt    string
+	userInput textinput.Model
+	values    []string
+	filtered  []string
+	cursorPos int
+
 	maxWidth   int // Maximum width of any string in values
 	startIndex int // Start index for viewport sliding
+
+	width  int
+	height int
 }
 
-func TableModel(prompt string, values []string) selectionModel {
+func SelectionModel(prompt string, values []string) selectionModel {
 
 	ti := textinput.New()
 	ti.Placeholder = "Type here"
@@ -96,6 +100,10 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.moveDown()
 			return m, nil
 		}
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+		return m, nil
 	}
 
 	m.userInput, cmd = m.userInput.Update(msg)
@@ -146,7 +154,7 @@ func (m selectionModel) handleChoice() tea.Cmd {
 }
 
 func (m selectionModel) View() string {
-	style := getBoxStyle(false, 100)
+	style := getSingleBoxStyle(min(m.maxWidth+len(CURSOR), m.width))
 
 	var sb strings.Builder
 
@@ -162,9 +170,9 @@ func (m selectionModel) View() string {
 		paddedValue := m.filtered[i] + strings.Repeat(" ", m.maxWidth-utf8.RuneCountInString(m.filtered[i]))
 
 		if i == m.cursorPos {
-			sb.WriteString(CURSOR + paddedValue)
+			sb.WriteString(CURSOR + " " + paddedValue)
 		} else {
-			sb.WriteString(NOTCURSOR + paddedValue)
+			sb.WriteString(NOTCURSOR + " " + paddedValue)
 		}
 
 		// Add newline if not the last visible item
@@ -175,11 +183,17 @@ func (m selectionModel) View() string {
 
 	// Add scrolling indicators if necessary
 	view := sb.String()
+
+	delimiter := "\n"
 	if m.startIndex > 0 {
-		view = "↑\n" + view
+		view = UPCURSOR + delimiter + view
+	} else {
+		view = delimiter + view
 	}
 	if endIndex < len(m.filtered) {
-		view = view + "\n↓"
+		view = view + delimiter + DOWNCURSOR
+	} else {
+		view = view + delimiter
 	}
 
 	return fmt.Sprintf(

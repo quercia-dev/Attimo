@@ -53,7 +53,7 @@ func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, DefaultKeyMap.Quit):
-			log.LogInfo("Quitting TUI")
+			log.LogInfo(quitMessage + " from main menu")
 			return m, tea.Quit
 		case key.Matches(msg, DefaultKeyMap.Up):
 			if m.cursor > 0 {
@@ -90,7 +90,7 @@ func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m mainMenu) View() string {
 	s := ""
 
-	boxWidth := m.getBoxWidth()
+	boxWidth := getFractionInt(m.width, 0.25)
 	style := getBoxStyle(false, boxWidth)
 	styleSel := getBoxStyle(true, boxWidth)
 
@@ -103,8 +103,4 @@ func (m mainMenu) View() string {
 		s += fmt.Sprintf("%s\n", style.Render(item))
 	}
 	return s
-}
-
-func (m mainMenu) getBoxWidth() int {
-	return m.width / 4
 }
