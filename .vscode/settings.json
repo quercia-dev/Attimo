@@ -3,6 +3,8 @@
         "Attimo",
         "datatypes",
         "gorm",
-        "lipgloss"
+        "lipgloss",
+        "textinput",
+        "logsmodel"
     ]
 }

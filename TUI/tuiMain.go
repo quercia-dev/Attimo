@@ -6,7 +6,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 const (
@@ -14,27 +13,33 @@ const (
 	closeItem  = "CLOSE"
 	agendaItem = "AGENDA"
 	editItem   = "EDIT"
+	logItem    = "LOGS"
 
 	openShortcut   = "o"
 	closeShortcut  = "c"
 	agendaShortcut = "a"
 	editShortcut   = "e"
+	logShortcut    = "l"
 )
 
 type mainMenu struct {
 	menuItems []string
 	cursor    int
 	shortcuts map[string]string
+
+	width  int
+	height int
 }
 
 func MainModel() mainMenu {
 	return mainMenu{
-		menuItems: []string{openItem, closeItem, agendaItem, editItem},
+		menuItems: []string{openItem, closeItem, agendaItem, editItem, logItem},
 		shortcuts: map[string]string{
 			openShortcut:   openItem,
 			closeShortcut:  closeItem,
 			agendaShortcut: agendaItem,
 			editShortcut:   editItem,
+			logShortcut:    logItem,
 		},
 	}
 }
@@ -48,21 +53,21 @@ func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, DefaultKeyMap.Quit):
-			// TODO: Handle quitting through control
-			log.LogInfo("Quitting TUI")
+			log.LogInfo(quitMessage + " from main menu")
 			return m, tea.Quit
-
 		case key.Matches(msg, DefaultKeyMap.Up):
 			if m.cursor > 0 {
 				m.cursor--
 			}
 			log.LogInfo("Cursor up")
+			return m, nil
 		case key.Matches(msg, DefaultKeyMap.Down):
 			if m.cursor < len(m.menuItems)-1 {
 				m.cursor++
 			}
 			log.LogInfo("Cursor down")
-		case key.Matches(msg, DefaultKeyMap.Enter):
+			return m, nil
+		case key.Matches(msg, DefaultKeyMap.GreedyEnter):
 			// Here you would handle the selection
 			log.LogInfo("Selected item: %s", m.menuItems[m.cursor])
 			return m, tea.Quit
@@ -74,38 +79,28 @@ func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		}
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
+		return m, nil
 	}
 	return m, nil
 }
 
 func (m mainMenu) View() string {
-	s := "\n\n\n"
+	s := ""
 
-	var style = lipgloss.NewStyle().
-		BorderStyle(lipgloss.RoundedBorder()).
-		BorderForeground(lipgloss.Color("63"))
+	boxWidth := getFractionInt(m.width, 0.25)
+	style := getBoxStyle(false, boxWidth)
+	styleSel := getBoxStyle(true, boxWidth)
 
 	// Menu items
 	for i, item := range m.menuItems {
-		cursor := " "
 		if m.cursor == i {
-			cursor = ">"
+			s += fmt.Sprintf("%s\n", styleSel.Render(item))
+			continue
 		}
-		n := 20
-		// Add number prefix and format menu item
-		menuText := fmt.Sprintf("%-*s", n, fmt.Sprintf("%s %d. %s", cursor, i+1, item))
-
-		// Add shortcut if exists
-		if shortcut, exists := m.shortcuts[item]; exists {
-			menuText = fmt.Sprintf("%-40s %s", menuText, shortcut)
-		}
-
-		s += fmt.Sprintf("%s\n", style.Render(menuText))
+		s += fmt.Sprintf("%s\n", style.Render(item))
 	}
-
-	// Quick open note
-	s += "\nQuick open with a system shortcut\n"
-	s += "\nPress q to quit\n"
-
 	return s
 }
