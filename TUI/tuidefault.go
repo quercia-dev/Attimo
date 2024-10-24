@@ -102,7 +102,6 @@ func getBoxStyle(selected bool, width int) lipgloss.Style {
 
 func getSingleBoxStyle(width int) lipgloss.Style {
 	style := lipgloss.NewStyle().
-		BorderStyle(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("63")).
 		AlignHorizontal(lipgloss.Center).
 		Width(width)
