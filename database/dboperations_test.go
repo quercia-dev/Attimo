@@ -1,6 +1,7 @@
 package database
 
 import (
+	log "Attimo/logging"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -24,11 +25,16 @@ const (
 )
 
 func TestAddRow(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	// Set up test database
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, testDbPath)
 
-	db, err := SetupDatabase(dbPath)
+	db, err := SetupDatabase(dbPath, logger)
 	if err != nil {
 		t.Fatalf(dbSetupErrorString, err)
 	}
@@ -138,10 +144,15 @@ func TestAddRow(t *testing.T) {
 }
 
 func TestAddRowNonexistentCategory(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, testDbPath)
 
-	db, err := SetupDatabase(dbPath)
+	db, err := SetupDatabase(dbPath, logger)
 	if err != nil {
 		t.Fatalf(dbSetupErrorString, err)
 	}
@@ -157,11 +168,16 @@ func TestAddRowNonexistentCategory(t *testing.T) {
 }
 
 func TestDeleteRow(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	// Set up test database
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, testDbPath)
 
-	db, err := SetupDatabase(dbPath)
+	db, err := SetupDatabase(dbPath, logger)
 	if err != nil {
 		t.Fatalf(dbSetupErrorString, err)
 	}
@@ -247,10 +263,15 @@ func TestDeleteRow(t *testing.T) {
 }
 
 func TestDeleteRowNonexistentCategory(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, testDbPath)
 
-	db, err := SetupDatabase(dbPath)
+	db, err := SetupDatabase(dbPath, logger)
 	if err != nil {
 		t.Fatalf(dbSetupErrorString, err)
 	}
@@ -264,11 +285,16 @@ func TestDeleteRowNonexistentCategory(t *testing.T) {
 }
 
 func TestEditRow(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	// Set up test database
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, testDbPath)
 
-	db, err := SetupDatabase(dbPath)
+	db, err := SetupDatabase(dbPath, logger)
 	if err != nil {
 		t.Fatalf(dbSetupErrorString, err)
 	}

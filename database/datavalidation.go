@@ -2,6 +2,7 @@ package database
 
 import (
 	log "Attimo/logging"
+	"fmt"
 	"net/mail"
 	"net/url"
 	"os"
@@ -38,48 +39,52 @@ func SplitStringArgument(input string) (string, []string) {
 }
 
 // / ValueCheck switch cases
-func (dt *Datatype) ValidateCheck(value interface{}) bool {
+func (dt *Datatype) ValidateCheck(logger *log.Logger, value interface{}) bool {
+	if logger == nil {
+		fmt.Println("nil logger")
+		return false
+	}
 
 	typeS, args := SplitStringArgument(dt.ValueCheck)
 
 	switch typeS {
 	case nonemptyCheck:
-		return validateNonempty(value)
+		return validateNonempty(logger, value)
 	case RangeCheck:
-		return validateInRange(value, args)
+		return validateInRange(logger, value, args)
 	case SetCheck:
-		return validateInSet(value, args)
+		return validateInSet(logger, value, args)
 	case NoCheck:
 		return true
 	case URLCheck:
-		return validateURL(value)
+		return validateURL(logger, value)
 	case MailCheck:
-		return validateEmail(value)
+		return validateEmail(logger, value)
 	case PhoneCheck:
-		return validatePhone(value)
+		return validatePhone(logger, value)
 	case FileCheck:
-		return validateFileExists(value)
+		return validateFileExists(logger, value)
 	case DateCheck:
-		return validateDate(value)
+		return validateDate(logger, value)
 	default:
-		log.LogErr("Unrecognized type: %v", dt.ValueCheck)
+		logger.LogErr("Unrecognized type: %v", dt.ValueCheck)
 		return false
 	}
 }
 
-func validateNonempty(value interface{}) bool {
+func validateNonempty(logger *log.Logger, value interface{}) bool {
 	str, ok := value.(string)
 	if !ok {
-		log.LogInfo(TypeMismatch, value, "string")
+		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	return str != ""
 }
 
-func validateInSet(value interface{}, args []string) bool {
+func validateInSet(logger *log.Logger, value interface{}, args []string) bool {
 	str, ok := value.(string)
 	if !ok {
-		log.LogInfo(TypeMismatch, value, "string")
+		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	for _, arg := range args {
@@ -91,74 +96,74 @@ func validateInSet(value interface{}, args []string) bool {
 }
 
 // /rejects empty http:// and relative urls like /foo/bar
-func validateURL(value interface{}) bool {
+func validateURL(logger *log.Logger, value interface{}) bool {
 	str, ok := value.(string)
 	if !ok {
-		log.LogInfo(" %v is not a string", value)
+		logger.LogInfo(" %v is not a string", value)
 		return false
 	}
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
-func validateInRange(value interface{}, args []string) bool {
+func validateInRange(logger *log.Logger, value interface{}, args []string) bool {
 	if args == nil || len(args) != 2 {
-		log.LogInfo("args are not exactly 2 in length: %v", args)
+		logger.LogInfo("args are not exactly 2 in length: %v", args)
 		return false
 	}
 	i, ok := value.(int)
 	if !ok {
-		log.LogInfo(TypeMismatch, value, "int")
+		logger.LogInfo(TypeMismatch, value, "int")
 		return false
 	}
 	min, err := strconv.Atoi(args[0])
 	if err != nil {
-		log.LogInfo(TypeMismatch, args[0], "int")
+		logger.LogInfo(TypeMismatch, args[0], "int")
 		return false
 	}
 	max, err := strconv.Atoi(args[1])
 	if err != nil {
-		log.LogInfo(TypeMismatch, args[1], "int")
+		logger.LogInfo(TypeMismatch, args[1], "int")
 		return false
 	}
 	return i >= min && i <= max
 }
 
-func validateEmail(value interface{}) bool {
+func validateEmail(logger *log.Logger, value interface{}) bool {
 	email, ok := value.(string)
 	if !ok {
-		log.LogInfo(TypeMismatch, value, "string")
+		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	_, err := mail.ParseAddress(email)
 	return err == nil
 }
 
-func validatePhone(value interface{}) bool {
+func validatePhone(logger *log.Logger, value interface{}) bool {
 	number, ok := value.(string)
 	if !ok {
-		log.LogInfo(TypeMismatch, value, "string")
+		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	re := regexp.MustCompile(`^[0-9]+$`)
 	return re.MatchString(number) && len(number) >= 7 && len(number) <= 15
 }
 
-func validateFileExists(value interface{}) bool {
+func validateFileExists(logger *log.Logger, value interface{}) bool {
 	path, ok := value.(string)
 
 	if !ok {
-		log.LogInfo(TypeMismatch, value, "string")
+		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	_, err := os.Stat(path)
 	return err == nil
 }
 
-func validateDate(value interface{}) bool {
+func validateDate(logger *log.Logger, value interface{}) bool {
 	date, ok := value.(string)
 	if !ok {
-		log.LogInfo(TypeMismatch, value, "string")
+		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	layout := dateFormat

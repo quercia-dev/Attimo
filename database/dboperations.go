@@ -94,12 +94,13 @@ func (d *Database) EditRow(categoryName string, condition map[string]interface{}
 
 // validateField validates a single field value against its datatype
 func (d *Database) validateField(tx *gorm.DB, columnName string, value interface{}) error {
+
 	datatype, err := getDatatypeByName(tx, columnName)
 	if err != nil {
 		return fmt.Errorf("failed to get datatype for column %s: %w", columnName, err)
 	}
 
-	if !datatype.ValidateCheck(value) {
+	if !datatype.ValidateCheck(d.logger, value) {
 		return fmt.Errorf("invalid value for column %s: %v", columnName, value)
 	}
 

@@ -4,10 +4,17 @@ import (
 	"os"
 	"testing"
 
+	log "Attimo/logging"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateURL(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tests := []struct {
 		name  string
 		input interface{}
@@ -22,12 +29,17 @@ func TestValidateURL(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, validateURL(tt.input), "validateURL(%v) should return %v", tt.input, tt.want)
+			assert.Equal(t, tt.want, validateURL(logger, tt.input), "validateURL(%v) should return %v", tt.input, tt.want)
 		})
 	}
 }
 
 func TestValidateInRange(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tests := []struct {
 		name  string
 		input interface{}
@@ -52,12 +64,17 @@ func TestValidateInRange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, validateInRange(tt.input, tt.args), "validateInRange(%v) should return %v", tt.input, tt.want)
+			assert.Equal(t, tt.want, validateInRange(logger, tt.input, tt.args), "validateInRange(%v) should return %v", tt.input, tt.want)
 		})
 	}
 }
 
 func TestValidateInSet(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tests := []struct {
 		name  string
 		input interface{}
@@ -73,12 +90,17 @@ func TestValidateInSet(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, validateInSet(tt.input, tt.args), "validateInSet(%v) should return %v", tt.input, tt.want)
+			assert.Equal(t, tt.want, validateInSet(logger, tt.input, tt.args), "validateInSet(%v) should return %v", tt.input, tt.want)
 		})
 	}
 }
 
 func TestValidateEmail(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tests := []struct {
 		name  string
 		input interface{}
@@ -92,12 +114,17 @@ func TestValidateEmail(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, validateEmail(tt.input), "validateEmail(%v) should return %v", tt.input, tt.want)
+			assert.Equal(t, tt.want, validateEmail(logger, tt.input), "validateEmail(%v) should return %v", tt.input, tt.want)
 		})
 	}
 }
 
 func TestValidatePhone(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tests := []struct {
 		name  string
 		input interface{}
@@ -113,12 +140,17 @@ func TestValidatePhone(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, validatePhone(tt.input), "validatePhone(%v) should return %v", tt.input, tt.want)
+			assert.Equal(t, tt.want, validatePhone(logger, tt.input), "validatePhone(%v) should return %v", tt.input, tt.want)
 		})
 	}
 }
 
 func TestValidateFileExists(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	// Create a temporary file for testing
 	tmpfile, err := os.CreateTemp("", "example")
 	assert.NoError(t, err, "Failed to create temporary file")
@@ -136,12 +168,17 @@ func TestValidateFileExists(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, validateFileExists(tt.input), "validateFileExists(%v) should return %v", tt.input, tt.want)
+			assert.Equal(t, tt.want, validateFileExists(logger, tt.input), "validateFileExists(%v) should return %v", tt.input, tt.want)
 		})
 	}
 }
 
 func TestValidateDate(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tests := []struct {
 		name  string
 		input interface{}
@@ -155,12 +192,17 @@ func TestValidateDate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, validateDate(tt.input), "validateDate(%v) should return %v", tt.input, tt.want)
+			assert.Equal(t, tt.want, validateDate(logger, tt.input), "validateDate(%v) should return %v", tt.input, tt.want)
 		})
 	}
 }
 
 func TestValidateCheck(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tmpfile, err := os.CreateTemp("", "example")
 	assert.NoError(t, err, "Failed to create temporary file")
 	defer os.Remove(tmpfile.Name())
@@ -184,7 +226,7 @@ func TestValidateCheck(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			dt := &Datatype{ValueCheck: tt.valueCheck}
-			assert.Equal(t, tt.want, dt.ValidateCheck(tt.input), "Datatype.ValidateCheck(%v) with ValueCheck=%v should return %v", tt.input, tt.valueCheck, tt.want)
+			assert.Equal(t, tt.want, dt.ValidateCheck(logger, tt.input), "Datatype.ValidateCheck(%v) with ValueCheck=%v should return %v", tt.input, tt.valueCheck, tt.want)
 		})
 	}
 }

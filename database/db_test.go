@@ -5,10 +5,17 @@ import (
 	"path/filepath"
 	"testing"
 
+	log "Attimo/logging"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetupDatabase(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	// Create a temporary directory for test databases
 	tempDir, err := os.MkdirTemp("", "test_db_*")
 	if err != nil {
@@ -35,7 +42,7 @@ func TestSetupDatabase(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			db, err := SetupDatabase(tt.dbPath)
+			db, err := SetupDatabase(tt.dbPath, logger)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -64,8 +71,13 @@ func TestSetupDatabase(t *testing.T) {
 }
 
 func TestDatabaseClose(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tempFile := filepath.Join(t.TempDir(), "test_close.db")
-	db, err := SetupDatabase(tempFile)
+	db, err := SetupDatabase(tempFile, logger)
 	assert.NoError(t, err)
 
 	db.Close()
@@ -78,8 +90,13 @@ func TestDatabaseClose(t *testing.T) {
 }
 
 func TestAddCategories(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tempFile := filepath.Join(t.TempDir(), "test_categories.db")
-	db, err := SetupDatabase(tempFile)
+	db, err := SetupDatabase(tempFile, logger)
 	assert.NoError(t, err)
 	defer db.Close()
 
@@ -113,7 +130,7 @@ func TestAddCategories(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tx := db.DB.Begin()
-			err := addCategories(tx, tt.categories)
+			err := addCategories(tx, tt.categories, logger)
 			if tt.wantErr {
 				assert.Error(t, err)
 				tx.Rollback()
@@ -132,8 +149,13 @@ func TestAddCategories(t *testing.T) {
 }
 
 func TestAddColumns(t *testing.T) {
+	logger, err := log.GetTestLogger()
+	if err != nil {
+		t.Errorf(log.LoggerErrorString, err)
+	}
+
 	tempFile := filepath.Join(t.TempDir(), "test_columns.db")
-	db, err := SetupDatabase(tempFile)
+	db, err := SetupDatabase(tempFile, logger)
 	assert.NoError(t, err)
 	defer db.Close()
 
@@ -168,7 +190,7 @@ func TestAddColumns(t *testing.T) {
 			assert.NoError(t, err)
 
 			// Then add columns
-			err = addColumns(tx, tt.category)
+			err = addColumns(tx, tt.category, logger)
 			if tt.wantErr {
 				assert.Error(t, err)
 				tx.Rollback()
