@@ -10,7 +10,8 @@ import (
 
 const (
 	logfile           = "logs/app.log"
-	LoggerErrorString = "Could not create logger: %v"
+	LoggerErrorString = "lould not create logger: %v"
+	LoggerNilString   = "logger is nil"
 )
 
 type Logger struct {

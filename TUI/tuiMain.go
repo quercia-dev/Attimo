@@ -35,7 +35,7 @@ type mainMenu struct {
 
 func MainModel(logger *log.Logger) (mainMenu, error) {
 	if logger == nil {
-		return mainMenu{}, fmt.Errorf("logger is nil")
+		return mainMenu{}, fmt.Errorf(log.LoggerNilString)
 	}
 
 	return mainMenu{

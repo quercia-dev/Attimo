@@ -33,6 +33,10 @@ func main() {
 	}
 
 	data, err := data.SetupDatabase(dbPath, logger)
+	if err != nil {
+		fmt.Println("Could not create database", err)
+		return
+	}
 
 	control := ctrl.New(data, logger)
 

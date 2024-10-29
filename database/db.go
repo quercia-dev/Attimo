@@ -67,7 +67,7 @@ type Datatype struct {
 // Returns a pointer to the database object and an error.
 func SetupDatabase(path string, logger *log.Logger) (*Database, error) {
 	if logger == nil {
-		return nil, fmt.Errorf("nil logger")
+		return nil, fmt.Errorf(log.LoggerNilString)
 	}
 
 	d := &Database{Path: path, logger: logger}
