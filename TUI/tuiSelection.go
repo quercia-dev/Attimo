@@ -31,7 +31,10 @@ type selectionModel struct {
 	height int
 }
 
-func SelectionModel(prompt string, values []string, logger *log.Logger) selectionModel {
+func SelectionModel(prompt string, values []string, logger *log.Logger) (*selectionModel, error) {
+	if logger == nil {
+		return nil, fmt.Errorf(log.LoggerNilString)
+	}
 
 	ti := textinput.New()
 	ti.Placeholder = "Type here"
@@ -48,7 +51,7 @@ func SelectionModel(prompt string, values []string, logger *log.Logger) selectio
 		}
 	}
 
-	return selectionModel{
+	return &selectionModel{
 		prompt:    prompt,
 		userInput: ti,
 		values:    values,
@@ -59,7 +62,7 @@ func SelectionModel(prompt string, values []string, logger *log.Logger) selectio
 
 		maxWidth:   maxWidth,
 		startIndex: 0,
-	}
+	}, nil
 }
 
 func (m selectionModel) Init() tea.Cmd {

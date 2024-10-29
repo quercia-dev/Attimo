@@ -38,7 +38,11 @@ func main() {
 		return
 	}
 
-	control := ctrl.New(data, logger)
+	control, err := ctrl.New(data, logger)
+	if err != nil {
+		fmt.Println("Could not create controller", err)
+		return
+	}
 
 	view.Init(control)
 }

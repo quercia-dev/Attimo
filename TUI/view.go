@@ -3,6 +3,7 @@ package tui
 import (
 	ctrl "Attimo/control"
 	log "Attimo/logging"
+	"fmt"
 )
 
 type TUI struct {
@@ -12,6 +13,9 @@ type TUI struct {
 }
 
 func New(logger *log.Logger, logsmodel *logsmodel) (*TUI, error) {
+	if logger == nil || logsmodel == nil {
+		return nil, fmt.Errorf(log.LoggerNilString)
+	}
 	return &TUI{
 		logger:    logger,
 		logsmodel: logsmodel,

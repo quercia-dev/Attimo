@@ -131,7 +131,7 @@ func (d *Database) createDefaultDB() error {
 // populateDB populates the database with the default schema.
 func populateDefaultDB(tx *gorm.DB, logger *log.Logger) error {
 	if logger == nil {
-		return fmt.Errorf("nil logger")
+		return fmt.Errorf(log.LoggerNilString)
 	}
 
 	if err := tx.Create(&Metadata{Version: currentVersion}).Error; err != nil {
@@ -148,7 +148,7 @@ func populateDefaultDB(tx *gorm.DB, logger *log.Logger) error {
 
 func addCategories(tx *gorm.DB, categories []CategoryTemplate, logger *log.Logger) error {
 	if logger == nil {
-		return fmt.Errorf("nil logger")
+		return fmt.Errorf(log.LoggerNilString)
 	}
 
 	for _, cat := range categories {
@@ -168,7 +168,7 @@ func addCategories(tx *gorm.DB, categories []CategoryTemplate, logger *log.Logge
 // addColumns adds columns to the category table, based on the columnsID field of the CategoryTemplate struct.
 func addColumns(tx *gorm.DB, cat CategoryTemplate, logger *log.Logger) error {
 	if logger == nil {
-		return fmt.Errorf("nil logger")
+		return fmt.Errorf(log.LoggerNilString)
 	}
 
 	for _, colID := range cat.ColumnsID {
