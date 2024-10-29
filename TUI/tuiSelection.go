@@ -22,6 +22,8 @@ type selectionModel struct {
 	filtered  []string
 	cursorPos int
 
+	logger *log.Logger
+
 	maxWidth   int // Maximum width of any string in values
 	startIndex int // Start index for viewport sliding
 
@@ -29,7 +31,7 @@ type selectionModel struct {
 	height int
 }
 
-func SelectionModel(prompt string, values []string) selectionModel {
+func SelectionModel(prompt string, values []string, logger *log.Logger) selectionModel {
 
 	ti := textinput.New()
 	ti.Placeholder = "Type here"
@@ -47,11 +49,14 @@ func SelectionModel(prompt string, values []string) selectionModel {
 	}
 
 	return selectionModel{
-		prompt:     prompt,
-		userInput:  ti,
-		values:     values,
-		filtered:   values,
-		cursorPos:  0,
+		prompt:    prompt,
+		userInput: ti,
+		values:    values,
+		filtered:  values,
+		cursorPos: 0,
+
+		logger: logger,
+
 		maxWidth:   maxWidth,
 		startIndex: 0,
 	}
@@ -85,7 +90,7 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, DefaultKeyMap.HardQuit):
-			log.LogInfo("Quitting TUI")
+			m.logger.LogInfo("Quitting TUI")
 			return m, tea.Quit
 		case key.Matches(msg, DefaultKeyMap.Enter):
 			m.handleChoice()
@@ -145,10 +150,10 @@ func (m *selectionModel) resetCursorMaybe() {
 func (m selectionModel) handleChoice() tea.Cmd {
 	if len(m.filtered) > 0 {
 		choice := m.filtered[m.cursorPos]
-		log.LogInfo("Selected item: %s", choice)
+		m.logger.LogInfo("Selected item: %s", choice)
 		return tea.Quit
 	}
-	log.LogInfo("No item to match for: %v", m.userInput.Value())
+	m.logger.LogInfo("No item to match for: %v", m.userInput.Value())
 	return nil
 }
 

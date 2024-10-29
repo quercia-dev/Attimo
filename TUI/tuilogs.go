@@ -21,6 +21,8 @@ type logsmodel struct {
 	width        int
 	height       int
 	scrollOffset int
+
+	logger *log.Logger
 }
 
 func (m *logsmodel) Write(p []byte) (n int, err error) {
@@ -33,8 +35,13 @@ func (m *logsmodel) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func LogsModel() logsmodel {
-	return logsmodel{}
+func LogsModel() (*log.Logger, *logsmodel, error) {
+	model := &logsmodel{}
+	logger, err := log.InitLoggingWithWriter(model)
+	if err != nil {
+		return nil, nil, err
+	}
+	return logger, &logsmodel{logger: logger}, nil
 }
 
 func (m logsmodel) Init() tea.Cmd {
@@ -46,14 +53,14 @@ func (m logsmodel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, DefaultKeyMap.Quit):
-			log.LogInfo("Quitting TUI logs")
+			m.logger.LogInfo("Quitting TUI logs")
 			return m, tea.Quit
 		case key.Matches(msg, DefaultKeyMap.Down):
-			log.LogInfo("Scrolling down")
+			m.logger.LogInfo("Scrolling down")
 			m.scrollOffset = max(0, m.scrollOffset-1)
 			return m, nil
 		case key.Matches(msg, DefaultKeyMap.Up):
-			log.LogInfo("Scrolling up")
+			m.logger.LogInfo("Scrolling up")
 			m.scrollOffset = min(m.count-m.height, m.scrollOffset+1)
 			return m, nil
 		}

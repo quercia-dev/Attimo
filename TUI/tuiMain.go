@@ -27,11 +27,17 @@ type mainMenu struct {
 	cursor    int
 	shortcuts map[string]string
 
+	logger *log.Logger
+
 	width  int
 	height int
 }
 
-func MainModel() mainMenu {
+func MainModel(logger *log.Logger) (mainMenu, error) {
+	if logger == nil {
+		return mainMenu{}, fmt.Errorf("logger is nil")
+	}
+
 	return mainMenu{
 		menuItems: []string{openItem, closeItem, agendaItem, editItem, logItem},
 		shortcuts: map[string]string{
@@ -41,7 +47,8 @@ func MainModel() mainMenu {
 			editShortcut:   editItem,
 			logShortcut:    logItem,
 		},
-	}
+		logger: logger,
+	}, nil
 }
 
 func (m mainMenu) Init() tea.Cmd {
@@ -53,29 +60,29 @@ func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, DefaultKeyMap.Quit):
-			log.LogInfo(quitMessage + " from main menu")
+			m.logger.LogInfo(quitMessage + " from main menu")
 			return m, tea.Quit
 		case key.Matches(msg, DefaultKeyMap.Up):
 			if m.cursor > 0 {
 				m.cursor--
 			}
-			log.LogInfo("Cursor up")
+			m.logger.LogInfo("Cursor up")
 			return m, nil
 		case key.Matches(msg, DefaultKeyMap.Down):
 			if m.cursor < len(m.menuItems)-1 {
 				m.cursor++
 			}
-			log.LogInfo("Cursor down")
+			m.logger.LogInfo("Cursor down")
 			return m, nil
 		case key.Matches(msg, DefaultKeyMap.GreedyEnter):
 			// Here you would handle the selection
-			log.LogInfo("Selected item: %s", m.menuItems[m.cursor])
+			m.logger.LogInfo("Selected item: %s", m.menuItems[m.cursor])
 			return m, tea.Quit
 		default:
-			log.LogInfo("Key press: %s", msg.String())
+			m.logger.LogInfo("Key press: %s", msg.String())
 			if _, exists := m.shortcuts[msg.String()]; exists {
 				// Here you would handle the selection
-				log.LogInfo("Selected shortcut item: %s", m.shortcuts[msg.String()])
+				m.logger.LogInfo("Selected shortcut item: %s", m.shortcuts[msg.String()])
 				return m, tea.Quit
 			}
 		}
