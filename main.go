@@ -5,63 +5,36 @@ import (
 	"os"
 	"path/filepath"
 
-	log "Attimo/logging"
-
-	TUI "Attimo/TUI"
-
-	tea "github.com/charmbracelet/bubbletea"
+	ctrl "Attimo/control"
+	data "Attimo/database"
+	view "Attimo/tui"
 )
 
 func main() {
-	LogsModel := TUI.LogsModel()
 
-	// set up logging
-	if err := log.InitLoggingWithWriter(&LogsModel); err != nil {
-		fmt.Println("Error: could not initialize logging.", err)
-		return
-	}
+	dbFolder := filepath.Join(".", "db")
+	dbPath := filepath.Join(dbFolder, "attimo.db")
 
-	dbFolder := filepath.Join(".", "test")
-	dbPath := filepath.Join(dbFolder, "central_storage.db")
-
-	if _, err := os.Stat(dbFolder); os.IsNotExist(err) {
-		if err := os.Mkdir(dbFolder, os.ModePerm); err != nil {
-			fmt.Printf("Failed to create dir: %v\n", err)
-			return
-		}
-	} else if err != nil {
-		fmt.Printf("Failed to check directory: %v\n", err)
-		return
-	}
-
+	// TEMPORARY: delete the database file so it resets every time
 	// if file exists, delete it
 	if _, err := os.Stat(dbPath); err == nil {
 		os.Remove(dbPath)
 	}
 
-	log.LogInfo("Starting TUI")
-
-	p := tea.NewProgram(TUI.MainModel())
-	if _, err := p.Run(); err != nil {
-		log.LogErr(TUI.TUIerror, err)
+	logger, logsmodel, err := view.GetLogger()
+	if err != nil {
+		fmt.Println("Could not create logger", err)
+		return
 	}
 
-	len := 1000
-	list := make([]string, len)
-	for i := 0; i < len/3; i++ {
-		list[i] = fmt.Sprintf("Option %d", i)
-		list[i+1] = fmt.Sprintf("Stuff %d", i)
-		list[i+2] = fmt.Sprintf("Things %d", i)
+	view, err := view.New(logger, logsmodel)
+	if err == nil {
+		fmt.Println("Could not create view", err)
 	}
 
-	p = tea.NewProgram(TUI.SelectionModel("Select an option, scroll to reach it", list))
-	if _, err := p.Run(); err != nil {
-		log.LogErr(TUI.TUIerror, err)
-	}
+	data, err := data.SetupDatabase(dbPath, logger)
 
-	p = tea.NewProgram(&LogsModel)
-	if _, err := p.Run(); err != nil {
-		log.LogErr(TUI.TUIerror, err)
-	}
+	control := ctrl.New(data, logger)
 
+	view.Init(control)
 }
