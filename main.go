@@ -7,6 +7,7 @@ import (
 
 	ctrl "Attimo/control"
 	data "Attimo/database"
+	log "Attimo/logging"
 	view "Attimo/tui"
 )
 
@@ -20,29 +21,29 @@ func main() {
 	if _, err := os.Stat(dbPath); err == nil {
 		os.Remove(dbPath)
 	}
-
-	logger, logsmodel, err := view.GetLogger()
+	// view.GetLogger()
+	logger, err := log.GetTestLogger()
 	if err != nil {
 		fmt.Println("Could not create logger", err)
 		return
 	}
 
-	view, err := view.New(logger, logsmodel)
-	if err == nil {
-		fmt.Println("Could not create view", err)
+	view, err := view.New(logger, nil)
+	if err != nil {
+		logger.LogErr("Could not create view %v", err)
+		return
 	}
 
 	data, err := data.SetupDatabase(dbPath, logger)
 	if err != nil {
-		fmt.Println("Could not create database", err)
+		logger.LogErr("Could not create database %v", err)
 		return
 	}
 
 	control, err := ctrl.New(data, logger)
 	if err != nil {
-		fmt.Println("Could not create controller", err)
+		logger.LogErr("Could not create controller %v", err)
 		return
 	}
-
 	view.Init(control)
 }

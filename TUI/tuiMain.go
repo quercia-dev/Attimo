@@ -33,7 +33,7 @@ type mainMenu struct {
 	height int
 }
 
-func MainModel(logger *log.Logger) (mainMenu, error) {
+func MainModel(logger *log.Logger) (tea.Model, error) {
 	if logger == nil {
 		return mainMenu{}, fmt.Errorf(log.LoggerNilString)
 	}
