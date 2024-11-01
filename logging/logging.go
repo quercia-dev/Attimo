@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	logfile           = "logs/app.log"
-	LoggerErrorString = "lould not create logger: %v"
+	testdir           = "logs/"
+	logfile           = "app.log"
+	LoggerErrorString = "could not create logger: %v"
 	LoggerNilString   = "logger is nil"
 )
 
@@ -21,7 +22,7 @@ type Logger struct {
 }
 
 func GetTestLogger() (*Logger, error) {
-	return InitLogging(logfile)
+	return InitLogging(testdir)
 }
 
 func InitLoggingWithWriter(w io.Writer) (*Logger, error) {
@@ -43,7 +44,7 @@ func InitLogging(logDir string) (*Logger, error) {
 	}
 
 	// open log file
-	logFile, err := os.OpenFile(filepath.Join(logDir, "app.log"),
+	logFile, err := os.OpenFile(filepath.Join(logDir, logfile),
 		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log file: %w", err)

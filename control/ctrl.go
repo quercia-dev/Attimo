@@ -7,8 +7,8 @@ import (
 )
 
 type Controller struct {
-	log  *log.Logger
-	data *data.Database
+	logger *log.Logger
+	data   *data.Database
 }
 
 func New(data *data.Database, logger *log.Logger) (*Controller, error) {
@@ -17,7 +17,7 @@ func New(data *data.Database, logger *log.Logger) (*Controller, error) {
 	}
 
 	return &Controller{
-		log:  logger,
-		data: data,
+		logger: logger,
+		data:   data,
 	}, nil
 }
