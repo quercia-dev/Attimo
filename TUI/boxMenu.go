@@ -29,7 +29,7 @@ type boxMenu struct {
 	shortcuts map[string]int
 }
 
-func boxModel(logger *log.Logger, menuItems []string, shortcuts map[string]int) (boxMenu, error) {
+func newBoxModel(logger *log.Logger, menuItems []string, shortcuts map[string]int) (boxMenu, error) {
 	if logger == nil {
 		return boxMenu{}, fmt.Errorf(log.LoggerNilString)
 	}

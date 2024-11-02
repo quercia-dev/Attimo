@@ -34,7 +34,7 @@ func (m *logsmodel) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func LogsModel() (*log.Logger, *logsmodel, error) {
+func newLogsModel() (*log.Logger, *logsmodel, error) {
 	model := &logsmodel{}
 	logger, err := log.InitLoggingWithWriter(model)
 	if err != nil {

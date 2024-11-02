@@ -28,7 +28,7 @@ type selectionModel struct {
 	tuiWindow
 }
 
-func selectionModel(prompt string, values []string, logger *log.Logger) (*selectionModel, error) {
+func newSelectionModel(prompt string, values []string, logger *log.Logger) (*selectionModel, error) {
 	if logger == nil {
 		return nil, fmt.Errorf(log.LoggerNilString)
 	}

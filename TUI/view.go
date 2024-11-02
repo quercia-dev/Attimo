@@ -29,7 +29,7 @@ func New(logger *log.Logger, logsmodel *logsmodel) (*TUI, error) {
 }
 
 func GetLogger() (*log.Logger, *logsmodel, error) {
-	return LogsModel()
+	return newLogsModel()
 }
 
 func (tui *TUI) Init(control *ctrl.Controller) error {
@@ -49,7 +49,7 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 		logShortcut:    4,
 	}
 
-	model, err := boxModel(tui.logger, mainItems, mainShortcuts)
+	model, err := newBoxModel(tui.logger, mainItems, mainShortcuts)
 	if err != nil {
 		tui.logger.LogErr("Could not get Main model")
 		return err
