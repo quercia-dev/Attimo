@@ -22,40 +22,28 @@ const (
 	logShortcut    = "l"
 )
 
-type mainMenu struct {
+type boxMenu struct {
+	tuiWindow
 	menuItems []string
 	cursor    int
-	shortcuts map[string]string
-
-	logger *log.Logger
-
-	width  int
-	height int
+	shortcuts map[string]int
 }
 
-func MainModel(logger *log.Logger) (tea.Model, error) {
+func boxModel(logger *log.Logger, menuItems []string, shortcuts map[string]int) (boxMenu, error) {
 	if logger == nil {
-		return mainMenu{}, fmt.Errorf(log.LoggerNilString)
+		return boxMenu{}, fmt.Errorf(log.LoggerNilString)
 	}
-
-	return mainMenu{
-		menuItems: []string{openItem, closeItem, agendaItem, editItem, logItem},
-		shortcuts: map[string]string{
-			openShortcut:   openItem,
-			closeShortcut:  closeItem,
-			agendaShortcut: agendaItem,
-			editShortcut:   editItem,
-			logShortcut:    logItem,
-		},
-		logger: logger,
+	return boxMenu{
+		menuItems: menuItems,
+		shortcuts: shortcuts,
 	}, nil
 }
 
-func (m mainMenu) Init() tea.Cmd {
+func (m boxMenu) Init() tea.Cmd {
 	return nil
 }
 
-func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m boxMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -66,25 +54,23 @@ func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursor > 0 {
 				m.cursor--
 			}
-			m.logger.LogInfo("Cursor up")
 			return m, nil
 		case key.Matches(msg, DefaultKeyMap.Down):
 			if m.cursor < len(m.menuItems)-1 {
 				m.cursor++
 			}
-			m.logger.LogInfo("Cursor down")
 			return m, nil
 		case key.Matches(msg, DefaultKeyMap.GreedyEnter):
-			// Here you would handle the selection
-			m.logger.LogInfo("Selected item: %s", m.menuItems[m.cursor])
+			m.selected = m.menuItems[m.cursor]
 			return m, tea.Quit
 		default:
-			m.logger.LogInfo("Key press: %s", msg.String())
-			if _, exists := m.shortcuts[msg.String()]; exists {
-				// Here you would handle the selection
-				m.logger.LogInfo("Selected shortcut item: %s", m.shortcuts[msg.String()])
-				return m, tea.Quit
+			index := m.shortcuts[msg.String()]
+			if index < 0 || index >= len(m.menuItems) {
+				m.logger.LogWarn("Unidentified key pressed: %s", msg.String())
+				return m, nil
 			}
+			m.selected = m.menuItems[index]
+			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -94,7 +80,7 @@ func (m mainMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m mainMenu) View() string {
+func (m boxMenu) View() string {
 	s := ""
 
 	boxWidth := getFractionInt(m.width, 0.25)

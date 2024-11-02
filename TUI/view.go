@@ -16,7 +16,6 @@ type TUI struct {
 	logger    *log.Logger
 	logsmodel *logsmodel
 	control   *ctrl.Controller
-	model     tea.Model
 }
 
 func New(logger *log.Logger, logsmodel *logsmodel) (*TUI, error) {
@@ -41,22 +40,33 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 	}
 
 	tui.control = control
+	mainItems := []string{openItem, closeItem, agendaItem, editItem, logItem}
+	mainShortcuts := map[string]int{
+		openShortcut:   0,
+		closeShortcut:  1,
+		agendaShortcut: 2,
+		editShortcut:   3,
+		logShortcut:    4,
+	}
 
-	var err error
-	tui.model, err = MainModel(tui.logger)
+	model, err := boxModel(tui.logger, mainItems, mainShortcuts)
 	if err != nil {
-		tui.logger.LogErr("Could not get Main model running")
+		tui.logger.LogErr("Could not get Main model")
 		return err
 	}
-	p := tea.NewProgram(tui.model)
+	p := tea.NewProgram(model)
 
 	newModel, err := p.Run()
-
 	if err != nil {
 		tui.logger.LogErr("tea program ran into an error %v", err)
 		return err
 	}
 
-	tui.logger.LogInfo("Exited program p into %v", newModel)
+	if newModel, ok := newModel.(boxMenu); ok {
+		tui.logger.LogInfo("Exited program by picking %v", newModel.selected)
+	} else {
+		tui.logger.LogWarn("Unexpected model return type %v", ok)
+	}
+
 	return nil
 }
