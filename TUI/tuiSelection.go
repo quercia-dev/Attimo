@@ -22,13 +22,10 @@ type selectionModel struct {
 	filtered  []string
 	cursorPos int
 
-	logger *log.Logger
-
 	maxWidth   int // Maximum width of any string in values
 	startIndex int // Start index for viewport sliding
 
-	width  int
-	height int
+	tuiWindow
 }
 
 func SelectionModel(prompt string, values []string, logger *log.Logger) (*selectionModel, error) {
@@ -52,16 +49,17 @@ func SelectionModel(prompt string, values []string, logger *log.Logger) (*select
 	}
 
 	return &selectionModel{
-		prompt:    prompt,
-		userInput: ti,
-		values:    values,
-		filtered:  values,
-		cursorPos: 0,
-
-		logger: logger,
-
-		maxWidth:   maxWidth,
+		prompt:     prompt,
+		userInput:  ti,
+		values:     values,
+		filtered:   values,
+		cursorPos:  0,
 		startIndex: 0,
+		maxWidth:   maxWidth,
+
+		tuiWindow: tuiWindow{
+			logger: logger,
+		},
 	}, nil
 }
 

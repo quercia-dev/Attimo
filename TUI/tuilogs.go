@@ -15,14 +15,13 @@ const (
 )
 
 type logsmodel struct {
-	logs         []string
-	index        int
-	count        int
-	width        int
-	height       int
-	scrollOffset int
+	tuiWindow
 
-	logger *log.Logger
+	logs  []string
+	index int
+	count int
+
+	scrollOffset int
 }
 
 func (m *logsmodel) Write(p []byte) (n int, err error) {
@@ -41,7 +40,7 @@ func LogsModel() (*log.Logger, *logsmodel, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return logger, &logsmodel{logger: logger}, nil
+	return logger, &logsmodel{tuiWindow: tuiWindow{logger: logger}}, nil
 }
 
 func (m logsmodel) Init() tea.Cmd {

@@ -1,6 +1,7 @@
 package tui
 
 import (
+	log "Attimo/logging"
 	"math"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -18,6 +19,15 @@ const (
 	quitMessage = "Quitting TUI"
 	TUIerror    = "Error running TUI: %v"
 )
+
+type tuiWindow struct {
+	logger *log.Logger
+
+	width  int
+	height int
+
+	selected interface{}
+}
 
 type KeyMap struct {
 	Quit key.Binding
