@@ -3,7 +3,7 @@ module Attimo
 go 1.23.1
 
 require (
-	github.com/mattn/go-sqlite3 v1.14.23 // indirect
+	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	gorm.io/driver/sqlite v1.5.6
 	gorm.io/gorm v1.25.12
 )
