@@ -56,14 +56,14 @@ func setupTestDB(t *testing.T) *TestDB {
 func setupTestTables(db *sql.DB) error {
 	// Create datatypes table
 	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS datatypes (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL,
-			variable_type TEXT NOT NULL,
-			completion_value TEXT,
-			completion_sort TEXT,
-			value_check TEXT NOT NULL
-		)
+    CREATE TABLE IF NOT EXISTS datatypes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        variable_type TEXT NOT NULL,
+        completion_value TEXT NOT NULL DEFAULT 'no',
+        completion_sort TEXT NOT NULL DEFAULT 'no',
+        value_check TEXT NOT NULL
+    )
 	`)
 	if err != nil {
 		return err
@@ -71,10 +71,16 @@ func setupTestTables(db *sql.DB) error {
 
 	// Insert required datatypes
 	_, err = db.Exec(`
-		INSERT INTO datatypes (name, variable_type, value_check) VALUES 
-		('Note', 'string', 'nonempty'),
-		('Project', 'string', 'nonempty'),
-		('Location', 'string', 'nonempty')
+    INSERT INTO datatypes (
+        name, 
+        variable_type, 
+        completion_value, 
+        completion_sort, 
+        value_check
+    ) VALUES 
+    ('Note', 'string', 'no', 'no', 'nonempty'),
+    ('Project', 'string', 'no', 'no', 'nonempty'),
+    ('Location', 'string', 'no', 'no', 'nonempty')
 	`)
 	if err != nil {
 		return err
