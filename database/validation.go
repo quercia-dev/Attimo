@@ -1,11 +1,8 @@
 package database
 
 import (
-	log "Attimo/logging"
-<<<<<<< HEAD:database/datavalidation.go
-=======
+	"Attimo/logging"
 	"database/sql"
->>>>>>> tf-sqlTEST:database/validation.go
 	"fmt"
 	"net/mail"
 	"net/url"
@@ -39,63 +36,80 @@ func SplitStringArgument(input string) (string, []string) {
 	return typeName, params
 }
 
-<<<<<<< HEAD:database/datavalidation.go
-// / ValueCheck switch cases
-func (dt *Datatype) ValidateCheck(logger *log.Logger, value interface{}) bool {
-	if logger == nil {
-		fmt.Println("nil logger")
-		return false
-	}
-
-=======
+// TODO REMOVE LOGGING WHEN OPERATIONS BECOME MORE FREQUENT
 // ValidateCheck performs validation based on the datatype's check rules
-func (dt *Datatype) ValidateCheck(value interface{}) bool {
->>>>>>> tf-sqlTEST:database/validation.go
+func (dt *Datatype) ValidateCheck(value interface{}, logger *logging.Logger) bool {
 	typeS, args := SplitStringArgument(dt.ValueCheck)
 
 	switch typeS {
 	case nonemptyCheck:
-		return validateNonempty(logger, value)
+		valid := validateNonempty(value)
+		if !valid {
+			logger.LogWarn("Nonempty validation failed for value: %v", value)
+		}
+		return valid
 	case RangeCheck:
-		return validateInRange(logger, value, args)
+		valid := validateInRange(value, args)
+		if !valid {
+			logger.LogWarn("Range validation failed for value: %v (args: %v)", value, args)
+		}
+		return valid
 	case SetCheck:
-		return validateInSet(logger, value, args)
+		valid := validateInSet(value, args)
+		if !valid {
+			logger.LogWarn("Set validation failed for value: %v (args: %v)", value, args)
+		}
+		return valid
 	case NoCheck:
 		return true
 	case URLCheck:
-		return validateURL(logger, value)
+		valid := validateURL(value)
+		if !valid {
+			logger.LogWarn("URL validation failed for value: %v", value)
+		}
+		return valid
 	case MailCheck:
-		return validateEmail(logger, value)
+		valid := validateEmail(value)
+		if !valid {
+			logger.LogWarn("Email validation failed for value: %v", value)
+		}
+		return valid
 	case PhoneCheck:
-		return validatePhone(logger, value)
+		valid := validatePhone(value)
+		if !valid {
+			logger.LogWarn("Phone validation failed for value: %v", value)
+		}
+		return valid
 	case FileCheck:
-		return validateFileExists(logger, value)
+		valid := validateFileExists(value)
+		if !valid {
+			logger.LogWarn("File validation failed for value: %v", value)
+		}
+		return valid
 	case DateCheck:
-		return validateDate(logger, value)
+		valid := validateDate(value)
+		if !valid {
+			logger.LogWarn("Date validation failed for value: %v", value)
+		}
+		return valid
 	default:
 		logger.LogErr("Unrecognized type: %v", dt.ValueCheck)
 		return false
 	}
 }
 
-<<<<<<< HEAD:database/datavalidation.go
-func validateNonempty(logger *log.Logger, value interface{}) bool {
-=======
 // Individual validation functions
 func validateNonempty(value interface{}) bool {
->>>>>>> tf-sqlTEST:database/validation.go
 	str, ok := value.(string)
 	if !ok {
-		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	return str != ""
 }
 
-func validateInSet(logger *log.Logger, value interface{}, args []string) bool {
+func validateInSet(value interface{}, args []string) bool {
 	str, ok := value.(string)
 	if !ok {
-		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	for _, arg := range args {
@@ -106,81 +120,64 @@ func validateInSet(logger *log.Logger, value interface{}, args []string) bool {
 	return false
 }
 
-<<<<<<< HEAD:database/datavalidation.go
-// /rejects empty http:// and relative urls like /foo/bar
-func validateURL(logger *log.Logger, value interface{}) bool {
-	str, ok := value.(string)
-	if !ok {
-		logger.LogInfo(" %v is not a string", value)
-=======
 func validateURL(value interface{}) bool {
 	str, ok := value.(string)
 	if !ok {
-		log.LogInfo(TypeMismatch, value, "string")
->>>>>>> tf-sqlTEST:database/validation.go
 		return false
 	}
 	u, err := url.Parse(str)
 	return err == nil && u.Scheme != "" && u.Host != ""
 }
 
-func validateInRange(logger *log.Logger, value interface{}, args []string) bool {
+func validateInRange(value interface{}, args []string) bool {
 	if args == nil || len(args) != 2 {
-		logger.LogInfo("args are not exactly 2 in length: %v", args)
 		return false
 	}
 	i, ok := value.(int)
 	if !ok {
-		logger.LogInfo(TypeMismatch, value, "int")
 		return false
 	}
 	min, err := strconv.Atoi(args[0])
 	if err != nil {
-		logger.LogInfo(TypeMismatch, args[0], "int")
 		return false
 	}
 	max, err := strconv.Atoi(args[1])
 	if err != nil {
-		logger.LogInfo(TypeMismatch, args[1], "int")
 		return false
 	}
 	return i >= min && i <= max
 }
 
-func validateEmail(logger *log.Logger, value interface{}) bool {
+func validateEmail(value interface{}) bool {
 	email, ok := value.(string)
 	if !ok {
-		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	_, err := mail.ParseAddress(email)
 	return err == nil
 }
 
-func validatePhone(logger *log.Logger, value interface{}) bool {
+func validatePhone(value interface{}) bool {
 	number, ok := value.(string)
 	if !ok {
-		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	re := regexp.MustCompile(`^[0-9]+$`)
 	return re.MatchString(number) && len(number) >= 7 && len(number) <= 15
 }
 
-func validateFileExists(logger *log.Logger, value interface{}) bool {
+func validateFileExists(value interface{}) bool {
 	path, ok := value.(string)
 	if !ok {
-		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	_, err := os.Stat(path)
 	return err == nil
 }
 
-func validateDate(logger *log.Logger, value interface{}) bool {
+func validateDate(value interface{}) bool {
 	date, ok := value.(string)
 	if !ok {
-		logger.LogInfo(TypeMismatch, value, "string")
 		return false
 	}
 	_, err := time.Parse(dateFormat, date)
@@ -209,7 +206,7 @@ func (d *Database) validateField(tx *sql.Tx, columnName string, value interface{
 		return fmt.Errorf("failed to get datatype for column %s: %w", columnName, err)
 	}
 
-	if !datatype.ValidateCheck(value) {
+	if !datatype.ValidateCheck(value, d.logger) {
 		return fmt.Errorf("invalid value for column %s: %v", columnName, value)
 	}
 

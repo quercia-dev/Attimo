@@ -1,14 +1,16 @@
 package database
 
 import (
+	"Attimo/logging"
 	"database/sql"
 	"time"
 )
 
 // Database struct holds the path to the database and the database connection.
 type Database struct {
-	Path string
-	DB   *sql.DB
+	Path   string
+	DB     *sql.DB
+	logger *logging.Logger
 }
 
 // Metadata struct holds the metadata of the database.
