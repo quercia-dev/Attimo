@@ -21,3 +21,11 @@ func New(data *data.Database, logger *log.Logger) (*Controller, error) {
 		data:   data,
 	}, nil
 }
+
+func (c *Controller) GetCategories(logger *log.Logger) ([]string, error) {
+	if logger == nil {
+		return nil, fmt.Errorf(log.LoggerNilString)
+	}
+
+	return c.data.GetCategories()
+}

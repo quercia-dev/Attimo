@@ -96,6 +96,9 @@ func getDefaultDatatypes() []Datatype {
 		{Name: "Status", VariableType: StringType, CompletionValue: SetCompletion + "(Not Started,In Progress,On Hold,Completed,Cancelled)", CompletionSort: LastSort, ValueCheck: nonemptyCheck},
 		{Name: "Tags", VariableType: csvType, CompletionValue: UniqueCompletion, CompletionSort: FrequencySort, ValueCheck: nonemptyCheck},
 		{Name: "Progress", VariableType: IntType, CompletionValue: SetCompletion + "(0,25,50,75,100)", CompletionSort: LastSort, ValueCheck: nonemptyCheck},
+		{Name: "Budget", VariableType: IntType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck},
+		{Name: "Tags", VariableType: csvType, CompletionValue: UniqueCompletion, CompletionSort: FrequencySort, ValueCheck: nonemptyCheck},
+		{Name: "Recurring", VariableType: StringType, CompletionValue: SetCompletion + "(Daily,Weekly,Monthly,Yearly)", CompletionSort: LastSort, ValueCheck: nonemptyCheck},
 	}
 }
 
