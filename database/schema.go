@@ -88,3 +88,66 @@ func toSQLiteType(goType string) (string, error) {
 		return "", fmt.Errorf("unsupported type: %s", goType)
 	}
 }
+
+func GetCategories(tx *sql.Tx) ([]string, error) {
+	// Query for table names
+	rows, err := tx.Query(`
+		SELECT name
+		FROM sqlite_master
+		WHERE type = 'table'
+		  AND name NOT LIKE 'sqlite_%'
+		  AND name NOT LIKE 'datatypes'
+		  AND name NOT LIKE 'metadata'
+		ORDER BY name
+	`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query table names: %w", err)
+	}
+	defer rows.Close()
+
+	var categories []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("failed to scan table name: %w", err)
+		}
+		categories = append(categories, name)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return categories, nil
+}
+
+func GetCategoryColumns(tx *sql.Tx, categoryName string) ([]string, error) {
+	// Query for column names
+	rows, err := tx.Query(`
+		SELECT name
+		FROM pragma_table_info(?)
+		WHERE name != 'id'
+		  AND name != 'created_at'
+		  AND name != 'updated_at'
+		  AND name != 'deleted_at'
+	`, categoryName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query column names: %w", err)
+	}
+	defer rows.Close()
+
+	var columns []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, fmt.Errorf("failed to scan column name: %w", err)
+		}
+		columns = append(columns, name)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return columns, nil
+}
