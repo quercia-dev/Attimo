@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	ctrl "Attimo/control"
@@ -18,9 +17,6 @@ func main() {
 
 	// TEMPORARY: delete the database file so it resets every time
 	// if file exists, delete it
-	if _, err := os.Stat(dbPath); err == nil {
-		os.Remove(dbPath)
-	}
 	// view.GetLogger()
 	logger, err := log.GetTestLogger()
 	if err != nil {

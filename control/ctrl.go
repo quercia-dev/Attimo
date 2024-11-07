@@ -29,3 +29,19 @@ func (c *Controller) GetCategories(logger *log.Logger) ([]string, error) {
 
 	return c.data.GetCategories()
 }
+
+func (c *Controller) GetCategoryColumns(logger *log.Logger, category string) ([]string, error) {
+	if logger == nil {
+		return nil, fmt.Errorf(log.LoggerNilString)
+	}
+
+	return c.data.GetCategoryColumns(category)
+}
+
+func (c *Controller) CreateRow(logger *log.Logger, category string, values data.RowData) error {
+	if logger == nil {
+		return fmt.Errorf(log.LoggerNilString)
+	}
+
+	return c.data.CreateRow(category, values)
+}

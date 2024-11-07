@@ -34,7 +34,7 @@ func newSelectionModel(prompt string, values []string, logger *log.Logger) (*sel
 	}
 
 	ti := textinput.New()
-	ti.Placeholder = "Type here"
+	ti.Placeholder = alluringString
 	ti.Focus()
 	ti.CharLimit = 156
 	ti.Width = 20

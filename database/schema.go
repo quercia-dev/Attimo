@@ -121,9 +121,9 @@ func (data *Database) GetCategories() ([]string, error) {
 	return categories, nil
 }
 
-func GetCategoryColumns(tx *sql.Tx, categoryName string) ([]string, error) {
+func (data *Database) GetCategoryColumns(categoryName string) ([]string, error) {
 	// Query for column names
-	rows, err := tx.Query(`
+	rows, err := data.DB.Query(`
 		SELECT name
 		FROM pragma_table_info(?)
 		WHERE name != 'id'
