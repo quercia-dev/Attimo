@@ -89,9 +89,9 @@ func toSQLiteType(goType string) (string, error) {
 	}
 }
 
-func GetCategories(tx *sql.Tx) ([]string, error) {
+func (data *Database) GetCategories() ([]string, error) {
 	// Query for table names
-	rows, err := tx.Query(`
+	rows, err := data.DB.Query(`
 		SELECT name
 		FROM sqlite_master
 		WHERE type = 'table'

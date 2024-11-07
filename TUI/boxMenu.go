@@ -61,7 +61,7 @@ func (m boxMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, nil
 		case key.Matches(msg, DefaultKeyMap.GreedyEnter):
-			m.selected = m.menuItems[m.cursor]
+			m.selected = m.cursor
 			return m, tea.Quit
 		default:
 			index := m.shortcuts[msg.String()]
@@ -69,7 +69,7 @@ func (m boxMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.logger.LogWarn("Unidentified key pressed: %s", msg.String())
 				return m, nil
 			}
-			m.selected = m.menuItems[index]
+			m.selected = index
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:

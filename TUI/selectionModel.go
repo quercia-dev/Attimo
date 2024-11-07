@@ -94,15 +94,24 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.logger.LogInfo("Quitting TUI")
 			return m, tea.Quit
 		case key.Matches(msg, DefaultKeyMap.Enter):
-			m.handleChoice()
-			return m, tea.Quit
-
+			if len(m.filtered) > 0 {
+				m.logger.LogInfo("Selected item: %s", m.filtered[m.cursorPos])
+				m.selected = m.cursorPos
+				return m, tea.Quit
+			}
+			m.logger.LogInfo("No item to match for: %v", m.userInput.Value())
 		case key.Matches(msg, DefaultKeyMap.Up):
 			m.moveUp()
 			return m, nil
-
 		case key.Matches(msg, DefaultKeyMap.Down):
 			m.moveDown()
+			return m, nil
+		default:
+			// Handle text input
+			m.userInput, _ = m.userInput.Update(msg)
+			m.filtered = filterValues(m.values, m.userInput.Value())
+			m.resetCursorMaybe()
+
 			return m, nil
 		}
 	case tea.WindowSizeMsg:
@@ -111,11 +120,7 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	m.userInput, cmd = m.userInput.Update(msg)
-	m.filtered = filterValues(m.values, m.userInput.Value())
-
-	m.resetCursorMaybe()
-
+	m.logger.LogInfo("Current cursor position: %v", m.cursorPos)
 	return m, cmd
 }
 
@@ -146,16 +151,6 @@ func (m *selectionModel) resetCursorMaybe() {
 		m.startIndex = 0
 	}
 
-}
-
-func (m selectionModel) handleChoice() tea.Cmd {
-	if len(m.filtered) > 0 {
-		choice := m.filtered[m.cursorPos]
-		m.logger.LogInfo("Selected item: %s", choice)
-		return tea.Quit
-	}
-	m.logger.LogInfo("No item to match for: %v", m.userInput.Value())
-	return nil
 }
 
 func (m selectionModel) View() string {
