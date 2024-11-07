@@ -64,7 +64,7 @@ func newSelectionModel(prompt string, values []string, logger *log.Logger) (*sel
 }
 
 func (m selectionModel) Init() tea.Cmd {
-	return textinput.Blink
+	return tea.Batch(tea.ClearScreen, textinput.Blink)
 }
 
 // filterValues excludes values that do not match the input
