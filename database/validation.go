@@ -185,7 +185,7 @@ func validateDate(value interface{}) bool {
 }
 
 // getDatatypeByName retrieves a datatype from the database by name
-func getDatatypeByName(tx *sql.Tx, name string) (*Datatype, error) {
+func GetDatatypeByName(tx *sql.Tx, name string) (*Datatype, error) {
 	var dt Datatype
 	err := tx.QueryRow(`
 		SELECT id, name, variable_type, completion_value, completion_sort, value_check 
@@ -201,7 +201,7 @@ func getDatatypeByName(tx *sql.Tx, name string) (*Datatype, error) {
 
 // validateField validates a single field value against its datatype
 func (d *Database) validateField(tx *sql.Tx, columnName string, value interface{}) error {
-	datatype, err := getDatatypeByName(tx, columnName)
+	datatype, err := GetDatatypeByName(tx, columnName)
 	if err != nil {
 		return fmt.Errorf("failed to get datatype for column %s: %w", columnName, err)
 	}

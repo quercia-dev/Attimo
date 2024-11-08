@@ -7,14 +7,8 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
-
-type inputModel struct {
-	tuiWindow
-	prompt string
-	input  textinput.Model
-	value  string
-}
 
 func newInputModel(prompt string, logger *log.Logger) (*inputModel, error) {
 	if logger == nil {
@@ -28,14 +22,23 @@ func newInputModel(prompt string, logger *log.Logger) (*inputModel, error) {
 	ti.Width = 20
 
 	return &inputModel{
-		prompt:    prompt,
-		input:     ti,
-		tuiWindow: tuiWindow{logger: logger},
+		prompt:     prompt,
+		input:      ti,
+		tuiWindow:  tuiWindow{logger: logger},
+		status:     StatusNone,
+		showStatus: false,
 	}, nil
 }
 
 func (m inputModel) Init() tea.Cmd {
 	return textinput.Blink
+}
+
+// SetStatus updates the status message of the input model
+func (m *inputModel) SetStatus(status Status, msg string) {
+	m.status = status
+	m.statusMsg = msg
+	m.showStatus = true
 }
 
 func (m inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -65,10 +68,26 @@ func (m inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m inputModel) View() string {
+	var statusView string
+	if m.showStatus {
+		switch m.status {
+		case StatusSuccess:
+			statusView = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("42")). // Green color
+				Render("✓ " + m.statusMsg)
+		case StatusError:
+			statusView = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("161")). // Red color
+				Render("✗ " + m.statusMsg)
+		}
+		statusView = "\n" + statusView
+	}
+
 	return fmt.Sprintf(
-		"%s\n\n%s\n\n%s",
+		"%s\n\n%s%s\n\n%s",
 		m.prompt,
 		m.input.View(),
+		statusView,
 		"(enter to submit, ctrl+c to quit)",
 	)
 }

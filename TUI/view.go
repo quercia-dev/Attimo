@@ -141,33 +141,83 @@ func (tui *TUI) handleOpen() error {
 
 	// Get and validate rowdata
 	data := make(database.RowData)
+	var lastModel *inputModel
 	for _, column := range columns {
 		// Text input for each column
 		model, err := newInputModel(fmt.Sprintf("Enter value for %s:", column), tui.logger)
 		if err != nil {
 			return fmt.Errorf("could not get input model for column %s: %w", column, err)
 		}
+		lastModel = model
 
-		p := tea.NewProgram(model)
-		newModel, err := p.Run()
-		if err != nil {
-			return fmt.Errorf("tea program ran into an error for col %s: %w", column, err)
-		}
+		var inputComplete bool
+		for !inputComplete {
+			p := tea.NewProgram(model)
+			newModel, err := p.Run()
+			if err != nil {
+				return fmt.Errorf("tea program ran into an error for col %s: %w", column, err)
+			}
 
-		if inputModel, ok := newModel.(inputModel); ok {
-			if inputModel.value != "" {
+			if inputModel, ok := newModel.(inputModel); ok {
+				if inputModel.value == "" {
+					model.SetStatus(StatusError, "Value cannot be empty")
+					continue
+				}
+
+				// Validate the input value
+				if err := tui.validateColumnInput(category, column, inputModel.value); err != nil {
+					model.SetStatus(StatusError, fmt.Sprintf("Invalid input: %v", err))
+					continue
+				}
+
 				data[column] = inputModel.value
+				model.SetStatus(StatusSuccess, "Input accepted")
+				inputComplete = true
 			}
 		}
 	}
 
-	// Create row
-	err = tui.control.CreateRow(tui.logger, category, data)
-	if err != nil {
+	// Create row and show final status
+	if err := tui.control.CreateRow(tui.logger, category, data); err != nil {
 		tui.logger.LogErr("Could not create row: %v", err)
+		// Show error in the UI
+		if lastModel != nil {
+			p := tea.NewProgram(lastModel)
+			lastModel.SetStatus(StatusError, fmt.Sprintf("Failed to create row: %v", err))
+			p.Run()
+		}
 		return err
 	}
 
+	// Show success status
+	if lastModel != nil {
+		p := tea.NewProgram(lastModel)
+		lastModel.SetStatus(StatusSuccess, "Row created successfully!")
+		p.Run()
+	}
+
 	tui.logger.LogInfo("Row created successfully")
+	return nil
+}
+
+func (tui *TUI) validateColumnInput(category, column, value string) error {
+	// Get the datatype for this column
+	datatype, err := tui.control.GetColumnDatatype(tui.logger, category, column)
+	if err != nil {
+		return fmt.Errorf("failed to get datatype: %w", err)
+	}
+
+	// Create a transaction for validation
+	tx, err := tui.control.BeginTransaction()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Validate the input
+	if !datatype.ValidateCheck(value, tui.logger) {
+		return fmt.Errorf("validation failed for %s", column)
+	}
+
 	return nil
 }

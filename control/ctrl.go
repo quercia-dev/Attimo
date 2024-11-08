@@ -1,8 +1,10 @@
 package control
 
 import (
+	"Attimo/database"
 	data "Attimo/database"
 	log "Attimo/logging"
+	"database/sql"
 	"fmt"
 )
 
@@ -83,4 +85,27 @@ func (c *Controller) ListRows(logger *log.Logger, opts ListRowsOptions) (*ListRo
 		len(rows), opts.Page, totalPages, opts.Category)
 
 	return result, nil
+}
+
+func (c *Controller) GetColumnDatatype(logger *log.Logger, category, column string) (*database.Datatype, error) {
+	if logger == nil {
+		return nil, fmt.Errorf("logger is nil")
+	}
+
+	tx, err := c.data.DB.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	datatype, err := data.GetDatatypeByName(tx, column)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get datatype: %w", err)
+	}
+
+	return datatype, nil
+}
+
+func (c *Controller) BeginTransaction() (*sql.Tx, error) {
+	return c.data.DB.Begin()
 }
