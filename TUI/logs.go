@@ -14,9 +14,32 @@ const (
 	maxLogs = 1000
 )
 
+type logsKeyMap struct {
+	keyMap
+	Up   key.Binding
+	Down key.Binding
+}
+
+func newLogsKeyMap() logsKeyMap {
+	return logsKeyMap{
+		keyMap: NewKeyMap(),
+
+		Up: key.NewBinding(
+			key.WithKeys("k", "up"),
+			key.WithHelp("↑/k", "move up"),
+		),
+
+		Down: key.NewBinding(
+			key.WithKeys("j", "down"),
+			key.WithHelp("↓/j", "move down"),
+		),
+	}
+}
+
 type logsmodel struct {
 	tuiWindow
 
+	keys  logsKeyMap
 	logs  []string
 	index int
 	count int
@@ -51,17 +74,15 @@ func (m logsmodel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, DefaultKeyMap.Quit):
+		case key.Matches(msg, m.keys.Quit):
 			m.logger.LogInfo("Quitting TUI logs")
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Down):
-			m.logger.LogInfo("Scrolling down")
-			m.scrollOffset = max(0, m.scrollOffset-1)
-			return m, nil
-		case key.Matches(msg, DefaultKeyMap.Up):
+		case key.Matches(msg, m.keys.Up):
 			m.logger.LogInfo("Scrolling up")
 			m.scrollOffset = min(m.count-m.height, m.scrollOffset+1)
-			return m, nil
+		case key.Matches(msg, m.keys.Down):
+			m.logger.LogInfo("Scrolling down")
+			m.scrollOffset = max(0, m.scrollOffset-1)
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -96,5 +117,6 @@ func (m logsmodel) View() string {
 	scrollIndicator := fmt.Sprintf("Showing %d-%d of %d", startIndex+1, endIndex, totalLines)
 	result = append(result, boxStyle.Render(scrollIndicator))
 
-	return logStyle.Render(strings.Join(result, "\n"))
+	helpView := m.help.View(m.keys)
+	return logStyle.Render(strings.Join(result, "\n")) + "\n" + helpView
 }

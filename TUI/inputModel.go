@@ -11,6 +11,25 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+type Status int
+
+const (
+	StatusNone Status = iota
+	StatusSuccess
+	StatusError
+)
+
+type inputModel struct {
+	tuiWindow
+	keys       selectionKeyMap
+	prompt     string
+	input      textinput.Model
+	value      string
+	status     Status
+	statusMsg  string
+	showStatus bool
+}
+
 func newInputModel(prompt string, logger *log.Logger) (*inputModel, error) {
 	if logger == nil {
 		return nil, fmt.Errorf(log.LoggerNilString)
@@ -24,10 +43,10 @@ func newInputModel(prompt string, logger *log.Logger) (*inputModel, error) {
 
 	return &inputModel{
 		tuiWindow: tuiWindow{
-			keys:   DefaultKeyMap,
 			help:   help.New(),
 			logger: logger,
 		},
+		keys:       newSelectionKeyMap(),
 		prompt:     prompt,
 		input:      ti,
 		status:     StatusNone,
@@ -52,13 +71,13 @@ func (m inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, DefaultKeyMap.HardQuit):
+		case key.Matches(msg, m.keys.Quit):
 			m.logger.LogInfo("Quitting input")
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Enter):
+		case key.Matches(msg, m.keys.Enter):
 			m.value = m.input.Value()
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Help):
+		case key.Matches(msg, m.keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
 			return m, nil
 		}

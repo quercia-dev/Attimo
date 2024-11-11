@@ -23,7 +23,6 @@ const (
 
 type tuiWindow struct {
 	logger *log.Logger
-	keys   keyMap
 	help   help.Model
 
 	width  int
@@ -33,64 +32,34 @@ type tuiWindow struct {
 }
 
 type keyMap struct {
-	// Quit is the key binding for quitting the program.
-	// Bound to a greater number of keys to make it easier to quit.
-	Quit key.Binding
 	// HardQuit is the key binding for quitting the program.
 	// Is is a subset of the Quit key binding.
 	// It is used for when the user is in a state where they need
 	// to use the Quit key binding.
-	HardQuit    key.Binding
-	Enter       key.Binding
-	GreedyEnter key.Binding
-	Up          key.Binding
-	Down        key.Binding
-	Right       key.Binding
-	Left        key.Binding
-	Help        key.Binding
+	HardQuit key.Binding
+	// Quit is the key binding for quitting the program.
+	// Bound to a greater number of keys to make it easier to quit.
+	Quit key.Binding
+	Help key.Binding
 }
 
-var DefaultKeyMap = keyMap{
-	Quit: key.NewBinding(
-		key.WithKeys("q", "esc", hardQuitKey),
-		key.WithHelp("q/esc", "quit"),
-	),
+func NewKeyMap() keyMap {
+	return keyMap{
+		HardQuit: key.NewBinding(
+			key.WithKeys(hardQuitKey),
+			key.WithHelp(hardQuitKey, "quit"),
+		),
 
-	HardQuit: key.NewBinding(
-		key.WithKeys(hardQuitKey),
-		key.WithHelp(hardQuitKey, "quit"),
-	),
+		Quit: key.NewBinding(
+			key.WithKeys("q", "esc", hardQuitKey),
+			key.WithHelp("q/esc", "quit"),
+		),
 
-	Enter: key.NewBinding(
-		key.WithKeys("enter"),
-		key.WithHelp("enter", "confirm"),
-	),
-
-	GreedyEnter: key.NewBinding(
-		key.WithKeys("enter", " "),
-		key.WithHelp("enter/space", "confirm"),
-	),
-
-	Up: key.NewBinding(
-		key.WithKeys("k", "up"),
-		key.WithHelp("↑/k", "move up"),
-	),
-	Down: key.NewBinding(
-		key.WithKeys("j", "down"),
-		key.WithHelp("↓/j", "move down"),
-	),
-	Right: key.NewBinding(
-		key.WithKeys("l", "right"),
-		key.WithHelp("→/l", "move right"),
-	),
-	Left: key.NewBinding(
-		key.WithKeys("h", "left"),
-		key.WithHelp("←/h", "move left"),
-	),
-	Help: key.NewBinding(
-		key.WithKeys("?"),
-		key.WithHelp("?", "help"),
-	),
+		Help: key.NewBinding(
+			key.WithKeys("?"),
+			key.WithHelp("?", "help"),
+		),
+	}
 }
 
 func (k keyMap) ShortHelp() []key.Binding {
@@ -99,8 +68,43 @@ func (k keyMap) ShortHelp() []key.Binding {
 
 func (k keyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Up, k.Down, k.Left, k.Right},          // first column
-		{k.Enter, k.GreedyEnter, k.Quit, k.Help}, // second column
+		{k.Quit, k.HardQuit}, // first column
+		{k.Help},             // second column
+	}
+}
+
+type menuKeyMap struct {
+	keyMap
+	Enter key.Binding
+	Up    key.Binding
+	Down  key.Binding
+}
+
+func (k menuKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Quit, k.HardQuit, k.Help},
+		{k.Enter, k.Up, k.Down},
+	}
+}
+
+func newMenuKeyMap() menuKeyMap {
+	return menuKeyMap{
+		keyMap: NewKeyMap(),
+
+		Enter: key.NewBinding(
+			key.WithKeys("enter", " "),
+			key.WithHelp("⏎/' '", "confirm"),
+		),
+
+		Up: key.NewBinding(
+			key.WithKeys("k", "up"),
+			key.WithHelp("↑/k", "move up"),
+		),
+
+		Down: key.NewBinding(
+			key.WithKeys("j", "down"),
+			key.WithHelp("↓/j", "move down"),
+		),
 	}
 }
 

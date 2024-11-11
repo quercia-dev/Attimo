@@ -16,9 +16,38 @@ const (
 	maxVisibleItems = 10
 )
 
+type selectionKeyMap struct {
+	keyMap
+	Enter key.Binding
+	Up    key.Binding
+	Down  key.Binding
+}
+
+func newSelectionKeyMap() selectionKeyMap {
+	return selectionKeyMap{
+		keyMap: NewKeyMap(),
+
+		Enter: key.NewBinding(
+			key.WithKeys("enter", " "),
+			key.WithHelp("⏎/' '", "confirm"),
+		),
+
+		Up: key.NewBinding(
+			key.WithKeys("k", "up"),
+			key.WithHelp("↑/k", "move up"),
+		),
+
+		Down: key.NewBinding(
+			key.WithKeys("j", "down"),
+			key.WithHelp("↓/j", "move down"),
+		),
+	}
+}
+
 type selectionModel struct {
 	tuiWindow
 
+	keys      selectionKeyMap
 	prompt    string
 	userInput textinput.Model
 	values    []string
@@ -51,11 +80,11 @@ func newSelectionModel(prompt string, values []string, logger *log.Logger) (*sel
 
 	return &selectionModel{
 		tuiWindow: tuiWindow{
-			keys:   DefaultKeyMap,
 			help:   help.New(),
 			logger: logger,
 		},
 
+		keys:       newSelectionKeyMap(),
 		prompt:     prompt,
 		userInput:  ti,
 		values:     values,
@@ -91,10 +120,10 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, DefaultKeyMap.HardQuit):
+		case key.Matches(msg, m.keys.Quit):
 			m.logger.LogInfo("Quitting TUI")
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Enter):
+		case key.Matches(msg, m.keys.Enter):
 			if len(m.filtered) > 0 {
 				m.logger.LogInfo("Selected item: %s", m.filtered[m.cursorPos])
 				m.selected = m.cursorPos
@@ -102,13 +131,13 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.logger.LogInfo("No item to match for: %v", m.userInput.Value())
 
-		case key.Matches(msg, DefaultKeyMap.Up):
+		case key.Matches(msg, m.keys.Up):
 			m.moveUp()
 
-		case key.Matches(msg, DefaultKeyMap.Down):
+		case key.Matches(msg, m.keys.Down):
 			m.moveDown()
 
-		case key.Matches(msg, DefaultKeyMap.Help):
+		case key.Matches(msg, m.keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
 
 		default:

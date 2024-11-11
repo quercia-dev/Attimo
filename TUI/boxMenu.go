@@ -19,19 +19,21 @@ const (
 
 type boxMenu struct {
 	tuiWindow
+	keys      menuKeyMap
 	menuItems []string
 	cursor    int
 }
 
-func newBoxModel(logger *log.Logger, menuItems []string, shortcuts map[string]int) (boxMenu, error) {
+func newBoxModel(logger *log.Logger, menuItems []string) (boxMenu, error) {
 	if logger == nil {
 		return boxMenu{}, fmt.Errorf(log.LoggerNilString)
 	}
 	return boxMenu{
 		tuiWindow: tuiWindow{
-			keys:   DefaultKeyMap,
 			help:   help.New(),
-			logger: logger},
+			logger: logger,
+		},
+		keys:      newMenuKeyMap(),
 		menuItems: menuItems,
 	}, nil
 }
@@ -44,23 +46,23 @@ func (m boxMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, DefaultKeyMap.Quit):
+		case key.Matches(msg, m.keys.Quit):
 			m.logger.LogInfo(quitMessage + " from main menu")
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Up):
+		case key.Matches(msg, m.keys.Up):
 			if m.cursor > 0 {
 				m.cursor--
 			}
 			return m, nil
-		case key.Matches(msg, DefaultKeyMap.Down):
+		case key.Matches(msg, m.keys.Down):
 			if m.cursor < len(m.menuItems)-1 {
 				m.cursor++
 			}
 			return m, nil
-		case key.Matches(msg, DefaultKeyMap.GreedyEnter):
+		case key.Matches(msg, m.keys.Enter):
 			m.selected = m.cursor
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Help):
+		case key.Matches(msg, m.keys.Help):
 			m.help.ShowAll = !m.help.ShowAll
 			return m, nil
 		}
