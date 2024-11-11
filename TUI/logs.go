@@ -63,7 +63,11 @@ func newLogsModel() (*log.Logger, *logsmodel, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return logger, &logsmodel{tuiWindow: tuiWindow{logger: logger}}, nil
+	logmod := &logsmodel{
+		tuiWindow: tuiWindow{logger: logger},
+		keys:      newLogsKeyMap(),
+	}
+	return logger, logmod, nil
 }
 
 func (m logsmodel) Init() tea.Cmd {
