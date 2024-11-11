@@ -4,6 +4,7 @@ import (
 	log "Attimo/logging"
 	"math"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -22,6 +23,8 @@ const (
 
 type tuiWindow struct {
 	logger *log.Logger
+	keys   keyMap
+	help   help.Model
 
 	width  int
 	height int
@@ -29,18 +32,7 @@ type tuiWindow struct {
 	selected interface{}
 }
 
-type KeyMap struct {
-	Quit key.Binding
-
-	Enter key.Binding
-
-	Up    key.Binding
-	Down  key.Binding
-	Right key.Binding
-	Left  key.Binding
-}
-
-type CustomKeyMap struct {
+type keyMap struct {
 	// Quit is the key binding for quitting the program.
 	// Bound to a greater number of keys to make it easier to quit.
 	Quit key.Binding
@@ -55,9 +47,10 @@ type CustomKeyMap struct {
 	Down        key.Binding
 	Right       key.Binding
 	Left        key.Binding
+	Help        key.Binding
 }
 
-var DefaultKeyMap = CustomKeyMap{
+var DefaultKeyMap = keyMap{
 	Quit: key.NewBinding(
 		key.WithKeys("q", "esc", hardQuitKey),
 		key.WithHelp("q/esc", "quit"),
@@ -94,6 +87,21 @@ var DefaultKeyMap = CustomKeyMap{
 		key.WithKeys("h", "left"),
 		key.WithHelp("←/h", "move left"),
 	),
+	Help: key.NewBinding(
+		key.WithKeys("?"),
+		key.WithHelp("?", "help"),
+	),
+}
+
+func (k keyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Help, k.Quit}
+}
+
+func (k keyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Up, k.Down, k.Left, k.Right},          // first column
+		{k.Enter, k.GreedyEnter, k.Quit, k.Help}, // second column
+	}
 }
 
 func getBoxStyle(selected bool, width int) lipgloss.Style {

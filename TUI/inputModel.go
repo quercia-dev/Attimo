@@ -4,6 +4,7 @@ import (
 	log "Attimo/logging"
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -22,9 +23,13 @@ func newInputModel(prompt string, logger *log.Logger) (*inputModel, error) {
 	ti.Width = 20
 
 	return &inputModel{
+		tuiWindow: tuiWindow{
+			keys:   DefaultKeyMap,
+			help:   help.New(),
+			logger: logger,
+		},
 		prompt:     prompt,
 		input:      ti,
-		tuiWindow:  tuiWindow{logger: logger},
 		status:     StatusNone,
 		showStatus: false,
 	}, nil
@@ -53,6 +58,9 @@ func (m inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, DefaultKeyMap.Enter):
 			m.value = m.input.Value()
 			return m, tea.Quit
+		case key.Matches(msg, DefaultKeyMap.Help):
+			m.help.ShowAll = !m.help.ShowAll
+			return m, nil
 		}
 
 		m.input, cmd = m.input.Update(msg)
@@ -88,6 +96,6 @@ func (m inputModel) View() string {
 		m.prompt,
 		m.input.View(),
 		statusView,
-		"(enter to submit, ctrl+c to quit)",
+		m.help.View(m.keys),
 	)
 }

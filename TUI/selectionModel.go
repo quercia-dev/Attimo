@@ -6,6 +6,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -16,6 +17,8 @@ const (
 )
 
 type selectionModel struct {
+	tuiWindow
+
 	prompt    string
 	userInput textinput.Model
 	values    []string
@@ -24,8 +27,6 @@ type selectionModel struct {
 
 	maxWidth   int // Maximum width of any string in values
 	startIndex int // Start index for viewport sliding
-
-	tuiWindow
 }
 
 func newSelectionModel(prompt string, values []string, logger *log.Logger) (*selectionModel, error) {
@@ -49,6 +50,12 @@ func newSelectionModel(prompt string, values []string, logger *log.Logger) (*sel
 	}
 
 	return &selectionModel{
+		tuiWindow: tuiWindow{
+			keys:   DefaultKeyMap,
+			help:   help.New(),
+			logger: logger,
+		},
+
 		prompt:     prompt,
 		userInput:  ti,
 		values:     values,
@@ -56,10 +63,6 @@ func newSelectionModel(prompt string, values []string, logger *log.Logger) (*sel
 		cursorPos:  0,
 		startIndex: 0,
 		maxWidth:   maxWidth,
-
-		tuiWindow: tuiWindow{
-			logger: logger,
-		},
 	}, nil
 }
 
@@ -85,8 +88,6 @@ func filterValues(values []string, input string) []string {
 }
 
 func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -100,19 +101,21 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 			m.logger.LogInfo("No item to match for: %v", m.userInput.Value())
+
 		case key.Matches(msg, DefaultKeyMap.Up):
 			m.moveUp()
-			return m, nil
+
 		case key.Matches(msg, DefaultKeyMap.Down):
 			m.moveDown()
-			return m, nil
+
+		case key.Matches(msg, DefaultKeyMap.Help):
+			m.help.ShowAll = !m.help.ShowAll
+
 		default:
 			// Handle text input
 			m.userInput, _ = m.userInput.Update(msg)
 			m.filtered = filterValues(m.values, m.userInput.Value())
 			m.resetCursorMaybe()
-
-			return m, nil
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -120,8 +123,7 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	m.logger.LogInfo("Current cursor position: %v", m.cursorPos)
-	return m, cmd
+	return m, nil
 }
 
 func (m *selectionModel) moveUp() {
@@ -201,6 +203,6 @@ func (m selectionModel) View() string {
 		m.prompt,
 		m.userInput.View(),
 		style.Render(view),
-		"(ctrl+c to quit)",
+		m.help.View(m.keys),
 	)
 }

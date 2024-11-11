@@ -4,6 +4,7 @@ import (
 	log "Attimo/logging"
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -34,6 +35,10 @@ func newBoxModel(logger *log.Logger, menuItems []string, shortcuts map[string]in
 		return boxMenu{}, fmt.Errorf(log.LoggerNilString)
 	}
 	return boxMenu{
+		tuiWindow: tuiWindow{
+			keys:   DefaultKeyMap,
+			help:   help.New(),
+			logger: logger},
 		menuItems: menuItems,
 		shortcuts: shortcuts,
 	}, nil
@@ -63,14 +68,9 @@ func (m boxMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, DefaultKeyMap.GreedyEnter):
 			m.selected = m.cursor
 			return m, tea.Quit
-		default:
-			index := m.shortcuts[msg.String()]
-			if index < 0 || index >= len(m.menuItems) {
-				m.logger.LogWarn("Unidentified key pressed: %s", msg.String())
-				return m, nil
-			}
-			m.selected = index
-			return m, tea.Quit
+		case key.Matches(msg, DefaultKeyMap.Help):
+			m.help.ShowAll = !m.help.ShowAll
+			return m, nil
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -95,5 +95,6 @@ func (m boxMenu) View() string {
 		}
 		s += fmt.Sprintf("%s\n", style.Render(item))
 	}
-	return s
+	helpView := m.help.View(m.keys)
+	return s + "\n" + helpView
 }
