@@ -75,6 +75,13 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 				return err
 			}
 			tui.logger.LogInfo("Successfully opened")
+		case 1: // CLOSE
+			err := tui.handleClose()
+			if err != nil {
+				tui.logger.LogErr("Error handling close command: %v", err)
+				return err
+			}
+			tui.logger.LogInfo("Successfully handled close command")
 		default:
 			tui.logger.LogWarn("Unexpected selection %v", newModel.selected)
 		}
@@ -143,6 +150,10 @@ func (tui *TUI) handleOpen() error {
 	data := make(database.RowData)
 	var lastModel *inputModel
 	for _, column := range columns {
+		if column == "Closed" {
+			continue
+		}
+
 		// Text input for each column
 		model, err := newInputModel(fmt.Sprintf("Enter value for %s:", column), tui.logger)
 		if err != nil {
@@ -217,6 +228,51 @@ func (tui *TUI) validateColumnInput(category, column, value string) error {
 	// Validate the input
 	if !datatype.ValidateCheck(value, tui.logger) {
 		return fmt.Errorf("validation failed for %s", column)
+	}
+
+	return nil
+}
+
+func (tui *TUI) handleClose() error {
+	// Create and run the close model
+	model, err := newClosedModel(tui.logger, tui.control)
+	if err != nil {
+		if err.Error() == "no pending items to close" {
+			// Show message to user that there are no pending items
+			msgModel, err := newInputModel("No pending items to close. Press enter to continue.", tui.logger)
+			if err != nil {
+				return err
+			}
+			p := tea.NewProgram(msgModel)
+			if _, err := p.Run(); err != nil {
+				return err
+			}
+			return nil
+		}
+		return err
+	}
+
+	p := tea.NewProgram(model)
+	finalModel, err := p.Run()
+	if err != nil {
+		return fmt.Errorf("error running close model: %w", err)
+	}
+
+	if finalModel, ok := finalModel.(closedModel); ok {
+		if finalModel.selected != nil && finalModel.dateInput.value != "" {
+			// Process the close operation
+			category := finalModel.selected["category"].(string)
+			itemID := finalModel.selected["item_id"].(int)
+			closeDate := finalModel.dateInput.value
+
+			err := tui.control.CloseItem(tui.logger, category, itemID, closeDate)
+			if err != nil {
+				tui.logger.LogErr("Failed to close item: %v", err)
+				return fmt.Errorf("failed to close item: %w", err)
+			}
+
+			tui.logger.LogInfo("Successfully closed item %d in category %s", itemID, category)
+		}
 	}
 
 	return nil
