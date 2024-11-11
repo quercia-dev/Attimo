@@ -122,6 +122,14 @@ func (db *Database) createDefaultDB() error {
 		return fmt.Errorf("failed to create datatypes table: %v", err)
 	}
 
+	// Create Pending table
+	err = createPendingTable(tx)
+	if err != nil {
+		tx.Rollback()
+		db.logger.LogErr("Failed to create pending table: %v", err)
+		return fmt.Errorf("failed to create pending table: %v", err)
+	}
+
 	// Populate default data
 	err = populateDefaultDB(tx, db.logger)
 	if err != nil {

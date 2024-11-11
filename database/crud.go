@@ -30,7 +30,7 @@ func (db *Database) CreateRow(categoryName string, data RowData) error {
 		values = append(values, val)
 	}
 
-	// Construct the INSERT query
+	// Construct and execute the INSERT query
 	query := fmt.Sprintf(
 		"INSERT INTO %s (%s) VALUES (%s)",
 		categoryName,
@@ -38,18 +38,70 @@ func (db *Database) CreateRow(categoryName string, data RowData) error {
 		strings.Join(placeholders, ", "),
 	)
 
-	// Execute the insert
-	_, err = tx.Exec(query, values...)
+	result, err := tx.Exec(query, values...)
 	if err != nil {
 		return fmt.Errorf("failed to insert row: %w", err)
 	}
 
-	// Commit transaction
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
+	itemID, err := result.LastInsertId()
+	if err != nil {
+		return fmt.Errorf("failed to get last insert id: %w", err)
 	}
 
-	return nil
+	// Add to pending if category has Opened field
+	columns, err = db.GetCategoryColumns(categoryName)
+	if err != nil {
+		return fmt.Errorf("failed to get columns: %w", err)
+	}
+
+	for _, col := range columns {
+		if col == "Opened" {
+			if err := db.addToPending(tx, categoryName, int(itemID)); err != nil {
+				return fmt.Errorf("failed to add to pending: %w", err)
+			}
+			break
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (db *Database) CloseItem(category string, itemID int, closeDate string) error {
+	tx, err := db.DB.Begin()
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Update the main record
+	updateQuery := fmt.Sprintf(`
+        UPDATE %s 
+        SET Closed = ?, 
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = ? 
+        AND deleted_at IS NULL
+    `, category)
+
+	result, err := tx.Exec(updateQuery, closeDate, itemID)
+	if err != nil {
+		return fmt.Errorf("failed to update item: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("no item found with id %d in category %s", itemID, category)
+	}
+
+	// Remove from pending tracking
+	if err := db.removeFromPending(tx, category, itemID); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 // ReadRow retrieves a single row from a category table
