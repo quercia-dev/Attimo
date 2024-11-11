@@ -15,19 +15,12 @@ const (
 	agendaItem = "AGENDA"
 	editItem   = "EDIT"
 	logItem    = "LOGS"
-
-	openShortcut   = "o"
-	closeShortcut  = "c"
-	agendaShortcut = "a"
-	editShortcut   = "e"
-	logShortcut    = "l"
 )
 
 type boxMenu struct {
 	tuiWindow
 	menuItems []string
 	cursor    int
-	shortcuts map[string]int
 }
 
 func newBoxModel(logger *log.Logger, menuItems []string, shortcuts map[string]int) (boxMenu, error) {
@@ -40,7 +33,6 @@ func newBoxModel(logger *log.Logger, menuItems []string, shortcuts map[string]in
 			help:   help.New(),
 			logger: logger},
 		menuItems: menuItems,
-		shortcuts: shortcuts,
 	}, nil
 }
 

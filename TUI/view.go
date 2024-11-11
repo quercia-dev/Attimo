@@ -42,15 +42,8 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 
 	tui.control = control
 	mainItems := []string{openItem, closeItem, agendaItem, editItem, logItem}
-	mainShortcuts := map[string]int{
-		openShortcut:   0,
-		closeShortcut:  1,
-		agendaShortcut: 2,
-		editShortcut:   3,
-		logShortcut:    4,
-	}
 
-	model, err := newBoxModel(tui.logger, mainItems, mainShortcuts)
+	model, err := newBoxModel(tui.logger, mainItems)
 	if err != nil {
 		tui.logger.LogErr("Could not get Main model")
 		return err
