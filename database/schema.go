@@ -111,6 +111,9 @@ func (data *Database) GetCategories() ([]string, error) {
 		if err := rows.Scan(&name); err != nil {
 			return nil, fmt.Errorf("failed to scan table name: %w", err)
 		}
+		if name == "pending" {
+			continue
+		}
 		categories = append(categories, name)
 	}
 

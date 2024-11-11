@@ -109,3 +109,11 @@ func (c *Controller) GetColumnDatatype(logger *log.Logger, category, column stri
 func (c *Controller) BeginTransaction() (*sql.Tx, error) {
 	return c.data.DB.Begin()
 }
+
+func (c *Controller) CloseItem(logger *log.Logger, category string, itemID int, closeDate string) error {
+	return c.data.CloseItem(category, itemID, closeDate)
+}
+
+func (c *Controller) GetPendingItems(logger *log.Logger) ([]data.RowData, error) {
+	return c.data.GetPendingItems()
+}

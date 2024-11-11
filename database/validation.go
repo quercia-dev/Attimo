@@ -214,7 +214,7 @@ func (d *Database) validateField(tx *sql.Tx, columnName string, value interface{
 }
 
 // validateInputData validates all fields in the input data
-func (d *Database) validateInputData(tx *sql.Tx, categoryName string, data map[string]interface{}) error {
+func (d *Database) validateInputData(tx *sql.Tx, categoryName string, data RowData) error {
 	// Get column information
 	rows, err := tx.Query(`
 		SELECT name 
