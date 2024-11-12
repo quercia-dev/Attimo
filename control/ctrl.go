@@ -114,6 +114,6 @@ func (c *Controller) CloseItem(logger *log.Logger, category string, itemID int, 
 	return c.data.CloseItem(category, itemID, closeDate)
 }
 
-func (c *Controller) GetPendingItems(logger *log.Logger) ([]data.RowData, error) {
-	return c.data.GetPendingItems()
+func (c *Controller) GetPendingPointers(logger *log.Logger) ([]string, error) {
+	return c.data.GetPendingPointers()
 }

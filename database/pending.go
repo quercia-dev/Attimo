@@ -3,8 +3,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"strings"
-	"time"
 )
 
 // createPendingTable creates the pending tracking table
@@ -69,58 +67,27 @@ func (db *Database) removeFromPending(tx *sql.Tx, category string, itemID int) e
 }
 
 // GetPendingItems returns all currently pending items with their details
-func (db *Database) GetPendingItems() ([]RowData, error) {
+func (db *Database) GetPendingPointers() ([]string, error) {
 	// Get all pending items
 	rows, err := db.DB.Query(`
-        SELECT id, pointer, created_at
+        SELECT pointer
         FROM pending
         WHERE deleted_at IS NULL
         ORDER BY created_at DESC
     `)
 	if err != nil {
-		return nil, fmt.Errorf("failed to query pending items: %w", err)
+		return nil, fmt.Errorf("failed to query pending pointers: %w", err)
 	}
 	defer rows.Close()
 
-	var results []RowData
+	var results []string
 	for rows.Next() {
-		var pendingID int
 		var pointer string
-		var createdAt time.Time
 
-		if err := rows.Scan(&pendingID, &pointer, &createdAt); err != nil {
+		if err := rows.Scan(&pointer); err != nil {
 			return nil, fmt.Errorf("failed to scan pending row: %w", err)
 		}
-
-		// Parse pointer to get category and ID
-		parts := strings.Split(pointer, ":")
-		if len(parts) != 2 {
-			db.logger.LogWarn("Invalid pointer format found: %s", pointer)
-			continue
-		}
-
-		category, itemIDStr := parts[0], parts[1]
-
-		// Get the item's details from its category table
-		query := fmt.Sprintf(`
-            SELECT %s.*
-            FROM %s
-            WHERE id = ? AND deleted_at IS NULL
-        `, category, category)
-
-		var itemData RowData
-		itemData, err = db.queryRowToMap(query, itemIDStr)
-		if err != nil {
-			db.logger.LogWarn("Failed to get details for %s: %v", pointer, err)
-			continue
-		}
-
-		// Add pending tracking information
-		itemData["pending_id"] = pendingID
-		itemData["category"] = category
-		itemData["pending_since"] = createdAt
-
-		results = append(results, itemData)
+		results = append(results, pointer)
 	}
 
 	return results, nil

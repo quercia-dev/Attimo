@@ -5,6 +5,8 @@ import (
 	"Attimo/database"
 	log "Attimo/logging"
 	"fmt"
+	"strconv"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -252,19 +254,27 @@ func (tui *TUI) handleClose() error {
 	}
 
 	if finalModel, ok := finalModel.(closedModel); ok {
-		if finalModel.selected != nil && finalModel.dateInput.value != "" {
-			// Process the close operation
-			category := finalModel.selected["category"].(string)
-			itemID := finalModel.selected["item_id"].(int)
-			closeDate := finalModel.dateInput.value
+		if finalModel.selected != "" && finalModel.timeInput.value != "" {
+			// Split the pointer to get category and ID
+			parts := strings.Split(finalModel.selected, ":")
+			if len(parts) != 2 {
+				return fmt.Errorf("invalid pointer format: %s", finalModel.selected)
+			}
 
-			err := tui.control.CloseItem(tui.logger, category, itemID, closeDate)
+			category := parts[0]
+			itemIDstring := parts[1]
+			itemID, err := strconv.Atoi(itemIDstring)
+			if err != nil {
+				return fmt.Errorf("invalid item ID: %s", itemIDstring)
+			}
+
+			err = tui.control.CloseItem(tui.logger, category, itemID, finalModel.timeInput.value)
 			if err != nil {
 				tui.logger.LogErr("Failed to close item: %v", err)
 				return fmt.Errorf("failed to close item: %w", err)
 			}
 
-			tui.logger.LogInfo("Successfully closed item %d in category %s", itemID, category)
+			tui.logger.LogInfo("Successfully closed item %s in category %s", strconv.Itoa(itemID), category)
 		}
 	}
 

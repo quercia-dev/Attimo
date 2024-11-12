@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	ctrl "Attimo/control"
-	"Attimo/database"
 	log "Attimo/logging"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -15,19 +14,21 @@ import (
 // closedModel:
 type closedModel struct {
 	tuiWindow
-	pendingItems []database.RowData
-	cursor       int
-	startIndex   int
-	selected     database.RowData
-	step         closedStep
-	dateInput    *inputModel
+
+	keys       selectionKeyMap
+	pointers   []string
+	cursor     int
+	startIndex int
+	selected   string
+	step       closedStep
+	timeInput  *inputModel
 }
 
 type closedStep int
 
 const (
 	selectItem closedStep = iota
-	enterDate
+	enterTime
 	confirmClose
 )
 
@@ -37,27 +38,28 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 	}
 
 	// Get pending items
-	pendingItems, err := control.GetPendingItems(logger)
+	pointers, err := control.GetPendingPointers(logger)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get pending items: %v", err)
+		return nil, fmt.Errorf("failed to get pending pointers: %v", err)
 	}
 
-	if len(pendingItems) == 0 {
+	if len(pointers) == 0 {
 		return nil, fmt.Errorf("no pending items to close")
 	}
 
-	dateInput, err := newInputModel("Enter close date (DD-MM-YYYY):", logger)
+	timeInput, err := newInputModel("Enter close time:", logger)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create date input: %v", err)
+		return nil, fmt.Errorf("failed to create time input: %v", err)
 	}
 
 	return &closedModel{
 		tuiWindow: tuiWindow{
 			logger: logger,
 		},
-		pendingItems: pendingItems,
-		step:         selectItem,
-		dateInput:    dateInput,
+		keys:      newSelectionKeyMap(),
+		pointers:  pointers,
+		step:      selectItem,
+		timeInput: timeInput,
 	}, nil
 }
 
@@ -71,8 +73,8 @@ func (m closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch m.step {
 		case selectItem:
 			return m.handleSelectItemInput(msg)
-		case enterDate:
-			return m.handleDateInput(msg)
+		case enterTime:
+			return m.handleTimeInput(msg)
 		case confirmClose:
 			return m.handleConfirmInput(msg)
 		}
@@ -88,11 +90,11 @@ func (m closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch {
-	case key.Matches(msg, DefaultKeyMap.Quit):
+	case key.Matches(msg, m.keys.Quit):
 		m.logger.LogInfo("Quitting close selection")
 		return m, tea.Quit
 
-	case key.Matches(msg, DefaultKeyMap.Up):
+	case key.Matches(msg, m.keys.Up):
 		if m.cursor > 0 {
 			m.cursor--
 			if m.cursor < m.startIndex {
@@ -101,8 +103,8 @@ func (m closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) 
 		}
 		return m, nil
 
-	case key.Matches(msg, DefaultKeyMap.Down):
-		if m.cursor < len(m.pendingItems)-1 {
+	case key.Matches(msg, m.keys.Down):
+		if m.cursor < len(m.pointers)-1 {
 			m.cursor++
 			if m.cursor >= m.startIndex+maxVisibleItems {
 				m.startIndex = m.cursor - maxVisibleItems + 1
@@ -110,42 +112,52 @@ func (m closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) 
 		}
 		return m, nil
 
-	case key.Matches(msg, DefaultKeyMap.Enter):
-		m.selected = m.pendingItems[m.cursor]
-		m.step = enterDate
+	case key.Matches(msg, m.keys.Enter):
+		m.selected = m.pointers[m.cursor]
+		m.step = enterTime
 		return m, nil
 	}
 
 	return m, nil
 }
 
-func (m closedModel) handleDateInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	if key.Matches(msg, DefaultKeyMap.Quit) {
+func (m closedModel) handleTimeInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if key.Matches(msg, m.keys.Quit) {
 		m.step = selectItem
 		return m, nil
 	}
 
-	var cmd tea.Cmd
-	dateInputModel, cmd := m.dateInput.Update(msg)
-	m.dateInput = dateInputModel.(*inputModel)
+	// Create a new model for the update
+	updatedModel := m
 
-	if m.dateInput.value != "" {
-		// Date was entered, move to confirmation
-		m.step = confirmClose
+	// Update the time input and get the new command
+	timeInputModel, cmd := m.timeInput.Update(msg)
+
+	// Type assert the result back to *inputModel
+	if newTimeInput, ok := timeInputModel.(*inputModel); ok {
+		updatedModel.timeInput = newTimeInput
+
+		// Check if a value was entered
+		if newTimeInput.value != "" {
+			updatedModel.step = confirmClose
+		}
+
+		return updatedModel, cmd
 	}
 
+	// If type assertion fails, return original model
 	return m, cmd
 }
 
 func (m closedModel) handleConfirmInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch {
-	case key.Matches(msg, DefaultKeyMap.Enter):
+	case key.Matches(msg, m.keys.Enter):
 		m.logger.LogInfo("Confirming close of item")
 		return m, tea.Quit
 
-	case key.Matches(msg, DefaultKeyMap.Quit):
-		m.step = enterDate
-		m.dateInput.value = ""
+	case key.Matches(msg, m.keys.Quit):
+		m.step = enterTime
+		m.timeInput.value = ""
 		return m, nil
 	}
 
@@ -156,8 +168,8 @@ func (m closedModel) View() string {
 	switch m.step {
 	case selectItem:
 		return m.viewSelectItem()
-	case enterDate:
-		return m.dateInput.View()
+	case enterTime:
+		return m.timeInput.View()
 	case confirmClose:
 		return m.viewConfirm()
 	default:
@@ -171,37 +183,24 @@ func (m closedModel) viewSelectItem() string {
 
 	// Calculate visible range
 	endIndex := m.startIndex + maxVisibleItems
-	if endIndex > len(m.pendingItems) {
-		endIndex = len(m.pendingItems)
+	if endIndex > len(m.pointers) {
+		endIndex = len(m.pointers)
 	}
 
 	// Display visible items
 	for i := m.startIndex; i < endIndex; i++ {
-		item := m.pendingItems[i]
 		cursor := " "
 		if i == m.cursor {
 			cursor = ">"
 		}
-
-		// Format item display
-		displayText := fmt.Sprintf("%s %s - %s",
-			cursor,
-			item["Project"],
-			item["Note"],
-		)
-
-		if createdAt, ok := item["created_at"].(string); ok {
-			displayText += fmt.Sprintf(" (Opened: %s)", createdAt)
-		}
-
-		sb.WriteString(displayText + "\n")
+		sb.WriteString(fmt.Sprintf("%s %s\n", cursor, m.pointers[i]))
 	}
 
 	// Add scroll indicators
 	if m.startIndex > 0 {
 		sb.WriteString("\n" + UPCURSOR)
 	}
-	if endIndex < len(m.pendingItems) {
+	if endIndex < len(m.pointers) {
 		sb.WriteString("\n" + DOWNCURSOR)
 	}
 
@@ -212,11 +211,8 @@ func (m closedModel) viewSelectItem() string {
 func (m closedModel) viewConfirm() string {
 	var sb strings.Builder
 	sb.WriteString("Confirm closing the following item:\n\n")
-
-	sb.WriteString(fmt.Sprintf("Project: %v\n", m.selected["Project"]))
-	sb.WriteString(fmt.Sprintf("Note: %v\n", m.selected["Note"]))
-	sb.WriteString(fmt.Sprintf("Close Date: %s\n\n", m.dateInput.value))
-
+	sb.WriteString(fmt.Sprintf("Item: %s\n", m.selected))
+	sb.WriteString(fmt.Sprintf("Close Date: %s\n\n", m.timeInput.value))
 	sb.WriteString("(enter) confirm • (esc) back")
 	return sb.String()
 }
