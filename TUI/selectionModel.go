@@ -13,7 +13,9 @@ import (
 )
 
 const (
-	maxVisibleItems = 10
+	maxVisibleItems    = 10
+	errorMessage       = "An error occurred: %v"
+	errorReplyContinue = "Continue"
 )
 
 type selectionKeyMap struct {
@@ -33,13 +35,13 @@ func newSelectionKeyMap() selectionKeyMap {
 		),
 
 		Up: key.NewBinding(
-			key.WithKeys("k", "up"),
-			key.WithHelp("↑/k", "move up"),
+			key.WithKeys("up"),
+			key.WithHelp("↑", "move up"),
 		),
 
 		Down: key.NewBinding(
-			key.WithKeys("j", "down"),
-			key.WithHelp("↓/j", "move down"),
+			key.WithKeys("down"),
+			key.WithHelp("↓", "move down"),
 		),
 	}
 }

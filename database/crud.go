@@ -21,7 +21,7 @@ func (db *Database) CreateRow(categoryName string, data RowData) error {
 	defer tx.Rollback()
 
 	// Validate input data
-	if err := db.validateInputData(tx, categoryName, data); err != nil {
+	if err := db.validateInputData(tx, categoryName, data, false); err != nil {
 		return fmt.Errorf("data validation failed: %w", err)
 	}
 
@@ -157,7 +157,7 @@ func (db *Database) UpdateRow(categoryName string, id int, data RowData) error {
 	defer tx.Rollback()
 
 	// Validate input data
-	if err := db.validateInputData(tx, categoryName, data); err != nil {
+	if err := db.validateInputData(tx, categoryName, data, true); err != nil {
 		return fmt.Errorf("data validation failed: %w", err)
 	}
 
