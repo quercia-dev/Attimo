@@ -28,8 +28,8 @@ func newSelectionKeyMap() selectionKeyMap {
 		keyMap: NewKeyMap(),
 
 		Enter: key.NewBinding(
-			key.WithKeys("enter", " "),
-			key.WithHelp("⏎/' '", "confirm"),
+			key.WithKeys("enter"),
+			key.WithHelp("⏎", "confirm"),
 		),
 
 		Up: key.NewBinding(
@@ -41,6 +41,12 @@ func newSelectionKeyMap() selectionKeyMap {
 			key.WithKeys("j", "down"),
 			key.WithHelp("↓/j", "move down"),
 		),
+	}
+}
+func (k selectionKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Quit, k.HardQuit, k.Help},
+		{k.Enter, k.Up, k.Down},
 	}
 }
 

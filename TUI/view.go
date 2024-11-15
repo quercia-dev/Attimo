@@ -13,6 +13,7 @@ import (
 
 const (
 	nilControllerString = "pointer to controller is nil"
+	valuePrompt         = "Enter value for %s:"
 )
 
 type TUI struct {
@@ -61,24 +62,21 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 
 	if newModel, ok := newModel.(boxMenu); ok {
 		tui.logger.LogInfo("Exited program by picking %v", newModel.selected)
-
+		var err error
 		switch newModel.selected {
 		case 0: // OPEN
-			err := tui.handleOpen()
-			if err != nil {
-				tui.logger.LogErr("Error handling open command: %v", err)
-				return err
-			}
-			tui.logger.LogInfo("Successfully opened")
+			err = tui.handleOpen()
 		case 1: // CLOSE
-			err := tui.handleClose()
-			if err != nil {
-				tui.logger.LogErr("Error handling close command: %v", err)
-				return err
-			}
-			tui.logger.LogInfo("Successfully handled close command")
+			err = tui.handleClose()
 		default:
 			tui.logger.LogWarn("Unexpected selection %v", newModel.selected)
+		}
+
+		if err != nil {
+			tui.logger.LogErr("Error handling open command: %v", err)
+			return err
+		} else {
+			tui.logger.LogInfo("Successfully handled command")
 		}
 
 	} else {
@@ -141,46 +139,10 @@ func (tui *TUI) handleOpen() error {
 		return err
 	}
 
-	// Get and validate rowdata
-	data := make(database.RowData)
-	var lastModel *inputModel
-	for _, column := range columns {
-		if column == "Closed" {
-			continue
-		}
-
-		// Text input for each column
-		model, err := newInputModel(fmt.Sprintf("Enter value for %s:", column), tui.logger)
-		if err != nil {
-			return fmt.Errorf("could not get input model for column %s: %w", column, err)
-		}
-		lastModel = model
-
-		var inputComplete bool
-		for !inputComplete {
-			p := tea.NewProgram(model)
-			newModel, err := p.Run()
-			if err != nil {
-				return fmt.Errorf("tea program ran into an error for col %s: %w", column, err)
-			}
-
-			if inputModel, ok := newModel.(inputModel); ok {
-				if inputModel.value == "" {
-					model.SetStatus(StatusError, "Value cannot be empty")
-					continue
-				}
-
-				// Validate the input value
-				if err := tui.validateColumnInput(category, column, inputModel.value); err != nil {
-					model.SetStatus(StatusError, fmt.Sprintf("Invalid input: %v", err))
-					continue
-				}
-
-				data[column] = inputModel.value
-				model.SetStatus(StatusSuccess, "Input accepted")
-				inputComplete = true
-			}
-		}
+	// asks the user to enter a row, and validates the data
+	data, lastModel, err := tui.enterNewRowData(category, columns)
+	if err != nil {
+		tui.logger.LogErr("Could not get row data: %v", err)
 	}
 
 	// Create row and show final status
@@ -204,6 +166,57 @@ func (tui *TUI) handleOpen() error {
 
 	tui.logger.LogInfo("Row created successfully")
 	return nil
+}
+
+func (tui *TUI) enterNewRowData(category string, columns []string) (database.RowData, *inputModel, error) {
+	// create a map to store the data
+	data := make(database.RowData)
+
+	var lastModel *inputModel
+	for _, column := range columns {
+		if column == "Closed" {
+			continue
+		}
+
+		// text input for each column
+		model, err := newInputModel(fmt.Sprintf(valuePrompt, column), tui.logger)
+		if err != nil {
+			return nil, nil, fmt.Errorf("could not get input model for column %s: %w", column, err)
+		}
+
+		lastModel = model
+
+		// loop until input is complete
+		// input is complete when the user enters a valid or empty value
+		var inputComplete bool
+		for !inputComplete {
+			p := tea.NewProgram(model)
+			newModel, err := p.Run()
+
+			if err != nil {
+				return nil, nil, fmt.Errorf("tea program ran into an error for col %s: %w", column, err)
+			}
+
+			if inputModel, ok := newModel.(inputModel); ok {
+				if inputModel.value == "" {
+					model.SetStatus(StatusError, "Value insertion skipped")
+					data[column] = ""
+					inputComplete = true
+				}
+
+				// Validate the input value
+				if err := tui.validateColumnInput(category, column, inputModel.value); err != nil {
+					model.SetStatus(StatusError, fmt.Sprintf("Invalid input: %v", err))
+					continue
+				}
+
+				data[column] = inputModel.value
+				model.SetStatus(StatusSuccess, "Input accepted")
+				inputComplete = true
+			}
+		}
+	}
+	return data, lastModel, nil
 }
 
 func (tui *TUI) validateColumnInput(category, column, value string) error {
@@ -276,6 +289,8 @@ func (tui *TUI) handleClose() error {
 
 			tui.logger.LogInfo("Successfully closed item %s in category %s", strconv.Itoa(itemID), category)
 		}
+	} else {
+		return fmt.Errorf("unexpected model return type")
 	}
 
 	return nil

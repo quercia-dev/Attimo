@@ -56,8 +56,8 @@ func NewKeyMap() keyMap {
 		),
 
 		Help: key.NewBinding(
-			key.WithKeys("?"),
-			key.WithHelp("?", "help"),
+			key.WithKeys("ctrl+h"),
+			key.WithHelp("ctrl+h", "help"),
 		),
 	}
 }
