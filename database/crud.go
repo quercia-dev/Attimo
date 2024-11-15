@@ -6,11 +6,17 @@ import (
 	"strings"
 )
 
+const (
+	columnsFetchErrorString = "failed to get columns: %w"
+	affectedRowsErrorString = "failed to get affected rows: %w"
+	failedToBeginTxString   = "failed to begin transaction: %w"
+)
+
 // CreateRow inserts a new row into a category table
 func (db *Database) CreateRow(categoryName string, data RowData) error {
 	tx, err := db.DB.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf(failedToBeginTxString, err)
 	}
 	defer tx.Rollback()
 
@@ -51,7 +57,7 @@ func (db *Database) CreateRow(categoryName string, data RowData) error {
 	// Add to pending if category has Opened field
 	columns, err = db.GetCategoryColumns(categoryName)
 	if err != nil {
-		return fmt.Errorf("failed to get columns: %w", err)
+		return fmt.Errorf(columnsFetchErrorString, err)
 	}
 
 	for _, col := range columns {
@@ -69,7 +75,7 @@ func (db *Database) CreateRow(categoryName string, data RowData) error {
 func (db *Database) CloseItem(category string, itemID int, closeDate string) error {
 	tx, err := db.DB.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf(failedToBeginTxString, err)
 	}
 	defer tx.Rollback()
 
@@ -89,7 +95,7 @@ func (db *Database) CloseItem(category string, itemID int, closeDate string) err
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return fmt.Errorf(affectedRowsErrorString, err)
 	}
 
 	if rowsAffected == 0 {
@@ -116,7 +122,7 @@ func (db *Database) ReadRow(categoryName string, id int) (RowData, error) {
 
 	columns, err := rows.Columns()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get columns: %w", err)
+		return nil, fmt.Errorf(columnsFetchErrorString, err)
 	}
 
 	if !rows.Next() {
@@ -146,7 +152,7 @@ func (db *Database) ReadRow(categoryName string, id int) (RowData, error) {
 func (db *Database) UpdateRow(categoryName string, id int, data RowData) error {
 	tx, err := db.DB.Begin()
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
+		return fmt.Errorf(failedToBeginTxString, err)
 	}
 	defer tx.Rollback()
 
@@ -181,7 +187,7 @@ func (db *Database) UpdateRow(categoryName string, id int, data RowData) error {
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return fmt.Errorf(affectedRowsErrorString, err)
 	}
 
 	if rowsAffected == 0 {
@@ -209,7 +215,7 @@ func (db *Database) DeleteRow(categoryName string, id int) error {
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("failed to get rows affected: %w", err)
+		return fmt.Errorf(affectedRowsErrorString, err)
 	}
 
 	if rowsAffected == 0 {
@@ -263,7 +269,7 @@ func (db *Database) ListRows(categoryName string, filters RowData, page, pageSiz
 	// Get columns
 	columns, err := rows.Columns()
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to get columns: %w", err)
+		return nil, 0, fmt.Errorf(columnsFetchErrorString, err)
 	}
 
 	// Prepare result slice
