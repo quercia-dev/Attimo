@@ -74,9 +74,10 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 
 		if err != nil {
 			tui.logger.LogErr("Error handling open command: %v", err)
-			return err
+			communicateError(tui.logger, fmt.Sprintf("Error handling open command: %v", err))
 		} else {
 			tui.logger.LogInfo("Successfully handled command")
+			communicateError(tui.logger, "Successfully handled command")
 		}
 
 	} else {
@@ -144,14 +145,8 @@ func (tui *TUI) handleOpen() error {
 	if err != nil {
 		tui.logger.LogErr("Could not get row data: %v", err)
 	}
-
-	// Create row and show final status
-	// TODO communicate success to the user
-	if err := tui.control.CreateRow(tui.logger, category, data); err != nil {
-		tui.logger.LogErr("Could not create row: %v", err)
-		return err
-	}
-	return nil
+	tui.logger.LogInfo("Attempted to enter row data: %v", data)
+	return tui.control.CreateRow(tui.logger, category, data)
 }
 
 func (tui *TUI) enterNewRowData(category string, columns []string) (database.RowData, error) {
