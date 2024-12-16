@@ -2,7 +2,9 @@ package tui
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	ctrl "Attimo/control"
 	log "Attimo/logging"
@@ -88,6 +90,42 @@ func (m closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func parseTimeInput(input string) (string, error) {
+	if input == "" {
+		// Return current time in the required format
+		return time.Now().Format("02-01-2006"), nil
+	}
+
+	if strings.HasPrefix(input, "+") {
+		// Parse minutes to add
+		minutesStr := strings.TrimPrefix(input, "+")
+		minutes, err := strconv.Atoi(minutesStr)
+		if err != nil {
+			return "", fmt.Errorf("invalid minutes format: %v", err)
+		}
+
+		// Add minutes to current time
+		futureTime := time.Now().Add(time.Duration(minutes) * time.Minute)
+		return futureTime.Format("02-01-2006"), nil
+	}
+
+	if strings.HasPrefix(input, "-") {
+		// Parse minutes to subtract
+		minutesStr := strings.TrimPrefix(input, "-")
+		minutes, err := strconv.Atoi(minutesStr)
+		if err != nil {
+			return "", fmt.Errorf("invalid minutes format: %v", err)
+		}
+
+		// Subtract minutes from current time
+		pastTime := time.Now().Add(-time.Duration(minutes) * time.Minute)
+		return pastTime.Format("02-01-2006"), nil
+	}
+
+	// For any other input, return as is (will be validated by the database layer)
+	return input, nil
+}
+
 func (m closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch {
 	case key.Matches(msg, m.keys.Quit):
@@ -121,31 +159,35 @@ func (m closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) 
 	return m, nil
 }
 
+// In handleTimeInput method
 func (m closedModel) handleTimeInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if key.Matches(msg, m.keys.Quit) {
 		m.step = selectItem
 		return m, nil
 	}
 
-	// Create a new model for the update
 	updatedModel := m
-
-	// Update the time input and get the new command
 	timeInputModel, cmd := m.timeInput.Update(msg)
 
-	// Type assert the result back to *inputModel
 	if newTimeInput, ok := timeInputModel.(*inputModel); ok {
 		updatedModel.timeInput = newTimeInput
 
-		// Check if a value was entered
-		if newTimeInput.value != "" {
+		if key.Matches(msg, m.keys.Enter) {
+			// Parse and validate the time input
+			parsedTime, err := parseTimeInput(newTimeInput.value)
+			if err != nil {
+				newTimeInput.SetStatus(StatusError, fmt.Sprintf("Invalid time format: %v", err))
+				return updatedModel, cmd
+			}
+
+			// Update the input value with the parsed time
+			newTimeInput.value = parsedTime
 			updatedModel.step = confirmClose
 		}
 
 		return updatedModel, cmd
 	}
 
-	// If type assertion fails, return original model
 	return m, cmd
 }
 
