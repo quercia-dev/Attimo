@@ -52,6 +52,12 @@ const (
 	DateCheck     = "date"
 )
 
+// Fill behavior
+const (
+	Open  = "open"
+	Close = "close"
+)
+
 // Current version
 const currentVersion = "1.0.0"
 
@@ -79,26 +85,26 @@ func ComposeArguments(args ...string) string {
 // getDefaultDatatypes returns the default datatype configurations
 func getDefaultDatatypes() []Datatype {
 	return []Datatype{
-		{Name: "Opened", VariableType: TimeType, CompletionValue: LastCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck},
-		{Name: "Closed", VariableType: TimeType, CompletionValue: DateCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck},
-		{Name: "Note", VariableType: StringType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck},
-		{Name: "Project", VariableType: StringType, CompletionValue: UniqueCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck},
-		{Name: "Person", VariableType: StringType, CompletionValue: UniqueCompletion, CompletionSort: FrequencySort, ValueCheck: nonemptyCheck},
-		{Name: "Location", VariableType: StringType, CompletionValue: UniqueCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck},
-		{Name: "URL", VariableType: StringType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: URLCheck},
-		{Name: "Cost_EUR", VariableType: IntType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck},
-		{Name: "Deadline", VariableType: TimeType, CompletionValue: DateCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck},
-		{Name: "Rating", VariableType: IntType, CompletionValue: SetCompletion + "(1,2,3,4,5)", CompletionSort: FrequencySort, ValueCheck: nonemptyCheck},
-		{Name: "Email", VariableType: StringType, CompletionValue: UniqueCompletion, CompletionSort: NoSort, ValueCheck: MailCheck},
-		{Name: "Phone", VariableType: StringType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: PhoneCheck},
-		{Name: "File", VariableType: StringType, CompletionValue: FileCompletion, CompletionSort: NoSort, ValueCheck: FileCheck},
-		{Name: "Priority", VariableType: StringType, CompletionValue: SetCompletion + "(Low,Medium,High,Urgent)", CompletionSort: FrequencySort, ValueCheck: nonemptyCheck},
-		{Name: "Status", VariableType: StringType, CompletionValue: SetCompletion + "(Not Started,In Progress,On Hold,Completed,Cancelled)", CompletionSort: LastSort, ValueCheck: nonemptyCheck},
-		{Name: "Tags", VariableType: csvType, CompletionValue: UniqueCompletion, CompletionSort: FrequencySort, ValueCheck: nonemptyCheck},
-		{Name: "Progress", VariableType: IntType, CompletionValue: SetCompletion + "(0,25,50,75,100)", CompletionSort: LastSort, ValueCheck: nonemptyCheck},
-		{Name: "Budget", VariableType: IntType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck},
-		{Name: "Recurring", VariableType: StringType, CompletionValue: SetCompletion + "(Daily,Weekly,Monthly,Yearly)", CompletionSort: LastSort, ValueCheck: nonemptyCheck},
-		{Name: "Dependencies", VariableType: csvType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck},
+		{Name: "Opened", VariableType: TimeType, CompletionValue: LastCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Closed", VariableType: TimeType, CompletionValue: DateCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck, FillBehavior: Close},
+		{Name: "Note", VariableType: StringType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Project", VariableType: StringType, CompletionValue: UniqueCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Person", VariableType: StringType, CompletionValue: UniqueCompletion, CompletionSort: FrequencySort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Location", VariableType: StringType, CompletionValue: UniqueCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "URL", VariableType: StringType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: URLCheck, FillBehavior: Open},
+		{Name: "Cost_EUR", VariableType: IntType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Deadline", VariableType: TimeType, CompletionValue: DateCompletion, CompletionSort: LastSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Rating", VariableType: IntType, CompletionValue: SetCompletion + "(1,2,3,4,5)", CompletionSort: FrequencySort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Email", VariableType: StringType, CompletionValue: UniqueCompletion, CompletionSort: NoSort, ValueCheck: MailCheck, FillBehavior: Open},
+		{Name: "Phone", VariableType: StringType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: PhoneCheck, FillBehavior: Open},
+		{Name: "File", VariableType: StringType, CompletionValue: FileCompletion, CompletionSort: NoSort, ValueCheck: FileCheck, FillBehavior: Open},
+		{Name: "Priority", VariableType: StringType, CompletionValue: SetCompletion + "(Low,Medium,High,Urgent)", CompletionSort: FrequencySort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Status", VariableType: StringType, CompletionValue: SetCompletion + "(Not Started,In Progress,On Hold,Completed,Cancelled)", CompletionSort: LastSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Tags", VariableType: csvType, CompletionValue: UniqueCompletion, CompletionSort: FrequencySort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Progress", VariableType: IntType, CompletionValue: SetCompletion + "(0,25,50,75,100)", CompletionSort: LastSort, ValueCheck: nonemptyCheck, FillBehavior: Close},
+		{Name: "Budget", VariableType: IntType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Recurring", VariableType: StringType, CompletionValue: SetCompletion + "(Daily,Weekly,Monthly,Yearly)", CompletionSort: LastSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
+		{Name: "Dependencies", VariableType: csvType, CompletionValue: NoCompletion, CompletionSort: NoSort, ValueCheck: nonemptyCheck, FillBehavior: Open},
 		// Dependencies could also be int[]
 	}
 }

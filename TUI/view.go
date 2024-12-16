@@ -133,8 +133,12 @@ func (tui *TUI) handleOpen() error {
 		return err
 	}
 
+	condition := &ctrl.ColumnCondition{
+		FillBehavior: "open",
+	}
+
 	// Get columns for selected category
-	columns, err := tui.control.GetCategoryColumns(tui.logger, category)
+	columns, err := tui.control.GetCategoryColumns(tui.logger, category, condition)
 	if err != nil {
 		tui.logger.LogErr("Could not get columns: %v", err)
 		return err
@@ -154,9 +158,6 @@ func (tui *TUI) enterNewRowData(category string, columns []string) (database.Row
 	data := make(database.RowData)
 
 	for _, column := range columns {
-		if column == "Closed" {
-			continue
-		}
 
 		// loop until input is complete
 		// input is complete when the user enters a valid or empty value

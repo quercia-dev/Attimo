@@ -52,6 +52,7 @@ func getColumnDefinitions(tx *sql.Tx, columnIDs []int) ([]string, error) {
 			&datatype.CompletionValue,
 			&datatype.CompletionSort,
 			&datatype.ValueCheck,
+			&datatype.FillBehavior,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve datatype for ID %d: %v", colID, err)

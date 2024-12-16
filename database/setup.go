@@ -156,7 +156,7 @@ func populateDefaultDB(tx *sql.Tx, logger *logging.Logger) error {
 	stmt, err := tx.Prepare(`
         INSERT INTO datatypes 
         (name, variable_type, completion_value, completion_sort, value_check, fill_behavior) 
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
     `)
 	if err != nil {
 		logger.LogErr("Failed to prepare datatype insert: %v", err)
@@ -173,6 +173,7 @@ func populateDefaultDB(tx *sql.Tx, logger *logging.Logger) error {
 			dt.CompletionValue,
 			dt.CompletionSort,
 			dt.ValueCheck,
+			dt.FillBehavior,
 		)
 		if err != nil {
 			logger.LogErr("Failed to insert datatype %s: %v", dt.Name, err)

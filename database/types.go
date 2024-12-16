@@ -29,6 +29,7 @@ type Datatype struct {
 	CompletionValue string
 	CompletionSort  string
 	ValueCheck      string
+	FillBehavior    string
 }
 
 // Category struct holds the category information.

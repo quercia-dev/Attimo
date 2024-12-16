@@ -15,8 +15,6 @@ func main() {
 	dbFolder := filepath.Join(".", "db")
 	dbPath := filepath.Join(dbFolder, "attimo.db")
 
-	// TEMPORARY: delete the database file so it resets every time
-	// if file exists, delete it
 	// view.GetLogger()
 	logger, err := log.GetTestLogger()
 	if err != nil {

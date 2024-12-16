@@ -27,12 +27,102 @@ func (c *Controller) GetCategories(logger *log.Logger) ([]string, error) {
 	return c.data.GetCategories()
 }
 
-func (c *Controller) GetCategoryColumns(logger *log.Logger, category string) ([]string, error) {
+func (c *Controller) GetCategoryColumns(logger *log.Logger, category string, condition *ColumnCondition) ([]string, error) {
 	if logger == nil {
 		return nil, fmt.Errorf(log.LoggerNilString)
 	}
 
-	return c.data.GetCategoryColumns(category)
+	// Get base columns from database
+	columns, err := c.data.GetCategoryColumns(category)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get base categories: %w", err)
+	}
+
+	// return all if no condition
+	if condition == nil {
+		return columns, nil
+	}
+
+	// create sets for faster lookups
+	includeSet := make(map[string]bool)
+	for _, col := range condition.IncludeColumn {
+		includeSet[col] = true
+	}
+
+	excludeSet := make(map[string]bool)
+	for _, col := range condition.ExcludeColumn {
+		excludeSet[col] = true
+	}
+
+	var filteredColumns []string
+
+	// start a transaction for getting datatypes
+	tx, err := c.data.DB.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer tx.Rollback()
+
+	for _, column := range columns {
+		include := true
+
+		// check if column should be excluded
+		if len(condition.ExcludeColumn) > 0 && excludeSet[column] {
+			include = false
+			continue
+		}
+
+		// check if column should be included
+		if len(condition.IncludeColumn) > 0 {
+			if !includeSet[column] {
+				include = false
+				continue
+			}
+		}
+
+		// get datattpe information for column
+		datatype, err := database.GetDatatypeByName(tx, column)
+		if err != nil {
+			logger.LogWarn("Failed to get datatype for column %s: %v", column, err)
+			continue
+		}
+
+		// check fill behavior if specified
+		if include && condition.FillBehavior != "" {
+			if datatype.FillBehavior != condition.FillBehavior {
+				include = false
+				continue
+			}
+		}
+
+		// Check data type if specified
+		if include && condition.DataType != "" {
+			if datatype.VariableType != condition.DataType {
+				include = false
+				continue
+			}
+		}
+
+		if include {
+			filteredColumns = append(filteredColumns, column)
+		}
+	}
+
+	// Verify all required columns are present
+	if len(condition.IncludeColumn) > 0 {
+		foundColumns := make(map[string]bool)
+		for _, col := range filteredColumns {
+			foundColumns[col] = true
+		}
+
+		for _, requiredCol := range condition.IncludeColumn {
+			if !foundColumns[requiredCol] {
+				return nil, fmt.Errorf("required column %s not found in category %s", requiredCol, category)
+			}
+		}
+	}
+
+	return filteredColumns, nil
 }
 
 func (c *Controller) CreateRow(logger *log.Logger, category string, values data.RowData) error {
