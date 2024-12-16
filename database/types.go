@@ -40,6 +40,15 @@ type Category struct {
 	Datatypes RowData
 }
 
+// Pending struct holds the pointer of unclosed rows.
+type Pending struct {
+	ID        int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt sql.NullTime
+	Pointer   string // Format: "Category:ID", e.g., "General:123"
+}
+
 type CategoryTemplate struct {
 	Name string
 	// contains a list of numerical IDs for the rows of the datatypes

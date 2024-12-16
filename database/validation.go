@@ -184,6 +184,14 @@ func validateDate(value interface{}) bool {
 	return err == nil
 }
 
+func isEmptyString(value interface{}) bool {
+	str, ok := value.(string)
+	if !ok {
+		return false
+	}
+	return str == ""
+}
+
 // getDatatypeByName retrieves a datatype from the database by name
 func GetDatatypeByName(tx *sql.Tx, name string) (*Datatype, error) {
 	var dt Datatype
@@ -200,10 +208,14 @@ func GetDatatypeByName(tx *sql.Tx, name string) (*Datatype, error) {
 }
 
 // validateField validates a single field value against its datatype
-func (d *Database) validateField(tx *sql.Tx, columnName string, value interface{}) error {
+func (d *Database) validateField(tx *sql.Tx, columnName string, validateEmpty bool, value interface{}) error {
 	datatype, err := GetDatatypeByName(tx, columnName)
 	if err != nil {
 		return fmt.Errorf("failed to get datatype for column %s: %w", columnName, err)
+	}
+
+	if !validateEmpty && isEmptyString(value) {
+		return nil
 	}
 
 	if !datatype.ValidateCheck(value, d.logger) {
@@ -214,7 +226,9 @@ func (d *Database) validateField(tx *sql.Tx, columnName string, value interface{
 }
 
 // validateInputData validates all fields in the input data
-func (d *Database) validateInputData(tx *sql.Tx, categoryName string, data map[string]interface{}) error {
+// against the column names and datatypes of the category
+// validateEmpty determines whether empty fields are allowed, true if they are allowed
+func (d *Database) validateInputData(tx *sql.Tx, categoryName string, data RowData, validateEmpty bool) error {
 	// Get column information
 	rows, err := tx.Query(`
 		SELECT name 
@@ -245,7 +259,7 @@ func (d *Database) validateInputData(tx *sql.Tx, categoryName string, data map[s
 			return fmt.Errorf("invalid field name: %s", field)
 		}
 
-		if err := d.validateField(tx, field, value); err != nil {
+		if err := d.validateField(tx, field, validateEmpty, value); err != nil {
 			return err
 		}
 	}

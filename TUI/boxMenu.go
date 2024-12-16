@@ -4,6 +4,7 @@ import (
 	log "Attimo/logging"
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -14,28 +15,26 @@ const (
 	agendaItem = "AGENDA"
 	editItem   = "EDIT"
 	logItem    = "LOGS"
-
-	openShortcut   = "o"
-	closeShortcut  = "c"
-	agendaShortcut = "a"
-	editShortcut   = "e"
-	logShortcut    = "l"
 )
 
 type boxMenu struct {
 	tuiWindow
+	keys      menuKeyMap
 	menuItems []string
 	cursor    int
-	shortcuts map[string]int
 }
 
-func newBoxModel(logger *log.Logger, menuItems []string, shortcuts map[string]int) (boxMenu, error) {
+func newBoxModel(logger *log.Logger, menuItems []string) (boxMenu, error) {
 	if logger == nil {
 		return boxMenu{}, fmt.Errorf(log.LoggerNilString)
 	}
 	return boxMenu{
+		tuiWindow: tuiWindow{
+			help:   help.New(),
+			logger: logger,
+		},
+		keys:      newMenuKeyMap(),
 		menuItems: menuItems,
-		shortcuts: shortcuts,
 	}, nil
 }
 
@@ -47,30 +46,25 @@ func (m boxMenu) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, DefaultKeyMap.Quit):
+		case key.Matches(msg, m.keys.Quit):
 			m.logger.LogInfo(quitMessage + " from main menu")
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Up):
+		case key.Matches(msg, m.keys.Up):
 			if m.cursor > 0 {
 				m.cursor--
 			}
 			return m, nil
-		case key.Matches(msg, DefaultKeyMap.Down):
+		case key.Matches(msg, m.keys.Down):
 			if m.cursor < len(m.menuItems)-1 {
 				m.cursor++
 			}
 			return m, nil
-		case key.Matches(msg, DefaultKeyMap.GreedyEnter):
+		case key.Matches(msg, m.keys.Enter):
 			m.selected = m.cursor
 			return m, tea.Quit
-		default:
-			index := m.shortcuts[msg.String()]
-			if index < 0 || index >= len(m.menuItems) {
-				m.logger.LogWarn("Unidentified key pressed: %s", msg.String())
-				return m, nil
-			}
-			m.selected = index
-			return m, tea.Quit
+		case key.Matches(msg, m.keys.Help):
+			m.help.ShowAll = !m.help.ShowAll
+			return m, nil
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -95,5 +89,6 @@ func (m boxMenu) View() string {
 		}
 		s += fmt.Sprintf("%s\n", style.Render(item))
 	}
-	return s
+	helpView := m.help.View(m.keys)
+	return s + "\n" + helpView
 }

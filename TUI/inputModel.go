@@ -4,11 +4,31 @@ import (
 	log "Attimo/logging"
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
+
+type Status int
+
+const (
+	StatusNone Status = iota
+	StatusSuccess
+	StatusError
+)
+
+type inputModel struct {
+	tuiWindow
+	keys       selectionKeyMap
+	prompt     string
+	input      textinput.Model
+	value      string
+	status     Status
+	statusMsg  string
+	showStatus bool
+}
 
 func newInputModel(prompt string, logger *log.Logger) (*inputModel, error) {
 	if logger == nil {
@@ -22,9 +42,13 @@ func newInputModel(prompt string, logger *log.Logger) (*inputModel, error) {
 	ti.Width = 20
 
 	return &inputModel{
+		tuiWindow: tuiWindow{
+			help:   help.New(),
+			logger: logger,
+		},
+		keys:       newSelectionKeyMap(),
 		prompt:     prompt,
 		input:      ti,
-		tuiWindow:  tuiWindow{logger: logger},
 		status:     StatusNone,
 		showStatus: false,
 	}, nil
@@ -47,12 +71,15 @@ func (m inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, DefaultKeyMap.HardQuit):
+		case key.Matches(msg, m.keys.Quit):
 			m.logger.LogInfo("Quitting input")
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Enter):
+		case key.Matches(msg, m.keys.Enter):
 			m.value = m.input.Value()
 			return m, tea.Quit
+		case key.Matches(msg, m.keys.Help):
+			m.help.ShowAll = !m.help.ShowAll
+			return m, nil
 		}
 
 		m.input, cmd = m.input.Update(msg)
@@ -88,6 +115,6 @@ func (m inputModel) View() string {
 		m.prompt,
 		m.input.View(),
 		statusView,
-		"(enter to submit, ctrl+c to quit)",
+		m.help.View(m.keys),
 	)
 }

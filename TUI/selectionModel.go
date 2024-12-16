@@ -6,16 +6,56 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 const (
-	maxVisibleItems = 10
+	maxVisibleItems    = 10
+	errorMessage       = "An error occurred: %v"
+	errorReplyContinue = "Continue"
 )
 
+type selectionKeyMap struct {
+	keyMap
+	Enter key.Binding
+	Up    key.Binding
+	Down  key.Binding
+}
+
+func newSelectionKeyMap() selectionKeyMap {
+	return selectionKeyMap{
+		keyMap: NewKeyMap(),
+
+		Enter: key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("⏎", "confirm"),
+		),
+
+		Up: key.NewBinding(
+			key.WithKeys("up"),
+			key.WithHelp("↑", "move up"),
+		),
+
+		Down: key.NewBinding(
+			key.WithKeys("down"),
+			key.WithHelp("↓", "move down"),
+		),
+	}
+}
+func (k selectionKeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Quit, k.HardQuit, k.Help},
+		{k.Enter, k.Up, k.Down},
+	}
+}
+
 type selectionModel struct {
+	tuiWindow
+
+	keys      selectionKeyMap
 	prompt    string
 	userInput textinput.Model
 	values    []string
@@ -24,8 +64,6 @@ type selectionModel struct {
 
 	maxWidth   int // Maximum width of any string in values
 	startIndex int // Start index for viewport sliding
-
-	tuiWindow
 }
 
 func newSelectionModel(prompt string, values []string, logger *log.Logger) (*selectionModel, error) {
@@ -49,6 +87,12 @@ func newSelectionModel(prompt string, values []string, logger *log.Logger) (*sel
 	}
 
 	return &selectionModel{
+		tuiWindow: tuiWindow{
+			help:   help.New(),
+			logger: logger,
+		},
+
+		keys:       newSelectionKeyMap(),
 		prompt:     prompt,
 		userInput:  ti,
 		values:     values,
@@ -56,10 +100,6 @@ func newSelectionModel(prompt string, values []string, logger *log.Logger) (*sel
 		cursorPos:  0,
 		startIndex: 0,
 		maxWidth:   maxWidth,
-
-		tuiWindow: tuiWindow{
-			logger: logger,
-		},
 	}, nil
 }
 
@@ -85,34 +125,34 @@ func filterValues(values []string, input string) []string {
 }
 
 func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, DefaultKeyMap.HardQuit):
+		case key.Matches(msg, m.keys.Quit):
 			m.logger.LogInfo("Quitting TUI")
 			return m, tea.Quit
-		case key.Matches(msg, DefaultKeyMap.Enter):
+		case key.Matches(msg, m.keys.Enter):
 			if len(m.filtered) > 0 {
 				m.logger.LogInfo("Selected item: %s", m.filtered[m.cursorPos])
 				m.selected = m.cursorPos
 				return m, tea.Quit
 			}
 			m.logger.LogInfo("No item to match for: %v", m.userInput.Value())
-		case key.Matches(msg, DefaultKeyMap.Up):
+
+		case key.Matches(msg, m.keys.Up):
 			m.moveUp()
-			return m, nil
-		case key.Matches(msg, DefaultKeyMap.Down):
+
+		case key.Matches(msg, m.keys.Down):
 			m.moveDown()
-			return m, nil
+
+		case key.Matches(msg, m.keys.Help):
+			m.help.ShowAll = !m.help.ShowAll
+
 		default:
 			// Handle text input
 			m.userInput, _ = m.userInput.Update(msg)
 			m.filtered = filterValues(m.values, m.userInput.Value())
 			m.resetCursorMaybe()
-
-			return m, nil
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -120,8 +160,7 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	m.logger.LogInfo("Current cursor position: %v", m.cursorPos)
-	return m, cmd
+	return m, nil
 }
 
 func (m *selectionModel) moveUp() {
@@ -201,6 +240,6 @@ func (m selectionModel) View() string {
 		m.prompt,
 		m.userInput.View(),
 		style.Render(view),
-		"(ctrl+c to quit)",
+		m.help.View(m.keys),
 	)
 }
