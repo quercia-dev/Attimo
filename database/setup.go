@@ -113,7 +113,8 @@ func (db *Database) createDefaultDB() error {
 			variable_type TEXT NOT NULL,
 			completion_value TEXT NOT NULL,
 			completion_sort TEXT NOT NULL,
-			value_check TEXT NOT NULL
+			value_check TEXT NOT NULL,
+			fill_behavior TEXT NOT NULL
 		)
 	`)
 	if err != nil {
@@ -154,7 +155,7 @@ func populateDefaultDB(tx *sql.Tx, logger *logging.Logger) error {
 	// Prepare insert statement for datatypes
 	stmt, err := tx.Prepare(`
         INSERT INTO datatypes 
-        (name, variable_type, completion_value, completion_sort, value_check) 
+        (name, variable_type, completion_value, completion_sort, value_check, fill_behavior) 
         VALUES (?, ?, ?, ?, ?)
     `)
 	if err != nil {

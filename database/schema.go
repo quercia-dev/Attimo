@@ -43,7 +43,7 @@ func getColumnDefinitions(tx *sql.Tx, columnIDs []int) ([]string, error) {
 		// Retrieve datatype information
 		var datatype Datatype
 		err := tx.QueryRow(`
-            SELECT name, variable_type, completion_value, completion_sort, value_check
+            SELECT name, variable_type, completion_value, completion_sort, value_check, fill_behavior
             FROM datatypes 
             WHERE id = ?
         `, colID).Scan(

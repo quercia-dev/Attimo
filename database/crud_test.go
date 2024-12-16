@@ -62,7 +62,8 @@ func setupTestTables(db *sql.DB) error {
         variable_type TEXT NOT NULL,
         completion_value TEXT NOT NULL DEFAULT 'no',
         completion_sort TEXT NOT NULL DEFAULT 'no',
-        value_check TEXT NOT NULL
+        value_check TEXT NOT NULL,
+		fill_behavior TEXT NOT NULL DEFAULT 'open'
     )
 	`)
 	if err != nil {
@@ -76,11 +77,12 @@ func setupTestTables(db *sql.DB) error {
         variable_type, 
         completion_value, 
         completion_sort, 
-        value_check
+        value_check,
+		fill_behavior
     ) VALUES 
-    ('Note', 'string', 'no', 'no', 'nonempty'),
-    ('Project', 'string', 'no', 'no', 'nonempty'),
-    ('Location', 'string', 'no', 'no', 'nonempty')
+    ('Note', 'string', 'no', 'no', 'nonempty', 'open'),
+    ('Project', 'string', 'no', 'no', 'nonempty', 'open'),
+    ('Location', 'string', 'no', 'no', 'nonempty', 'close')
 	`)
 	if err != nil {
 		return err

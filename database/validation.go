@@ -196,7 +196,7 @@ func isEmptyString(value interface{}) bool {
 func GetDatatypeByName(tx *sql.Tx, name string) (*Datatype, error) {
 	var dt Datatype
 	err := tx.QueryRow(`
-		SELECT id, name, variable_type, completion_value, completion_sort, value_check 
+		SELECT id, name, variable_type, completion_value, completion_sort, value_check, fill_behavior
 		FROM datatypes 
 		WHERE name = ?
 	`, name).Scan(&dt.ID, &dt.Name, &dt.VariableType, &dt.CompletionValue, &dt.CompletionSort, &dt.ValueCheck)
