@@ -2,7 +2,6 @@ package tui
 
 import (
 	ctrl "Attimo/control"
-	"Attimo/database"
 	log "Attimo/logging"
 	"fmt"
 	"strconv"
@@ -144,80 +143,50 @@ func (tui *TUI) handleOpen() error {
 		return err
 	}
 
-	// asks the user to enter a row, and validates the data
-	data, err := tui.enterNewRowData(category, columns)
-	if err != nil {
-		tui.logger.LogErr("Could not get row data: %v", err)
-	}
-	tui.logger.LogInfo("Attempted to enter row data: %v", data)
-	return tui.control.CreateRow(tui.logger, category, data)
-}
-
-func (tui *TUI) enterNewRowData(category string, columns []string) (database.RowData, error) {
-	// create a map to store the data
-	data := make(database.RowData)
-
+	// collect values through user input
+	values := make(map[string]string)
 	for _, column := range columns {
-
-		// loop until input is complete
-		// input is complete when the user enters a valid or empty value
-		var inputComplete bool
-		for !inputComplete {
-			// text input for each column
-			lastModel, err := newInputModel(fmt.Sprintf(valuePrompt, column), tui.logger)
-			if err != nil {
-				return nil, fmt.Errorf("could not get input model for column %s: %w", column, err)
-			}
-
-			p := tea.NewProgram(lastModel)
-			newModel, err := p.Run()
-
-			if err != nil {
-				return nil, fmt.Errorf("tea program ran into an error for col %s: %w", column, err)
-			}
-
-			if inputModel, ok := newModel.(inputModel); ok {
-				if inputModel.value == "" {
-					lastModel.SetStatus(StatusError, "Value insertion skipped")
-					data[column] = ""
-					inputComplete = true
-				}
-
-				// Validate the input value
-				if err := tui.validateColumnInput(category, column, inputModel.value); err != nil {
-					lastModel.SetStatus(StatusError, fmt.Sprintf("Invalid input: %v", err))
-					continue
-				}
-
-				data[column] = inputModel.value
-				lastModel.SetStatus(StatusSuccess, "Input accepted")
-				inputComplete = true
-			}
+		value, err := tui.promptForValue(column)
+		if err != nil {
+			tui.logger.LogErr("Could not get value for column %s: %v", column, err)
+		}
+		if value != "" { // only include non-empty values CHECK IF THIS IS NEEDED!!!
+			values[column] = value
 		}
 	}
-	return data, nil
-}
 
-func (tui *TUI) validateColumnInput(category, column, value string) error {
-	// Get the datatype for this column
-	datatype, err := tui.control.GetColumnDatatype(tui.logger, category, column)
-	if err != nil {
-		return fmt.Errorf("failed to get datatype: %w", err)
+	// send request to controller
+	request := ctrl.OpenItemRequest{
+		Category: category,
+		Values:   values,
 	}
 
-	// Create a transaction for validation
-	tx, err := tui.control.BeginTransaction()
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer tx.Rollback()
-
-	// Validate the input
-	if !datatype.ValidateCheck(value, tui.logger) {
-		return fmt.Errorf("validation failed for %s", column)
+	response := tui.control.OpenItem(tui.logger, request)
+	if response.Success {
+		return response.Error
 	}
 
 	return nil
+}
+
+// helper function to get user input
+func (tui *TUI) promptForValue(column string) (string, error) {
+	model, err := newInputModel(fmt.Sprintf(valuePrompt, column), tui.logger)
+	if err != nil {
+		return "", fmt.Errorf("could not get input model for column %s: %w", column, err)
+	}
+
+	p := tea.NewProgram(model)
+	result, err := p.Run()
+	if err != nil {
+		return "", fmt.Errorf("failed to run input program: %w", err)
+	}
+
+	if m, ok := result.(inputModel); ok {
+		return m.value, nil
+	}
+
+	return "", fmt.Errorf("unexpected model return type")
 }
 
 func (tui *TUI) handleClose() error {

@@ -34,21 +34,24 @@ type ListRowsResult struct {
 	PageSize    int
 }
 
-//type OpenItemResult struct {
-//	Category string
-//	Columns  []string
-//	Data     data.RowData
-//	Error    error
-//}
+type OpenItemRequest struct {
+	Category string
+	Values   map[string]string
+}
+
+type OpenItemResponse struct {
+	Success bool
+	Error   error
+}
+
+type ValidationResult struct {
+	IsValid bool
+	Message string
+}
 
 //type CloseItemResult struct {
 //	Category  string
 //	ItemID    int
 //	CloseDate string
 //	Error     error
-//}
-
-//type ValidationResult struct {
-//	IsValid bool
-//	Message string
 //}
