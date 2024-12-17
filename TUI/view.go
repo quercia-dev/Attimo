@@ -266,5 +266,30 @@ func (tui *TUI) handleClose() error {
 }
 
 func (tui *TUI) handleEdit() error {
+	// TODO - get the category from the user
+
+	cols, rows, err := tui.control.GetDummyData(tui.logger)
+	if err != nil {
+		tui.logger.LogErr("Could not get category data: %v", err)
+		return err
+	}
+
+	model, err := newTableModel(tui.logger, cols, rows)
+	if err != nil {
+		tui.logger.LogErr("Could not get table model: %v", err)
+		return err
+	}
+
+	p := tea.NewProgram(model)
+	finalModel, err := p.Run()
+	if err != nil {
+		return fmt.Errorf("error running close model: %w", err)
+	}
+
+	if finalModel, ok := finalModel.(tableModel); ok {
+		communicateError(tui.logger, fmt.Sprintf("Selected row: %v", finalModel.cursor))
+		tui.logger.LogInfo("Selected row: %v", finalModel.cursor)
+	}
+
 	return nil
 }
