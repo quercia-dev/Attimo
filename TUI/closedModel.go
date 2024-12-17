@@ -32,6 +32,7 @@ const (
 	selectItem closedStep = iota
 	enterTime
 	confirmClose
+	NoPendingErrorString = "no pending items to close"
 )
 
 func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel, error) {
@@ -46,7 +47,7 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 	}
 
 	if len(pointers) == 0 {
-		return nil, fmt.Errorf("no pending items to close")
+		return nil, fmt.Errorf(NoPendingErrorString)
 	}
 
 	timeInput, err := newInputModel("Enter close time:", logger)

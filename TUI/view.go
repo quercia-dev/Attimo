@@ -68,6 +68,8 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 			err = tui.handleOpen()
 		case 1: // CLOSE
 			err = tui.handleClose()
+		case 3: // EDIT
+			err = tui.handleEdit()
 		default:
 			tui.logger.LogWarn("Unexpected selection %v", newModel.selected)
 		}
@@ -223,18 +225,7 @@ func (tui *TUI) handleClose() error {
 	// Create and run the close model
 	model, err := newClosedModel(tui.logger, tui.control)
 	if err != nil {
-		if err.Error() == "no pending items to close" {
-			// Show message to user that there are no pending items
-			msgModel, err := newInputModel("No pending items to close. Press enter to continue.", tui.logger)
-			if err != nil {
-				return err
-			}
-			p := tea.NewProgram(msgModel)
-			if _, err := p.Run(); err != nil {
-				return err
-			}
-			return nil
-		}
+		communicateError(tui.logger, fmt.Sprintf("Could not create close model: %v", err))
 		return err
 	}
 
@@ -271,5 +262,9 @@ func (tui *TUI) handleClose() error {
 		return fmt.Errorf("unexpected model return type")
 	}
 
+	return nil
+}
+
+func (tui *TUI) handleEdit() error {
 	return nil
 }
