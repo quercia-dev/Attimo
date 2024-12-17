@@ -13,7 +13,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// closedModel:
 type closedModel struct {
 	tuiWindow
 
@@ -31,7 +30,10 @@ type closedStep int
 const (
 	selectItem closedStep = iota
 	enterTime
-	confirmClose
+)
+
+const (
+	datetimeFormat = "2006-01-02 15:04:05"
 )
 
 func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel, error) {
@@ -54,6 +56,8 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 		return nil, fmt.Errorf("failed to create time input: %v", err)
 	}
 
+	timeInput.input.Focus()
+
 	return &closedModel{
 		tuiWindow: tuiWindow{
 			logger: logger,
@@ -65,11 +69,11 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 	}, nil
 }
 
-func (m closedModel) Init() tea.Cmd {
+func (m *closedModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch m.step {
@@ -77,8 +81,6 @@ func (m closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.handleSelectItemInput(msg)
 		case enterTime:
 			return m.handleTimeInput(msg)
-		case confirmClose:
-			return m.handleConfirmInput(msg)
 		}
 
 	case tea.WindowSizeMsg:
@@ -91,42 +93,41 @@ func (m closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func parseTimeInput(input string) (string, error) {
-	if input == "" {
-		// Return current time in the required format
-		return time.Now().Format("02-01-2006"), nil
-	}
+	input = strings.TrimSpace(input)
+	now := time.Now()
 
-	if strings.HasPrefix(input, "+") {
-		// Parse minutes to add
+	switch {
+	case input == "":
+		return now.Format(datetimeFormat), nil
+
+	case strings.HasPrefix(input, "+"):
 		minutesStr := strings.TrimPrefix(input, "+")
 		minutes, err := strconv.Atoi(minutesStr)
 		if err != nil {
 			return "", fmt.Errorf("invalid minutes format: %v", err)
 		}
 
-		// Add minutes to current time
-		futureTime := time.Now().Add(time.Duration(minutes) * time.Minute)
-		return futureTime.Format("02-01-2006"), nil
-	}
+		return now.Add(time.Duration(minutes) * time.Minute).Format(datetimeFormat), nil
 
-	if strings.HasPrefix(input, "-") {
-		// Parse minutes to subtract
+	case strings.HasPrefix(input, "-"):
 		minutesStr := strings.TrimPrefix(input, "-")
 		minutes, err := strconv.Atoi(minutesStr)
 		if err != nil {
 			return "", fmt.Errorf("invalid minutes format: %v", err)
 		}
 
-		// Subtract minutes from current time
-		pastTime := time.Now().Add(-time.Duration(minutes) * time.Minute)
-		return pastTime.Format("02-01-2006"), nil
-	}
+		return now.Add(-time.Duration(minutes) * time.Minute).Format(datetimeFormat), nil
 
-	// For any other input, return as is (will be validated by the database layer)
-	return input, nil
+	default:
+		_, err := time.Parse(datetimeFormat, input)
+		if err != nil {
+			return "", fmt.Errorf("invalid time format: %v", err)
+		}
+		return input, nil
+	}
 }
 
-func (m closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch {
 	case key.Matches(msg, m.keys.Quit):
 		m.logger.LogInfo("Quitting close selection")
@@ -160,66 +161,44 @@ func (m closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) 
 }
 
 // In handleTimeInput method
-func (m closedModel) handleTimeInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *closedModel) handleTimeInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if key.Matches(msg, m.keys.Quit) {
 		m.step = selectItem
 		return m, nil
 	}
 
-	updatedModel := m
-	timeInputModel, cmd := m.timeInput.Update(msg)
-
-	if newTimeInput, ok := timeInputModel.(*inputModel); ok {
-		updatedModel.timeInput = newTimeInput
-
-		if key.Matches(msg, m.keys.Enter) {
-			// Parse and validate the time input
-			parsedTime, err := parseTimeInput(newTimeInput.value)
-			if err != nil {
-				newTimeInput.SetStatus(StatusError, fmt.Sprintf("Invalid time format: %v", err))
-				return updatedModel, cmd
-			}
-
-			// Update the input value with the parsed time
-			newTimeInput.value = parsedTime
-			updatedModel.step = confirmClose
+	if key.Matches(msg, m.keys.Enter) {
+		// Parse and validate the time input
+		parsedTime, err := parseTimeInput(m.timeInput.input.Value())
+		if err != nil {
+			m.timeInput.SetStatus(StatusError, fmt.Sprintf("Invalid time format: %v", err))
+			return m, nil
 		}
-
-		return updatedModel, cmd
+		// Store the final value and quit
+		m.timeInput.value = parsedTime
+		return m, tea.Quit
 	}
 
+	var cmd tea.Cmd
+	m.timeInput.input, cmd = m.timeInput.input.Update(msg) //delegate to underlying text input model
 	return m, cmd
 }
 
-func (m closedModel) handleConfirmInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch {
-	case key.Matches(msg, m.keys.Enter):
-		m.logger.LogInfo("Confirming close of item")
-		return m, tea.Quit
-
-	case key.Matches(msg, m.keys.Quit):
-		m.step = enterTime
-		m.timeInput.value = ""
-		return m, nil
-	}
-
-	return m, nil
-}
-
-func (m closedModel) View() string {
+func (m *closedModel) View() string {
 	switch m.step {
 	case selectItem:
 		return m.viewSelectItem()
 	case enterTime:
-		return m.timeInput.View()
-	case confirmClose:
-		return m.viewConfirm()
+		return fmt.Sprintf(
+			"Enter close time for:\n\n%s",
+			m.timeInput.View(),
+		)
 	default:
 		return "Unknown step"
 	}
 }
 
-func (m closedModel) viewSelectItem() string {
+func (m *closedModel) viewSelectItem() string {
 	var sb strings.Builder
 	sb.WriteString("Select item to close:\n\n")
 
@@ -247,14 +226,5 @@ func (m closedModel) viewSelectItem() string {
 	}
 
 	sb.WriteString("\n\n(↑/↓) navigate • (enter) select • (esc) quit")
-	return sb.String()
-}
-
-func (m closedModel) viewConfirm() string {
-	var sb strings.Builder
-	sb.WriteString("Confirm closing the following item:\n\n")
-	sb.WriteString(fmt.Sprintf("Item: %s\n", m.selected))
-	sb.WriteString(fmt.Sprintf("Close Date: %s\n\n", m.timeInput.value))
-	sb.WriteString("(enter) confirm • (esc) back")
 	return sb.String()
 }

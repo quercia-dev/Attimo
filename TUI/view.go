@@ -214,7 +214,7 @@ func (tui *TUI) handleClose() error {
 		return fmt.Errorf("error running close model: %w", err)
 	}
 
-	if finalModel, ok := finalModel.(closedModel); ok {
+	if finalModel, ok := finalModel.(*closedModel); ok {
 		if finalModel.selected != "" && finalModel.timeInput.value != "" {
 			// Split the pointer to get category and ID
 			parts := strings.Split(finalModel.selected, ":")
