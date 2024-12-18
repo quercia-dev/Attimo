@@ -146,11 +146,33 @@ func (tui *TUI) handleOpen() error {
 	// collect values through user input
 	values := make(map[string]string)
 	for _, column := range columns {
-		value, err := tui.promptForValue(column)
-		if err != nil {
-			tui.logger.LogErr("Could not get value for column %s: %v", column, err)
+		var value string
+		if column == "Opened" {
+			// Use TimeHandler for "Opened" column
+			timeHandler, err := NewTimeHandler("Enter open time:", tui.logger)
+			if err != nil {
+				tui.logger.LogErr("Could not create time handler: %v", err)
+				return err
+			}
+
+			p := tea.NewProgram(timeHandler)
+			result, err := p.Run()
+			if err != nil {
+				return fmt.Errorf("failed to run time handler: %w", err)
+			}
+
+			if th, ok := result.(*TimeHandler); ok {
+				value = th.GetValue()
+			}
+		} else {
+			// Handle other columns as before
+			value, err = tui.promptForValue(column)
+			if err != nil {
+				tui.logger.LogErr("Could not get value for column %s: %v", column, err)
+			}
 		}
-		if value != "" { // only include non-empty values CHECK IF THIS IS NEEDED!!!
+
+		if value != "" {
 			values[column] = value
 		}
 	}
@@ -215,7 +237,7 @@ func (tui *TUI) handleClose() error {
 	}
 
 	if finalModel, ok := finalModel.(*closedModel); ok {
-		if finalModel.selected != "" && finalModel.timeInput.value != "" {
+		if finalModel.selected != "" && finalModel.timeHandler.value != "" {
 			// Split the pointer to get category and ID
 			parts := strings.Split(finalModel.selected, ":")
 			if len(parts) != 2 {
@@ -229,7 +251,7 @@ func (tui *TUI) handleClose() error {
 				return fmt.Errorf("invalid item ID: %s", itemIDstring)
 			}
 
-			err = tui.control.CloseItem(tui.logger, category, itemID, finalModel.timeInput.value)
+			err = tui.control.CloseItem(tui.logger, category, itemID, finalModel.timeHandler.value)
 			if err != nil {
 				tui.logger.LogErr("Failed to close item: %v", err)
 				return fmt.Errorf("failed to close item: %w", err)

@@ -2,9 +2,7 @@ package tui
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
-	"time"
 
 	ctrl "Attimo/control"
 	log "Attimo/logging"
@@ -16,13 +14,13 @@ import (
 type closedModel struct {
 	tuiWindow
 
-	keys       selectionKeyMap
-	pointers   []string
-	cursor     int
-	startIndex int
-	selected   string
-	step       closedStep
-	timeInput  *inputModel
+	keys        selectionKeyMap
+	pointers    []string
+	cursor      int
+	startIndex  int
+	selected    string
+	step        closedStep
+	timeHandler *TimeHandler
 }
 
 type closedStep int
@@ -30,10 +28,6 @@ type closedStep int
 const (
 	selectItem closedStep = iota
 	enterTime
-)
-
-const (
-	datetimeFormat = "2006-01-02 15:04:05"
 )
 
 func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel, error) {
@@ -51,21 +45,19 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 		return nil, fmt.Errorf("no pending items to close")
 	}
 
-	timeInput, err := newInputModel("Enter close time:", logger)
+	timeHandler, err := NewTimeHandler("Enter close time:", logger)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create time input: %v", err)
+		return nil, fmt.Errorf("failed to create time handler: %v", err)
 	}
-
-	timeInput.input.Focus()
 
 	return &closedModel{
 		tuiWindow: tuiWindow{
 			logger: logger,
 		},
-		keys:      newSelectionKeyMap(),
-		pointers:  pointers,
-		step:      selectItem,
-		timeInput: timeInput,
+		keys:        newSelectionKeyMap(),
+		pointers:    pointers,
+		step:        selectItem,
+		timeHandler: timeHandler,
 	}, nil
 }
 
@@ -82,7 +74,6 @@ func (m *closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case enterTime:
 			return m.handleTimeInput(msg)
 		}
-
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
@@ -90,41 +81,6 @@ func (m *closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
-}
-
-func parseTimeInput(input string) (string, error) {
-	input = strings.TrimSpace(input)
-	now := time.Now()
-
-	switch {
-	case input == "":
-		return now.Format(datetimeFormat), nil
-
-	case strings.HasPrefix(input, "+"):
-		minutesStr := strings.TrimPrefix(input, "+")
-		minutes, err := strconv.Atoi(minutesStr)
-		if err != nil {
-			return "", fmt.Errorf("invalid minutes format: %v", err)
-		}
-
-		return now.Add(time.Duration(minutes) * time.Minute).Format(datetimeFormat), nil
-
-	case strings.HasPrefix(input, "-"):
-		minutesStr := strings.TrimPrefix(input, "-")
-		minutes, err := strconv.Atoi(minutesStr)
-		if err != nil {
-			return "", fmt.Errorf("invalid minutes format: %v", err)
-		}
-
-		return now.Add(-time.Duration(minutes) * time.Minute).Format(datetimeFormat), nil
-
-	default:
-		_, err := time.Parse(datetimeFormat, input)
-		if err != nil {
-			return "", fmt.Errorf("invalid time format: %v", err)
-		}
-		return input, nil
-	}
 }
 
 func (m *closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
@@ -160,27 +116,11 @@ func (m *closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd)
 	return m, nil
 }
 
-// In handleTimeInput method
 func (m *closedModel) handleTimeInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	if key.Matches(msg, m.keys.Quit) {
-		m.step = selectItem
-		return m, nil
+	model, cmd := m.timeHandler.Update(msg)
+	if timeHandler, ok := model.(*TimeHandler); ok {
+		m.timeHandler = timeHandler
 	}
-
-	if key.Matches(msg, m.keys.Enter) {
-		// Parse and validate the time input
-		parsedTime, err := parseTimeInput(m.timeInput.input.Value())
-		if err != nil {
-			m.timeInput.SetStatus(StatusError, fmt.Sprintf("Invalid time format: %v", err))
-			return m, nil
-		}
-		// Store the final value and quit
-		m.timeInput.value = parsedTime
-		return m, tea.Quit
-	}
-
-	var cmd tea.Cmd
-	m.timeInput.input, cmd = m.timeInput.input.Update(msg) //delegate to underlying text input model
 	return m, cmd
 }
 
@@ -191,7 +131,7 @@ func (m *closedModel) View() string {
 	case enterTime:
 		return fmt.Sprintf(
 			"Enter close time for:\n\n%s",
-			m.timeInput.View(),
+			m.timeHandler.View(),
 		)
 	default:
 		return "Unknown step"
