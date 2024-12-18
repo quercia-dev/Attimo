@@ -112,6 +112,7 @@ func getDefaultDatatypes() []Datatype {
 // getDefaultCategories returns the default category configurations
 func getDefaultCategories() []CategoryTemplate {
 	return []CategoryTemplate{
+		{Name: "TEST", ColumnsID: []int{1, 2, 13, 17}},           // Opened, Closed, File, Progress
 		{Name: "General", ColumnsID: []int{1, 2, 3, 4, 6, 13}},   // Opened, Closed, Note, Project, Location, File
 		{Name: "Contact", ColumnsID: []int{1, 2, 3, 11, 12, 13}}, // Opened, Closed, Note, Email, Phone, File
 		{Name: "Financial", ColumnsID: []int{1, 2, 3, 6, 8}},     // Opened, Closed, Note, Location, Cost_EUR

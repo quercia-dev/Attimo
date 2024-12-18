@@ -8,19 +8,25 @@ import (
 	log "Attimo/logging"
 
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type closedModel struct {
 	tuiWindow
 
-	keys        selectionKeyMap
-	pointers    []string
-	cursor      int
-	startIndex  int
-	selected    string
-	step        closedStep
-	timeHandler *TimeHandler
+	keys          selectionKeyMap
+	pointers      []string
+	cursor        int
+	startIndex    int
+	selected      string
+	step          closedStep
+	timeHandler   *TimeHandler
+	closeColumns  []string
+	currentColumn int
+	closeValues   map[string]string
+	input         *inputModel
+	control       *ctrl.Controller
 }
 
 type closedStep int
@@ -28,6 +34,7 @@ type closedStep int
 const (
 	selectItem closedStep = iota
 	enterTime
+	completeRow
 )
 
 func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel, error) {
@@ -58,6 +65,8 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 		pointers:    pointers,
 		step:        selectItem,
 		timeHandler: timeHandler,
+		closeValues: make(map[string]string),
+		control:     control,
 	}, nil
 }
 
@@ -66,6 +75,15 @@ func (m *closedModel) Init() tea.Cmd {
 }
 
 func (m *closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	if m.step == completeRow && m.input != nil {
+		var model tea.Model
+		model, cmd = m.input.Update(msg)
+		if im, ok := model.(*inputModel); ok {
+			m.input = im
+		}
+		return m, cmd
+	}
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch m.step {
@@ -73,6 +91,8 @@ func (m *closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.handleSelectItemInput(msg)
 		case enterTime:
 			return m.handleTimeInput(msg)
+		case completeRow:
+			return m.handleCompleteRowInput(msg)
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -117,9 +137,84 @@ func (m *closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd)
 }
 
 func (m *closedModel) handleTimeInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if key.Matches(msg, m.keys.Quit) {
+		m.step = selectItem
+		return m, nil
+	}
+
+	if key.Matches(msg, m.keys.Enter) {
+		parts := strings.Split(m.selected, ":")
+		if len(parts) != 2 {
+			return m, tea.Quit
+		}
+
+		category := parts[0]
+
+		condition := &ctrl.ColumnCondition{
+			ExcludeColumn: []string{"Closed"},
+			FillBehavior:  "close",
+		}
+
+		closeColumns, err := m.control.GetCategoryColumns(m.logger, category, condition)
+		if err != nil {
+			m.logger.LogErr("Could not get columns: %v", err)
+			return m, tea.Quit
+		}
+
+		if len(closeColumns) > 0 {
+			m.closeColumns = closeColumns
+			m.currentColumn = 0
+			// input model for columns
+			input, err := newInputModel(fmt.Sprintf("Enter value for %s:", closeColumns[0]), m.logger)
+			if err != nil {
+				m.logger.LogErr("Could not create input model: %v", err)
+				return m, tea.Quit
+			}
+			m.input = input
+			m.input.input.Focus()
+			m.step = completeRow
+			cmd := m.input.Init()
+			return m, tea.Batch(textinput.Blink, cmd)
+		}
+		return m, tea.Quit
+	}
 	model, cmd := m.timeHandler.Update(msg)
 	if timeHandler, ok := model.(*TimeHandler); ok {
 		m.timeHandler = timeHandler
+	}
+	return m, cmd
+}
+
+func (m *closedModel) handleCompleteRowInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch {
+	case key.Matches(msg, m.keys.Quit):
+		m.step = enterTime
+		return m, nil
+	case key.Matches(msg, m.keys.Enter):
+		// Store the current value
+		m.closeValues[m.closeColumns[m.currentColumn]] = m.input.value
+
+		// Move to next column or finish
+		m.currentColumn++
+		if m.currentColumn >= len(m.closeColumns) {
+			return m, tea.Quit
+		}
+
+		// Create input for next column
+		var err error
+		m.input, err = newInputModel(fmt.Sprintf("Enter value for %s:", m.closeColumns[m.currentColumn]), m.logger)
+		if err != nil {
+			m.logger.LogErr("Could not create input model: %v", err)
+			return m, tea.Quit
+		}
+		m.input.input.Focus()
+		return m, tea.Batch(textinput.Blink)
+	}
+
+	// Handle regular input updates with proper type assertion
+	model, cmd := m.input.Update(msg)
+	if inputModel, ok := model.(*inputModel); ok {
+		m.input = inputModel
 	}
 	return m, cmd
 }
@@ -133,6 +228,16 @@ func (m *closedModel) View() string {
 			"Enter close time for:\n\n%s",
 			m.timeHandler.View(),
 		)
+	case completeRow:
+		if len(m.closeColumns) > 0 {
+			return fmt.Sprintf(
+				"Completing close fields (%d/%d):\n\n%s",
+				m.currentColumn+1,
+				len(m.closeColumns),
+				m.input.View(),
+			)
+		}
+		return "No additional fields to complete"
 	default:
 		return "Unknown step"
 	}
