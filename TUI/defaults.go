@@ -27,7 +27,7 @@ type tuiWindow struct {
 
 	width  int
 	height int
-
+	// stores the current state of the TUI
 	selected interface{}
 }
 

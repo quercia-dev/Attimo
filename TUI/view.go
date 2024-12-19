@@ -67,6 +67,8 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 			err = tui.handleOpen()
 		case 1: // CLOSE
 			err = tui.handleClose()
+		case 3: // EDIT
+			err = tui.handleEdit()
 		default:
 			tui.logger.LogWarn("Unexpected selection %v", newModel.selected)
 		}
@@ -125,7 +127,6 @@ func (tui *TUI) selectCategory() (string, error) {
 }
 
 func (tui *TUI) handleOpen() error {
-	// Get and validate category selection
 	category, err := tui.selectCategory()
 	if err != nil {
 		tui.logger.LogErr("Could not get category: %v", err)
@@ -193,18 +194,7 @@ func (tui *TUI) handleClose() error {
 	// Create and run the close model
 	model, err := newClosedModel(tui.logger, tui.control)
 	if err != nil {
-		if err.Error() == "no pending items to close" {
-			// Show message to user that there are no pending items
-			msgModel, err := newInputModel("No pending items to close. Press enter to continue.", tui.logger)
-			if err != nil {
-				return err
-			}
-			p := tea.NewProgram(msgModel)
-			if _, err := p.Run(); err != nil {
-				return err
-			}
-			return nil
-		}
+		communicateError(tui.logger, fmt.Sprintf("Could not create close model: %v", err))
 		return err
 	}
 
@@ -239,6 +229,39 @@ func (tui *TUI) handleClose() error {
 		}
 	} else {
 		return fmt.Errorf("unexpected model return type")
+	}
+
+	return nil
+}
+
+func (tui *TUI) handleEdit() error {
+	category, err := tui.selectCategory()
+	if err != nil {
+		tui.logger.LogErr("Could not get category: %v", err)
+		return err
+	}
+
+	cols, rows, err := tui.control.GetData(tui.logger, category)
+	if err != nil {
+		tui.logger.LogErr("Could not get category data: %v", err)
+		return err
+	}
+
+	model, err := newTableModel(tui.logger, cols, rows)
+	if err != nil {
+		tui.logger.LogErr("Could not get table model: %v", err)
+		return err
+	}
+
+	p := tea.NewProgram(model)
+	finalModel, err := p.Run()
+	if err != nil {
+		return fmt.Errorf("error running close model: %w", err)
+	}
+
+	if finalModel, ok := finalModel.(tableModel); ok {
+		communicateError(tui.logger, fmt.Sprintf("Selected row: %v", finalModel.cursor))
+		tui.logger.LogInfo("Selected row: %v", finalModel.cursor)
 	}
 
 	return nil

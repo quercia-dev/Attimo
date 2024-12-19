@@ -260,3 +260,29 @@ func (c *Controller) CloseItem(logger *log.Logger, category string, itemID int, 
 func (c *Controller) GetPendingPointers(logger *log.Logger) ([]string, error) {
 	return c.data.GetPendingPointers()
 }
+
+func (c *Controller) GetData(logger *log.Logger, category string) ([]string, []map[string]string, error) {
+	cols := []string{"id", "name", "date", "column"}
+	data := []map[string]string{
+		{
+			"id":     "12345",
+			"name":   "Alice",
+			"date":   "2024-12-16",
+			"column": "value1",
+		},
+		{
+			"id":     "12346",
+			"name":   "Bob",
+			"date":   "2024-12-17",
+			"column": "value2",
+		},
+		{
+			"id":     "12347",
+			"name":   "Charlie",
+			"date":   "2024-12-18",
+			"column": "value3",
+		},
+	}
+
+	return cols, data, nil
+}

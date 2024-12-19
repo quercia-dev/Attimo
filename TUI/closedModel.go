@@ -10,6 +10,7 @@ import (
 	log "Attimo/logging"
 
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -30,10 +31,10 @@ type closedStep int
 const (
 	selectItem closedStep = iota
 	enterTime
-)
+	confirmClose
 
-const (
-	datetimeFormat = "2006-01-02 15:04:05"
+	datetimeFormat       = "2006-01-02 15:04:05"
+	NoPendingErrorString = "no pending items to close"
 )
 
 func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel, error) {
@@ -48,7 +49,7 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 	}
 
 	if len(pointers) == 0 {
-		return nil, fmt.Errorf("no pending items to close")
+		return nil, fmt.Errorf(NoPendingErrorString)
 	}
 
 	timeInput, err := newInputModel("Enter close time:", logger)
@@ -69,8 +70,8 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 	}, nil
 }
 
-func (m *closedModel) Init() tea.Cmd {
-	return nil
+func (m closedModel) Init() tea.Cmd {
+	return tea.Batch(tea.ClearScreen, textinput.Blink)
 }
 
 func (m *closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
