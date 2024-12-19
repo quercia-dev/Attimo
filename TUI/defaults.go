@@ -31,33 +31,42 @@ type tuiWindow struct {
 	selected interface{}
 }
 
-type keyMap struct {
+type basicKeyMap struct {
 	// HardQuit is the key binding for quitting the program.
 	// Is is a subset of the Quit key binding.
 	// It is used for when the user is in a state where they need
 	// to use the Quit key binding.
 	HardQuit key.Binding
-	// Quit is the key binding for quitting the program.
-	// Bound to a greater number of keys to make it easier to quit.
-	Quit key.Binding
-	Help key.Binding
+	Help     key.Binding
 }
 
-func NewKeyMap() keyMap {
-	return keyMap{
+func NewBasicKeyMap() basicKeyMap {
+	return basicKeyMap{
 		HardQuit: key.NewBinding(
 			key.WithKeys(hardQuitKey),
 			key.WithHelp(hardQuitKey, "quit"),
 		),
 
-		Quit: key.NewBinding(
-			key.WithKeys("q", "esc", hardQuitKey),
-			key.WithHelp("q/esc", "quit"),
-		),
-
 		Help: key.NewBinding(
 			key.WithKeys("ctrl+h"),
 			key.WithHelp("ctrl+h", "help"),
+		),
+	}
+}
+
+type keyMap struct {
+	basicKeyMap
+	// Quit is the key binding for quitting the program.
+	// Bound to a greater number of keys to make it easier to quit.
+	Quit key.Binding
+}
+
+func NewKeyMap() keyMap {
+	return keyMap{
+		basicKeyMap: NewBasicKeyMap(),
+		Quit: key.NewBinding(
+			key.WithKeys("q", "esc", hardQuitKey),
+			key.WithHelp("q/esc", "quit"),
 		),
 	}
 }

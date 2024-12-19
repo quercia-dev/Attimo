@@ -71,7 +71,7 @@ func (m inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.keys.Quit):
+		case key.Matches(msg, m.keys.HardQuit):
 			m.logger.LogInfo("Quitting input")
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.Enter):

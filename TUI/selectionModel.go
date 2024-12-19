@@ -19,7 +19,7 @@ const (
 )
 
 type selectionKeyMap struct {
-	keyMap
+	basicKeyMap
 	Enter key.Binding
 	Up    key.Binding
 	Down  key.Binding
@@ -27,7 +27,7 @@ type selectionKeyMap struct {
 
 func newSelectionKeyMap() selectionKeyMap {
 	return selectionKeyMap{
-		keyMap: NewKeyMap(),
+		basicKeyMap: NewBasicKeyMap(),
 
 		Enter: key.NewBinding(
 			key.WithKeys("enter"),
@@ -45,9 +45,14 @@ func newSelectionKeyMap() selectionKeyMap {
 		),
 	}
 }
+
+func (k selectionKeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.HardQuit, k.Help}
+}
+
 func (k selectionKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Quit, k.HardQuit, k.Help},
+		{k.HardQuit, k.Help},
 		{k.Enter, k.Up, k.Down},
 	}
 }
@@ -128,7 +133,7 @@ func (m selectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.keys.Quit):
+		case key.Matches(msg, m.keys.HardQuit):
 			m.logger.LogInfo("Quitting TUI")
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.Enter):

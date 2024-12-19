@@ -130,7 +130,7 @@ func parseTimeInput(input string) (string, error) {
 
 func (m *closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch {
-	case key.Matches(msg, m.keys.Quit):
+	case key.Matches(msg, m.keys.HardQuit):
 		m.logger.LogInfo("Quitting close selection")
 		return m, tea.Quit
 
@@ -163,7 +163,7 @@ func (m *closedModel) handleSelectItemInput(msg tea.KeyMsg) (tea.Model, tea.Cmd)
 
 // In handleTimeInput method
 func (m *closedModel) handleTimeInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	if key.Matches(msg, m.keys.Quit) {
+	if key.Matches(msg, m.keys.HardQuit) {
 		m.step = selectItem
 		return m, nil
 	}
