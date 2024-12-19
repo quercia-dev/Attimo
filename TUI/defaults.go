@@ -3,6 +3,7 @@ package tui
 import (
 	log "Attimo/logging"
 	"math"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -172,4 +173,33 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// wrapString wraps a string to a given width
+// word wrapping is supported
+func wrapString(s string, width int) string {
+	if width <= 0 {
+		return s
+	}
+
+	var result string
+	var line string
+
+	for _, word := range strings.Fields(s) {
+		if len(line)+len(word)+1 > width {
+			result += line + "\n"
+			line = word
+		} else {
+			if len(line) > 0 {
+				line += " "
+			}
+			line += word
+		}
+	}
+
+	if len(line) > 0 {
+		result += line
+	}
+
+	return result
 }

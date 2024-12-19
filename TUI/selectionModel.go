@@ -238,10 +238,11 @@ func (m selectionModel) View() string {
 	} else {
 		view = view + delimiter
 	}
+	wrappedPrompt := wrapString(m.prompt, m.width)
 
 	return fmt.Sprintf(
 		"%s\n\n%s\n\n%s\n%s",
-		m.prompt,
+		wrappedPrompt,
 		m.userInput.View(),
 		style.Render(view),
 		m.help.View(m.keys),
