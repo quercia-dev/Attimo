@@ -10,6 +10,7 @@ import (
 	log "Attimo/logging"
 
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -67,7 +68,7 @@ func newClosedModel(logger *log.Logger, control *ctrl.Controller) (*closedModel,
 }
 
 func (m closedModel) Init() tea.Cmd {
-	return nil
+	return tea.Batch(tea.ClearScreen, textinput.Blink)
 }
 
 func (m closedModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

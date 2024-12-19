@@ -118,7 +118,7 @@ func (c *Controller) GetPendingPointers(logger *log.Logger) ([]string, error) {
 	return c.data.GetPendingPointers()
 }
 
-func (c *Controller) GetDummyData(logger *log.Logger) ([]string, []map[string]string, error) {
+func (c *Controller) GetData(logger *log.Logger, category string) ([]string, []map[string]string, error) {
 	cols := []string{"id", "name", "date", "column"}
 	data := []map[string]string{
 		{

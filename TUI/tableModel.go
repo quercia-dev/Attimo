@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/table"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -34,8 +35,6 @@ type tableModel struct {
 type tableKeyMap struct {
 	keyMap
 	Enter      key.Binding
-	MoveRight  key.Binding
-	MoveLeft   key.Binding
 	MoveUp     key.Binding
 	MoveDown   key.Binding
 	PageUp     key.Binding
@@ -50,8 +49,9 @@ func (k tableKeyMap) ShortHelp() []key.Binding {
 
 func (k tableKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Quit, k.HardQuit, k.Help},
-		{k.Enter, k.MoveRight, k.MoveLeft, k.MoveUp, k.MoveDown},
+		{k.Quit, k.HardQuit, k.Help, k.Enter},
+		{k.MoveUp, k.MoveDown, k.PageUp, k.PageDown},
+		{k.GotoTop, k.GotoBottom},
 	}
 }
 
@@ -68,15 +68,6 @@ func newTableKeyMap() tableKeyMap {
 		Enter: key.NewBinding(
 			key.WithKeys("enter", " "),
 			key.WithHelp("⏎/' '", "confirm"),
-		),
-
-		MoveRight: key.NewBinding(
-			key.WithKeys("l", "right"),
-			key.WithHelp("→/l", "move right"),
-		),
-		MoveLeft: key.NewBinding(
-			key.WithKeys("h", "left"),
-			key.WithHelp("←/h", "move left"),
 		),
 		MoveUp: key.NewBinding(
 			key.WithKeys("k", "up"),
@@ -110,8 +101,7 @@ func arrayToCols(cols []string) []table.Column {
 	for i, col := range cols {
 		columns[i] = table.Column{
 			Title: col,
-			// TODO make this dynamic
-			Width: 20,
+			Width: max(10, runewidth.StringWidth(col)+2),
 		}
 	}
 	return columns
@@ -164,15 +154,11 @@ func newTableModel(logger *log.Logger, cols []string, row []map[string]string) (
 		viewport: viewport.New(0, 20),
 		styles:   s,
 	}
-
-	m.viewport.Height = 20 - lipgloss.Height(m.headersView())
-	m.UpdateViewport()
-
 	return m, nil
 }
 
 func (m tableModel) Init() tea.Cmd {
-	return nil
+	return tea.Batch(tea.ClearScreen, textinput.Blink)
 }
 
 // Update is the Bubble Tea update loop.
@@ -194,10 +180,6 @@ func (m tableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.MoveUp(1)
 		case key.Matches(msg, m.keys.MoveDown):
 			m.MoveDown(1)
-		case key.Matches(msg, m.keys.MoveRight):
-			m.MoveUp(m.viewport.Height)
-		case key.Matches(msg, m.keys.MoveLeft):
-			m.MoveDown(m.viewport.Height)
 		case key.Matches(msg, m.keys.PageUp):
 			m.MoveUp(m.viewport.Height / 2)
 		case key.Matches(msg, m.keys.PageDown):
@@ -207,6 +189,10 @@ func (m tableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.GotoBottom):
 			m.GotoBottom()
 		}
+	case tea.WindowSizeMsg:
+		m.viewport.Width = msg.Width
+		m.viewport.Height = msg.Height - lipgloss.Height(m.headersView()) - lipgloss.Height(m.help.View(m.keys)) - 2
+		m.UpdateViewport()
 	}
 
 	return m, nil

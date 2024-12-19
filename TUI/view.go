@@ -128,7 +128,6 @@ func (tui *TUI) selectCategory() (string, error) {
 }
 
 func (tui *TUI) handleOpen() error {
-	// Get and validate category selection
 	category, err := tui.selectCategory()
 	if err != nil {
 		tui.logger.LogErr("Could not get category: %v", err)
@@ -266,9 +265,13 @@ func (tui *TUI) handleClose() error {
 }
 
 func (tui *TUI) handleEdit() error {
-	// TODO - get the category from the user
+	category, err := tui.selectCategory()
+	if err != nil {
+		tui.logger.LogErr("Could not get category: %v", err)
+		return err
+	}
 
-	cols, rows, err := tui.control.GetDummyData(tui.logger)
+	cols, rows, err := tui.control.GetData(tui.logger, category)
 	if err != nil {
 		tui.logger.LogErr("Could not get category data: %v", err)
 		return err

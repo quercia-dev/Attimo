@@ -55,7 +55,7 @@ func newInputModel(prompt string, logger *log.Logger) (*inputModel, error) {
 }
 
 func (m inputModel) Init() tea.Cmd {
-	return textinput.Blink
+	return tea.Batch(tea.ClearScreen, textinput.Blink)
 }
 
 // SetStatus updates the status message of the input model
