@@ -262,27 +262,26 @@ func (c *Controller) GetPendingPointers(logger *log.Logger) ([]string, error) {
 }
 
 func (c *Controller) GetData(logger *log.Logger, category string) ([]string, []map[string]string, error) {
-	cols := []string{"id", "name", "date", "column"}
-	data := []map[string]string{
-		{
-			"id":     "12345",
-			"name":   "Alice",
-			"date":   "2024-12-16",
-			"column": "value1",
-		},
-		{
-			"id":     "12346",
-			"name":   "Bob",
-			"date":   "2024-12-17",
-			"column": "value2",
-		},
-		{
-			"id":     "12347",
-			"name":   "Charlie",
-			"date":   "2024-12-18",
-			"column": "value3",
-		},
+	if logger == nil {
+		return nil, nil, fmt.Errorf(log.LoggerNilString)
+	}
+	// TODO add loop to get rows further down
+	filters := database.RowData{}
+	rows, _, err := c.data.ListRows(category, filters, 1, 1000)
+	if err != nil {
+		logger.LogErr("Failed to list rows for category %s: %v", category, err)
+		return nil, nil, fmt.Errorf("failed to list rows: %w", err)
 	}
 
-	return cols, data, nil
+	stringRows, err := database.RowDataToString(rows)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to convert rows to string: %w", err)
+	}
+
+	cols, err := c.data.GetCategoryColumns(category)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get columns: %w", err)
+	}
+
+	return cols, stringRows, nil
 }

@@ -74,11 +74,10 @@ func (tui *TUI) Init(control *ctrl.Controller) error {
 		}
 
 		if err != nil {
-			tui.logger.LogErr("Error handling open command: %v", err)
+			tui.logger.LogErr("Error handling %v case : %v", newModel.selected, err)
 			communicateError(tui.logger, fmt.Sprintf("Error handling open command: %v", err))
 		} else {
 			tui.logger.LogInfo("Successfully handled command")
-			communicateError(tui.logger, "Successfully handled command")
 		}
 
 	} else {

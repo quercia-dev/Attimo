@@ -3,6 +3,7 @@ package database
 import (
 	"Attimo/logging"
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -57,3 +58,27 @@ type CategoryTemplate struct {
 }
 
 type RowData map[string]interface{}
+
+func (row RowData) toString() (map[string]string, error) {
+	result := make(map[string]string)
+	for key, value := range row {
+		strValue, ok := value.(string)
+		if !ok {
+			return nil, fmt.Errorf("value of key %s is not a string", key)
+		}
+		result[key] = strValue
+	}
+	return result, nil
+}
+
+func RowDataToString(rows []RowData) ([]map[string]string, error) {
+	result := make([]map[string]string, len(rows))
+	for i, row := range rows {
+		strRow, err := row.toString()
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert row %d to string: %w", i, err)
+		}
+		result[i] = strRow
+	}
+	return result, nil
+}

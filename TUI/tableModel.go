@@ -171,6 +171,7 @@ func (m tableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keys.Quit):
+			m.cursor = -1
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.Enter):
 			return m, tea.Quit
@@ -191,7 +192,7 @@ func (m tableModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.WindowSizeMsg:
 		m.viewport.Width = msg.Width
-		m.viewport.Height = msg.Height - lipgloss.Height(m.headersView()) - lipgloss.Height(m.help.View(m.keys)) - 2
+		m.viewport.Height = msg.Height - lipgloss.Height(m.headersView()) - lipgloss.Height(m.help.View(m.keys)) - 3
 		m.UpdateViewport()
 	}
 
