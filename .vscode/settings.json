@@ -2,6 +2,9 @@
     "cSpell.words": [
         "Attimo",
         "datatypes",
-        "gorm"
+        "gorm",
+        "lipgloss",
+        "textinput",
+        "logsmodel"
     ]
 }

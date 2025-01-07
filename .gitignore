@@ -7,3 +7,6 @@ test/
 
 # Logging
 logs/
+
+# Database itself
+attimo.db

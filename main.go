@@ -2,38 +2,42 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
-	database "Attimo/database"
+	ctrl "Attimo/control"
+	data "Attimo/database"
+	log "Attimo/logging"
+	view "Attimo/tui"
 )
 
 func main() {
 
-	// set up logging
-	dbFolder := filepath.Join(".", "test")
-	dbPath := filepath.Join(dbFolder, "central_storage.db")
+	dbFolder := filepath.Join(".", "db")
+	dbPath := filepath.Join(dbFolder, "attimo.db")
 
-	if _, err := os.Stat(dbFolder); os.IsNotExist(err) {
-		if err := os.Mkdir(dbFolder, os.ModePerm); err != nil {
-			fmt.Printf("Failed to create dir: %v\n", err)
-			return
-		}
-	} else if err != nil {
-		fmt.Printf("Failed to check directory: %v\n", err)
-		return
-	}
-
-	// if file exists, delete it
-	if _, err := os.Stat(dbPath); err == nil {
-		os.Remove(dbPath)
-	}
-
-	db, err := database.SetupDatabase(dbPath)
-
+	// view.GetLogger()
+	logger, err := log.GetTestLogger()
 	if err != nil {
-		fmt.Printf("Error: could not create db object. %v\n", err)
+		fmt.Println("Could not create logger", err)
 		return
 	}
-	defer db.Close()
+
+	view, err := view.New(logger, nil)
+	if err != nil {
+		logger.LogErr("Could not create view %v", err)
+		return
+	}
+
+	data, err := data.SetupDatabase(dbPath, logger)
+	if err != nil {
+		logger.LogErr("Could not create database %v", err)
+		return
+	}
+
+	control, err := ctrl.New(data, logger)
+	if err != nil {
+		logger.LogErr("Could not create controller %v", err)
+		return
+	}
+	view.Init(control)
 }
