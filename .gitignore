@@ -10,3 +10,8 @@ logs/
 
 # Database itself
 attimo.db
+
+# wails ignore
+build/bin
+node_modules
+frontend/dist
