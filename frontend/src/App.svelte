@@ -5,7 +5,7 @@
   import Lists from './components/Lists.svelte';
   import Overview from './components/Overview.svelte';
   import SearchBar from './components/SearchBar.svelte';
-  import Sidebar from './components/Sidebar.svelte';
+  import Sidebar from './components/sidebar.svelte';
 
 </script>
 
