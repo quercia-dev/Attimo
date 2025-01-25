@@ -36,16 +36,13 @@
   }
 
   .container {
+   flex-grow: 1;
    position: relative;
    display: flex;
    flex-direction: column;
    padding: 10px;
    background-color: rgba(240, 240, 240, 0.5);
-   height: 100% - 30px;
-   margin-left: 10px;
-   margin-top: 10px;
-   margin-bottom: 10px;
-   border-radius: 5px;
+   align-self: stretch;
  }
  
 
