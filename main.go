@@ -49,9 +49,6 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.logger = logger
 
-	// TODO Initialize view
-	// here
-
 	// Initialize database
 	database, err := data.SetupDatabase(dbPath, logger)
 	if err != nil {
@@ -69,9 +66,6 @@ func (a *App) startup(ctx context.Context) {
 		return
 	}
 	a.control = controller
-
-	// TODO Initialize view with controller
-	// here
 }
 
 // Greet returns a greeting for the given name
@@ -83,9 +77,13 @@ func main() {
 	app := NewApp()
 
 	err := wails.Run(&options.App{
-		Title:     "Your App",
-		Width:     1024,
-		Height:    768,
+		Title: "Attimo",
+
+		Width:     700,
+		Height:    400,
+		MinWidth:  700,
+		MinHeight: 400,
+
 		OnStartup: app.startup,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
