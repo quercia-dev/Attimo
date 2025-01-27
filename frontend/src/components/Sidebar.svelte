@@ -53,7 +53,7 @@
   }
 
   button:hover {
-      filter: invert(1);
+    background-color: #1b63d8;
   }
 
   img {

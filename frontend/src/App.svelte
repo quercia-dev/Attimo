@@ -43,7 +43,6 @@
    display: flex;
    flex-direction: column;
    padding: 10px;
-   background-color: rgba(240, 240, 240, 0.5);
    align-self: stretch;
  }
  
