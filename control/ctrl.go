@@ -260,3 +260,45 @@ func (c *Controller) CloseItem(logger *log.Logger, category string, itemID int, 
 func (c *Controller) GetPendingPointers(logger *log.Logger) ([]string, error) {
 	return c.data.GetPendingPointers()
 }
+
+func (c *Controller) GetData(logger *log.Logger, category string) ([]string, []map[string]string, error) {
+
+	if logger == nil {
+
+		return nil, nil, fmt.Errorf(log.LoggerNilString)
+
+	}
+
+	// TODO add loop to get rows further down
+
+	filters := database.RowData{}
+
+	rows, _, err := c.data.ListRows(category, filters, 1, 1000)
+
+	if err != nil {
+
+		logger.LogErr("Failed to list rows for category %s: %v", category, err)
+
+		return nil, nil, fmt.Errorf("failed to list rows: %w", err)
+
+	}
+
+	stringRows, err := database.RowDataToString(rows)
+
+	if err != nil {
+
+		return nil, nil, fmt.Errorf("failed to convert rows to string: %w", err)
+
+	}
+
+	cols, err := c.data.GetCategoryColumns(category)
+
+	if err != nil {
+
+		return nil, nil, fmt.Errorf("failed to get columns: %w", err)
+
+	}
+
+	return cols, stringRows, nil
+
+}
