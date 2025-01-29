@@ -26,6 +26,10 @@
       <button class="btn" id="thirty-day-button" on:click={greet} title="Entries in the last 30 days">#####</button>     
     </div>
     <Overview />
+    <div class="calendar">
+      <h2>Calendar</h2>
+      <Calendar />
+    </div>
     <Logo />
   </div>  
 
@@ -45,6 +49,13 @@
    padding: 10px;
    align-self: stretch;
  }
+
+  .calendar {
+    height: 400px;
+    width: 100%;
+    overflow-y: auto;
+
+  }
  
 
  
