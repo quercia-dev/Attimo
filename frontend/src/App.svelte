@@ -17,14 +17,16 @@
 
 <main>
   <Sidebar />
-  <Logo />
-
+  
   <div class="container">
     <div class="result" id="result">{resultText}</div>
     <div class="input-box" id="input">
       <input autocomplete="off" bind:value={name} class="input" id="name" type="text" placeholder="Table name..."/>
       <button class="btn" id="tot-button" on:click={greet} title="Total Entries">####</button>
-      <button class="btn" id="thirty-day-button" on:click={greet} title="Entries in the last 30 days">#####</button>     </div>
+      <button class="btn" id="thirty-day-button" on:click={greet} title="Entries in the last 30 days">#####</button>     
+    </div>
+    <Overview />
+    <Logo />
   </div>  
 
 </main>
@@ -41,7 +43,6 @@
    display: flex;
    flex-direction: column;
    padding: 10px;
-   background-color: rgba(240, 240, 240, 0.5);
    align-self: stretch;
  }
  
