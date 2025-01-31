@@ -209,26 +209,14 @@ func (d *Database) validateField(tx *sql.Tx, columnName string, validateEmpty bo
 // validateEmpty determines whether empty fields are allowed, true if they are allowed
 func (d *Database) validateInputData(tx *sql.Tx, categoryName string, data RowData, validateEmpty bool) error {
 	// Get column information
-	rows, err := tx.Query(`
-		SELECT name 
-		FROM pragma_table_info(?)
-		WHERE name != 'id' 
-		  AND name != 'created_at' 
-		  AND name != 'updated_at' 
-		  AND name != 'deleted_at'
-	`, categoryName)
+	columns, err := d.GetCategoryColumns(categoryName)
 	if err != nil {
 		return fmt.Errorf("failed to get column info: %w", err)
 	}
-	defer rows.Close()
 
 	// Create a map of valid columns
 	validColumns := make(map[string]bool)
-	for rows.Next() {
-		var colName string
-		if err := rows.Scan(&colName); err != nil {
-			return fmt.Errorf("error scanning column name: %w", err)
-		}
+	for _, colName := range columns {
 		validColumns[colName] = true
 	}
 

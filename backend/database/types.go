@@ -60,33 +60,20 @@ type CategoryTemplate struct {
 type RowData map[string]interface{}
 
 func (row RowData) toString() map[string]string {
-
 	result := make(map[string]string)
 
 	for key, value := range row {
-
 		strValue := fmt.Sprintf("%v", value)
-
 		result[key] = strValue
-
 	}
-
 	return result
-
 }
 
 func RowDataToString(rows []RowData) ([]map[string]string, error) {
-
 	result := make([]map[string]string, len(rows))
 
 	for i, row := range rows {
-
-		strRow := row.toString()
-
-		result[i] = strRow
-
+		result[i] = row.toString()
 	}
-
 	return result, nil
-
 }

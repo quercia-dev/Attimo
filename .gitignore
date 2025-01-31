@@ -5,6 +5,7 @@ Thumbs.db
 # Backend
 backend/test/
 backend/logs/
+backend/db/
 
 # Frontend
 frontend/node_modules/
