@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "flowbite-svelte": "^0.47.4"
-  },
-  "devDependencies": {
-    "@event-calendar/core": "^3.9.0",
-    "@event-calendar/time-grid": "^3.9.0"
-  }
-}
