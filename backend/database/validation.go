@@ -36,66 +36,45 @@ func SplitStringArgument(input string) (string, []string) {
 	return typeName, params
 }
 
+func logValidationFailure(logger *logging.Logger, validationType string, value interface{}, args []string) {
+	logger.LogWarn("%s validation failed for value: %v (args: %v)", validationType, value, args)
+}
+
 // TODO REMOVE LOGGING WHEN OPERATIONS BECOME MORE FREQUENT
 // ValidateCheck performs validation based on the datatype's check rules
 func (dt *Datatype) ValidateCheck(value interface{}, logger *logging.Logger) bool {
 	typeS, args := SplitStringArgument(dt.ValueCheck)
+	var valid bool
 
 	switch typeS {
 	case nonemptyCheck:
-		valid := validateNonempty(value)
-		if !valid {
-			logger.LogWarn("Nonempty validation failed for value: %v", value)
-		}
-		return valid
+		valid = validateNonempty(value)
 	case RangeCheck:
-		valid := validateInRange(value, args)
-		if !valid {
-			logger.LogWarn("Range validation failed for value: %v (args: %v)", value, args)
-		}
-		return valid
+		valid = validateInRange(value, args)
 	case SetCheck:
-		valid := validateInSet(value, args)
-		if !valid {
-			logger.LogWarn("Set validation failed for value: %v (args: %v)", value, args)
-		}
-		return valid
+		valid = validateInSet(value, args)
 	case NoCheck:
-		return true
+		valid = true
 	case URLCheck:
-		valid := validateURL(value)
-		if !valid {
-			logger.LogWarn("URL validation failed for value: %v", value)
-		}
-		return valid
+		valid = validateURL(value)
 	case MailCheck:
-		valid := validateEmail(value)
-		if !valid {
-			logger.LogWarn("Email validation failed for value: %v", value)
-		}
-		return valid
+		valid = validateEmail(value)
 	case PhoneCheck:
-		valid := validatePhone(value)
-		if !valid {
-			logger.LogWarn("Phone validation failed for value: %v", value)
-		}
-		return valid
+		valid = validatePhone(value)
 	case FileCheck:
-		valid := validateFileExists(value)
-		if !valid {
-			logger.LogWarn("File validation failed for value: %v", value)
-		}
-		return valid
+		valid = validateFileExists(value)
 	case DateCheck:
-		valid := validateDate(value)
-		if !valid {
-			logger.LogWarn("Date validation failed for value: %v", value)
-		}
-		return valid
+		valid = validateDate(value)
 	default:
 		logger.LogErr("Unrecognized type: %v", dt.ValueCheck)
 		return false
 	}
+
+	if !valid {
+		logValidationFailure(logger, typeS, value, args)
+	}
+
+	return valid
 }
 
 // Individual validation functions
