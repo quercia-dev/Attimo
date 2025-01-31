@@ -1,17 +1,24 @@
-# Files
+# OS
 .DS_Store
-.vscode
+Thumbs.db
 
-# Testing
-test/
+# Backend
+backend/test/
+backend/logs/
 
-# Logging
-logs/
+# Frontend
+frontend/node_modules/
+frontend/.output/
+frontend/.vercel/
+frontend/.svelte-kit/
+frontend/build/
 
-# Database itself
-attimo.db
+# Env files
+.env
+.env.*
+!.env.example
+!.env.test
 
-# wails ignore
-build/bin
-node_modules
-frontend/dist
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
