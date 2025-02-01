@@ -1,8 +1,7 @@
 <script lang="ts">
 	import '../app.postcss';
 	import { AppRail, AppRailTile, AppRailAnchor } from '@skeletonlabs/skeleton';
-	import { writable } from 'svelte/store';
-
+		
 	let currentTile: number = 0;
 </script>
 
