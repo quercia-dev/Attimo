@@ -2,6 +2,7 @@
 	import { openPath } from '@tauri-apps/plugin-opener';
 	import { AppBar } from '@skeletonlabs/skeleton';
 	import { LightSwitch } from '@skeletonlabs/skeleton';
+	import { showAppRail } from '../stores/appStore';
 
 	let linkElement: HTMLAnchorElement;
 	async function openMailto(mailtoLink: string) {
@@ -13,13 +14,13 @@
 	}
 </script>
 
-<AppBar style="grid-template-columns: 1fr 3fr;">
+<AppBar>
 	<svelte:fragment slot="lead">
 		<button
 			type="button"
-			on:click={() => console.log('click hamburger')}
+			on:click={() => showAppRail.update(value => !value)}
 			aria-label="Open drawer"
-			class="icon-button"
+			class="icon-button hover:bg-primary-400"
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +52,7 @@
       href="mailto:example@example.com"
       target="_blank"
       aria-label="Send email"
-      class="icon-button"
+      class="icon-button hover:bg-primary-400"
       on:click={() => openMailto(linkElement.href)}
     >
       <svg
@@ -75,14 +76,12 @@
 </AppBar>
 
 <style>
-	/* Flex container to place elements side by side */
 	.icon-container {
 	  display: flex;
-	  align-items: center; /* Vertically center the items */
-	  gap: 10px; /* Add space between the elements */
+	  align-items: center; 
+	  gap: 10px;
 	}
   
-	/* Optional: Style the icon button (if necessary) */
 	.icon-button {
 	  display: inline-flex;
 	  align-items: center;

@@ -21,28 +21,28 @@ export const QuercusTheme: CustomThemeConfig = {
 		"--on-error": "var(--color-surface-100)",
 		"--on-surface": "0 0 0",
 		// =~= Theme Colors  =~=
-		// primary | #1ea7e1 
-		"--color-primary-50": "221 242 251", // #ddf2fb
-		"--color-primary-100": "210 237 249", // #d2edf9
-		"--color-primary-200": "199 233 248", // #c7e9f8
-		"--color-primary-300": "165 220 243", // #a5dcf3
-		"--color-primary-400": "98 193 234", // #62c1ea
-		"--color-primary-500": "30 167 225", // #1ea7e1
-		"--color-primary-600": "27 150 203", // #1b96cb
-		"--color-primary-700": "23 125 169", // #177da9
-		"--color-primary-800": "18 100 135", // #126487
-		"--color-primary-900": "15 82 110", // #0f526e
-		// secondary | #045f00
-		"--color-secondary-50": "217 231 217", // #d9e7d9
-		"--color-secondary-100": "205 223 204", // #cddfcc
-		"--color-secondary-200": "192 215 191", // #c0d7bf
-		"--color-secondary-300": "155 191 153", // #9bbf99
-		"--color-secondary-400": "79 143 77", // #4f8f4d
-		"--color-secondary-500": "4 95 0", // #045f00
-		"--color-secondary-600": "4 86 0", // #045600
-		"--color-secondary-700": "3 71 0", // #034700
-		"--color-secondary-800": "2 57 0", // #023900
-		"--color-secondary-900": "2 47 0", // #022f00
+		// primary | #045f00 
+		"--color-primary-50": "217 231 217", // #d9e7d9
+		"--color-primary-100": "205 223 204", // #cddfcc
+		"--color-primary-200": "192 215 191", // #c0d7bf
+		"--color-primary-300": "155 191 153", // #9bbf99
+		"--color-primary-400": "79 143 77", // #4f8f4d
+		"--color-primary-500": "4 95 0", // #045f00
+		"--color-primary-600": "4 86 0", // #045600
+		"--color-primary-700": "3 71 0", // #034700
+		"--color-primary-800": "2 57 0", // #023900
+		"--color-primary-900": "2 47 0", // #022f00
+		// secondary | #1ea7e1 
+		"--color-secondary-50": "221 242 251", // #ddf2fb
+		"--color-secondary-100": "210 237 249", // #d2edf9
+		"--color-secondary-200": "199 233 248", // #c7e9f8
+		"--color-secondary-300": "165 220 243", // #a5dcf3
+		"--color-secondary-400": "98 193 234", // #62c1ea
+		"--color-secondary-500": "30 167 225", // #1ea7e1
+		"--color-secondary-600": "27 150 203", // #1b96cb
+		"--color-secondary-700": "23 125 169", // #177da9
+		"--color-secondary-800": "18 100 135", // #126487
+		"--color-secondary-900": "15 82 110", // #0f526e
 		// tertiary | #a9a9a9 
 		"--color-tertiary-50": "242 242 242", // #f2f2f2
 		"--color-tertiary-100": "238 238 238", // #eeeeee
