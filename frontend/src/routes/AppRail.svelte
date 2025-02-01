@@ -7,7 +7,7 @@
 	let currentTile: number = 0;
 </script>
 
-<div transition:fade={{ duration: 300 }} class="app-rail-wrapper">
+<div class="app-rail-wrapper">
 	{#if $showAppRail}
 		<AppRail>
 			<AppRailTile bind:group={currentTile} name="home" value={0} title="home">
