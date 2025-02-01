@@ -2,12 +2,21 @@
 	import '../app.postcss';
 
 	import { AppBar } from '@skeletonlabs/skeleton';
+	import { openPath } from '@tauri-apps/plugin-opener';
 
 	import AppRail from './AppRail.svelte';
-
 	import Home from './Home.svelte';
 
 	let currentTile: number = 0;
+
+	let linkElement: HTMLAnchorElement;
+	async function openMailto(mailtoLink: string) {
+		try {
+			await openPath(mailtoLink);
+		} catch (error) {
+			console.error('Error opening mailto link:', error);
+		}
+	}
 </script>
 
 <div style="display: flex; height: 100vh;">
@@ -42,11 +51,13 @@
 				</button>
 			</svelte:fragment>
 			<svelte:fragment slot="trail">
-				<button
-					type="button"
-					on:click={() => console.log('click hamburger')}
-					aria-label="Open drawer"
+				<a
+					bind:this={linkElement}
+					href="mailto:example@example.com"
+					target="_blank"
+					aria-label="Send email"
 					class="icon-button"
+					on:click={() => openMailto(linkElement.href)}
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -62,7 +73,7 @@
 					>
 						<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
 					</svg>
-				</button>
+				</a>
 			</svelte:fragment>
 		</AppBar>
 
