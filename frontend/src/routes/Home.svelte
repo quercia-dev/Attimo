@@ -21,7 +21,7 @@
 </script>
 
 <main class="bg-surface-500 dark:bg-inherit p-4 space-y-4 flex flex-col flex-1">
-    <div class="bg-surface-300 dark:bg-surface-500 p-4 space-y-2 rounded-md shadow-xl flex-grow">
+    <div class="bg-surface-200 dark:bg-surface-500 p-4 space-y-2 rounded-md shadow-xl flex-grow">
         <h1 class="text-2xl font-bold">Search</h1>
         <input
             id="search"
@@ -46,5 +46,4 @@
         aspect-ratio: 16 / 9;
         overflow: auto;
     }
-    
 </style>
