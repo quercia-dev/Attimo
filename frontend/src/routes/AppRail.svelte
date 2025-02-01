@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '../app.postcss';
 	import { AppRail, AppRailTile, AppRailAnchor } from '@skeletonlabs/skeleton';
-		
+	
 	let currentTile: number = 0;
 </script>
 
