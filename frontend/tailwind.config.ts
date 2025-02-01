@@ -2,9 +2,10 @@ import { join } from 'path'
 import type { Config } from 'tailwindcss'
 import forms from '@tailwindcss/forms';
 import { skeleton } from '@skeletonlabs/tw-plugin'
+import { QuercusTheme } from './src/quercia-theme'
 
 export default {
-	darkMode: 'class',
+	darkMode: 'selector',
 	content: ['./src/**/*.{html,js,svelte,ts}', join(require.resolve('@skeletonlabs/skeleton'), '../**/*.{html,js,svelte,ts}')],
 	theme: {
 		extend: {},
@@ -13,13 +14,12 @@ export default {
 		forms,
 		skeleton({
 			themes: {
-				preset: [
-					{
-						name: 'rocket',
-						enhancements: true,
-					},
+				custom: [
+					QuercusTheme
 				],
+				preset: ['rocket', 'vintage'],
 			},
 		}),
 	],
 } satisfies Config;
+		  

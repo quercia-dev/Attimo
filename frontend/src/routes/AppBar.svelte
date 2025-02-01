@@ -1,9 +1,9 @@
 <script lang="ts">
-    import '../app.postcss';
-    import { openPath } from '@tauri-apps/plugin-opener';
+	import { openPath } from '@tauri-apps/plugin-opener';
 	import { AppBar } from '@skeletonlabs/skeleton';
+	import { LightSwitch } from '@skeletonlabs/skeleton';
 
-    let linkElement: HTMLAnchorElement;
+	let linkElement: HTMLAnchorElement;
 	async function openMailto(mailtoLink: string) {
 		try {
 			await openPath(mailtoLink);
@@ -40,28 +40,51 @@
 		</button>
 	</svelte:fragment>
 	<svelte:fragment slot="trail">
-		<a
-			bind:this={linkElement}
-			href="mailto:example@example.com"
-			target="_blank"
-			aria-label="Send email"
-			class="icon-button"
-			on:click={() => openMailto(linkElement.href)}
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="32"
-				height="32"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="3"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class="feather feather-message-square"
-			>
-				<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-			</svg>
-		</a>
-	</svelte:fragment>
+  <!-- Container to hold LightSwitch and the link icon side by side -->
+  <div class="icon-container">
+    <!-- LightSwitch component -->
+    <LightSwitch />
+    
+    <!-- Mail link with icon -->
+    <a
+      bind:this={linkElement}
+      href="mailto:example@example.com"
+      target="_blank"
+      aria-label="Send email"
+      class="icon-button"
+      on:click={() => openMailto(linkElement.href)}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32"
+        height="32"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="feather feather-message-square"
+      >
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+    </a>
+  </div>
+</svelte:fragment>
+
 </AppBar>
+
+<style>
+	/* Flex container to place elements side by side */
+	.icon-container {
+	  display: flex;
+	  align-items: center; /* Vertically center the items */
+	  gap: 10px; /* Add space between the elements */
+	}
+  
+	/* Optional: Style the icon button (if necessary) */
+	.icon-button {
+	  display: inline-flex;
+	  align-items: center;
+	}
+  </style>
