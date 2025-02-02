@@ -2,15 +2,19 @@
 	import '../app.postcss';
 	import { AppRail, AppRailTile, AppRailAnchor } from '@skeletonlabs/skeleton';
 	import { fade, slide } from 'svelte/transition';
-	import { showAppRail } from '../stores/appStore';
+	import { tileState, showAppRail } from '../stores/appStore';
 
 	let currentTile: number = 0;
+
+	function handleTileClick(value: number) {
+		tileState.set(value);
+	}
 </script>
 
 <div class="app-rail-wrapper">
 	{#if $showAppRail}
 		<AppRail>
-			<AppRailTile bind:group={currentTile} name="home" value={0} title="home">
+			<AppRailTile bind:group={currentTile} name="home" value={0} title="home" on:click={() => handleTileClick(0)}>
 				<svelte:fragment slot="lead">
 					<div style="display: flex; justify-content: center;">
 						<svg
@@ -31,7 +35,7 @@
 					</div>
 				</svelte:fragment>
 			</AppRailTile>
-			<AppRailTile bind:group={currentTile} name="calendar" value={1} title="calendar">
+			<AppRailTile bind:group={currentTile} name="calendar" value={1} title="calendar" on:click={() => handleTileClick(1)}>
 				<svelte:fragment slot="lead">
 					<div style="display: flex; justify-content: center;">
 						<svg
@@ -56,7 +60,7 @@
 					</div>
 				</svelte:fragment>
 			</AppRailTile>
-			<AppRailTile bind:group={currentTile} name="open" value={2} title="open">
+			<AppRailTile bind:group={currentTile} name="open" value={2} title="open" on:click={() => handleTileClick(2)}>
 				<svelte:fragment slot="lead">
 					<div style="display: flex; justify-content: center;">
 						<svg
@@ -76,7 +80,7 @@
 					</div>
 				</svelte:fragment>
 			</AppRailTile>
-			<AppRailTile bind:group={currentTile} name="close" value={3} title="close">
+			<AppRailTile bind:group={currentTile} name="close" value={3} title="close" on:click={() => handleTileClick(3)}>
 				<svelte:fragment slot="lead">
 					<div style="display: flex; justify-content: center;">
 						<svg
