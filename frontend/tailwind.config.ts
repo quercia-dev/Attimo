@@ -2,7 +2,7 @@ import { join } from 'path'
 import type { Config } from 'tailwindcss'
 import forms from '@tailwindcss/forms';
 import { skeleton } from '@skeletonlabs/tw-plugin'
-import { QuercusTheme } from './src/quercia-theme'
+import { QuercusTheme } from './src/styles/quercia-theme'
 
 export default {
 	darkMode: 'selector',

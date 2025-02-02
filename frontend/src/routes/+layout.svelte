@@ -5,7 +5,7 @@
 
 	import AppRail from './AppRail.svelte';
 	import AppBar from './AppBar.svelte';
-	import Home from './Home.svelte';
+	import Home from './home/+page.svelte';
 
 	let currentTile: number = 0;
 </script>
