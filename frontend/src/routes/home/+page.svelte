@@ -1,6 +1,6 @@
 <script>
-	let searchQuery = '';
-	let topDivHeight = 150;
+	let searchQuery = $state('');
+	let topDivHeight = $state(150);
 
 	import Calendar from '@event-calendar/core';
 	import TimeGrid from '@event-calendar/time-grid';
@@ -53,7 +53,7 @@
 			type="search"
 			placeholder="dammi un Attimo..."
 			bind:value={searchQuery}
-			on:input={() => console.log(searchQuery)}
+			oninput={() => console.log(searchQuery)}
 			class="mt-1 block w-4/5 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-800"
 		/>
 	</div>
@@ -63,7 +63,7 @@
 		role="slider"
 		tabindex="0"
 		aria-valuenow={topDivHeight}
-		on:mousedown={startResizing}
+		onmousedown={startResizing}
 	></div>
 
 	<div class="bg-white text-gray-900 p-4 rounded-md shadow-xl flex-1 overflow-hidden">
