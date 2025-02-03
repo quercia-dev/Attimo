@@ -15,6 +15,8 @@
   },
   "devDependencies": {
     "@event-calendar/core": "^3.9.0",
+    "@event-calendar/day-grid": "^3.9.0",
+    "@event-calendar/list": "^3.9.0",
     "@event-calendar/time-grid": "^3.9.0",
     "@skeletonlabs/skeleton": "2.11.0",
     "@skeletonlabs/tw-plugin": "0.4.1",
