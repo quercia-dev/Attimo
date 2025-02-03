@@ -5,7 +5,9 @@
 	import AppRail from './AppRail.svelte';
 	import AppBar from './AppBar.svelte';
 	import Home from './home/+page.svelte';
+	import Table from './table/+page.svelte';
 	import Calendar from './calendar/+page.svelte';
+	import SimplePane from '../components/SimplePane.svelte';
 	import { tileState } from '../stores/appStore';
 </script>
 
@@ -23,6 +25,12 @@
 					<Home />
 				{:else if $tileState === 1}
 					<Calendar />
+				{:else if $tileState == 4}
+					<Table />
+				{:else}
+					<SimplePane>
+						<p>Page not found</p>
+					</SimplePane>
 				{/if}
 			</main>
 

@@ -11,6 +11,10 @@
 	}
 </script>
 
+<!--
+	When adding a new element, ensure that the value attribute is set to +1 of the largest number so far,
+	irrespective of where it is placed in the list. This ensures that each element has a unique and sequential value.
+-->
 <div class="app-rail-wrapper">
 	{#if $showAppRail}
 		<AppRail>
@@ -63,6 +67,13 @@
 						</div>
 					
 							{/snippet}
+			</AppRailTile>
+			<AppRailTile bind:group={currentTile} name="data" value={4} title="data" on:click={() => handleTileClick(4)}>
+				<svelte:fragment slot="lead">
+					<div style="display: flex; justify-content: center;">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-list"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+					</div>
+				</svelte:fragment>
 			</AppRailTile>
 			<AppRailTile bind:group={currentTile} name="open" value={2} title="open" on:click={() => handleTileClick(2)}>
 				{#snippet lead()}

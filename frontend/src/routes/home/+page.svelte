@@ -4,6 +4,7 @@
 
 	import Calendar from '@event-calendar/core';
 	import TimeGrid from '@event-calendar/time-grid';
+	import SimplePane from '../../components/SimplePane.svelte';
 
 	let plugins = [TimeGrid];
 	let options = {
@@ -66,11 +67,11 @@
 		onmousedown={startResizing}
 	></div>
 
-	<div class="bg-white text-gray-900 p-4 rounded-md shadow-xl flex-1 overflow-hidden">
+	<SimplePane>
 		<div class="calendar-container h-full w-full">
 			<Calendar {plugins} {options} />
 		</div>
-	</div>
+	</SimplePane>
 </main>
 
 <style>
