@@ -3,6 +3,7 @@ import type { Config } from 'tailwindcss'
 import forms from '@tailwindcss/forms';
 import { skeleton } from '@skeletonlabs/tw-plugin'
 import { QuercusTheme } from './src/styles/quercia-theme'
+import { EarthTheme } from './src/styles/earth-theme'
 
 export default {
 	darkMode: 'selector',
@@ -15,7 +16,7 @@ export default {
 		skeleton({
 			themes: {
 				custom: [
-					QuercusTheme
+					QuercusTheme, EarthTheme
 				],
 				preset: ['rocket', 'vintage'],
 			},
