@@ -42,25 +42,24 @@
 </script>
 
 <main
-	class="bg-surface-500 dark:bg-inherit flex flex-col h-[calc(100vh-8rem)] overflow-hidden"
+	class="flex flex-col h-[calc(100vh-8rem)] overflow-hidden"
 >
 	<div
-		class="bg-surface-200 dark:bg-surface-500 p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
+		class="bg-surface-50 dark:bg-primary-500 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
 		style="height: {topDivHeight}px; min-height: 110px;"
 	>
-		<h1 class="text-2xl font-bold">Search</h1>
 		<input
 			id="search"
 			type="search"
-			placeholder="dammi un Attimo..."
+			placeholder="Dammi un Attimo..."
 			bind:value={searchQuery}
 			oninput={() => console.log(searchQuery)}
-			class="mt-1 block w-4/5 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-gray-800"
+			class="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-surface-50 placeholder:text-surface-500 mt-1 block w-4/5 rounded-md shadow-sm"
 		/>
 	</div>
 
 	<div
-		class="slider bg-inherit flex-shrink-0"
+		class="slider flex-shrink-0"
 		role="slider"
 		tabindex="0"
 		aria-valuenow={topDivHeight}
@@ -73,16 +72,3 @@
 		</div>
 	</SimplePane>
 </main>
-
-<style>
-	.calendar-container {
-		width: 100%;
-		height: 100%;
-		overflow: auto;
-	}
-	.slider {
-		height: 10px;
-		background: transparent;
-		cursor: row-resize;
-	}
-</style>
