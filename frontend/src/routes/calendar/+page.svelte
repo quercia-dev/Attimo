@@ -29,7 +29,7 @@
 </script>
 
 <SimplePane>
-		<div class="calendar-container h-full w-full">
+		<div class="calendar-container">
 			<Calendar {plugins} {options} />
 		</div>
 </SimplePane>
