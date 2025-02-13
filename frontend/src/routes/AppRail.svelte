@@ -17,7 +17,7 @@
 -->
 <div class="app-rail-wrapper ">
 	{#if $showAppRail}
-		<AppRail background="bg-secondary-400 dark:bg-secondary-700">
+		<AppRail background="bg-primary-300 dark:bg-primary-800">
 			<AppRailTile bind:group={currentTile} name="home" value={0} title="home" on:click={() => handleTileClick(0)}>
 				{#snippet lead()}
 							
@@ -118,7 +118,7 @@
 							{/snippet}
 			</AppRailTile>
 			{#snippet trail()}
-			<AppRailTile class="bg-secondary-500 dark:bg-secondary-900" bind:group={currentTile} name="settings" value={5} title="settings" on:click={() => handleTileClick(5)}>					
+			<AppRailTile bind:group={currentTile} name="settings" value={5} title="settings" on:click={() => handleTileClick(5)}>					
 
 						<div style="display: flex; justify-content: center;">
 							<svg

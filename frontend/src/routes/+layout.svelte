@@ -35,7 +35,7 @@
 			</main>
 
 			<footer
-				class="bg-primary-400 dark:bg-primary-800"
+				class="bg-primary-400 dark:bg-primary-900"
 				style="display: flex; justify-content: flex-end; align-items: center;"
 			>
 				<span style="margin-right: 10px;">Quercia development team</span>

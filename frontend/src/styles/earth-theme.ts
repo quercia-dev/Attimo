@@ -15,7 +15,7 @@ export const EarthTheme: CustomThemeConfig = {
 		// =~= Theme On-X Colors =~=
 		"--on-primary": "var(--color-secondary-800)",
 		"--on-secondary": "var(--color-primary-300)",
-		"--on-tertiary": "var(--color-secondary-800)",
+		"--on-tertiary": "var(--color-secondary-700)",
 		"--on-success": "var(--color-secondary-900)",
 		"--on-warning": "var(--color-secondary-700)",
 		"--on-error": "var(--color-secondary-50)",
@@ -32,28 +32,28 @@ export const EarthTheme: CustomThemeConfig = {
 		"--color-primary-700": "98 138 177", // #628ab1
 		"--color-primary-800": "79 110 142", // #4f6e8e
 		"--color-primary-900": "64 90 116", // #405a74
-		// secondary | #3e72f4 
-		"--color-secondary-50": "226 234 253", // #e2eafd
-		"--color-secondary-100": "216 227 253", // #d8e3fd
-		"--color-secondary-200": "207 220 252", // #cfdcfc
-		"--color-secondary-300": "178 199 251", // #b2c7fb
-		"--color-secondary-400": "120 156 247", // #789cf7
-		"--color-secondary-500": "62 114 244", // #3e72f4
-		"--color-secondary-600": "56 103 220", // #3867dc
-		"--color-secondary-700": "47 86 183", // #2f56b7
-		"--color-secondary-800": "37 68 146", // #254492
-		"--color-secondary-900": "30 56 120", // #1e3878
-		// tertiary | #7eb851 
-		"--color-tertiary-50": "236 244 229", // #ecf4e5
-		"--color-tertiary-100": "229 241 220", // #e5f1dc
-		"--color-tertiary-200": "223 237 212", // #dfedd4
-		"--color-tertiary-300": "203 227 185", // #cbe3b9
-		"--color-tertiary-400": "165 205 133", // #a5cd85
-		"--color-tertiary-500": "126 184 81", // #7eb851
-		"--color-tertiary-600": "113 166 73", // #71a649
-		"--color-tertiary-700": "95 138 61", // #5f8a3d
-		"--color-tertiary-800": "76 110 49", // #4c6e31
-		"--color-tertiary-900": "62 90 40", // #3e5a28
+		// secondary | #9d5521 
+		"--color-secondary-50": "240 230 222", // #f0e6de
+		"--color-secondary-100": "235 221 211", // #ebddd3
+		"--color-secondary-200": "231 213 200", // #e7d5c8
+		"--color-secondary-300": "216 187 166", // #d8bba6
+		"--color-secondary-400": "186 136 100", // #ba8864
+		"--color-secondary-500": "157 85 33", // #9d5521
+		"--color-secondary-600": "141 77 30", // #8d4d1e
+		"--color-secondary-700": "118 64 25", // #764019
+		"--color-secondary-800": "94 51 20", // #5e3314
+		"--color-secondary-900": "77 42 16", // #4d2a10
+		// tertiary | #FDDD5E 
+		"--color-tertiary-50": "255 250 231", // #fffae7
+		"--color-tertiary-100": "255 248 223", // #fff8df
+		"--color-tertiary-200": "255 247 215", // #fff7d7
+		"--color-tertiary-300": "254 241 191", // #fef1bf
+		"--color-tertiary-400": "254 231 142", // #fee78e
+		"--color-tertiary-500": "253 221 94", // #FDDD5E
+		"--color-tertiary-600": "228 199 85", // #e4c755
+		"--color-tertiary-700": "190 166 71", // #bea647
+		"--color-tertiary-800": "152 133 56", // #988538
+		"--color-tertiary-900": "124 108 46", // #7c6c2e
 		// success | #88d100 
 		"--color-success-50": "237 248 217", // #edf8d9
 		"--color-success-100": "231 246 204", // #e7f6cc
@@ -87,16 +87,17 @@ export const EarthTheme: CustomThemeConfig = {
 		"--color-error-700": "152 51 51", // #983333
 		"--color-error-800": "121 41 41", // #792929
 		"--color-error-900": "99 33 33", // #632121
-		// surface | #ffc39a 
-		"--color-surface-50": "255 246 240", // #fff6f0
-		"--color-surface-100": "255 243 235", // #fff3eb
-		"--color-surface-200": "255 240 230", // #fff0e6
-		"--color-surface-300": "255 231 215", // #ffe7d7
-		"--color-surface-400": "255 213 184", // #ffd5b8
-		"--color-surface-500": "255 195 154", // #ffc39a
-		"--color-surface-600": "230 176 139", // #e6b08b
-		"--color-surface-700": "191 146 116", // #bf9274
-		"--color-surface-800": "153 117 92", // #99755c
-		"--color-surface-900": "125 96 75", // #7d604b
+		// surface | #b8d6f4 
+		"--color-surface-50": "244 249 253", // #f4f9fd
+		"--color-surface-100": "241 247 253", // #f1f7fd
+		"--color-surface-200": "237 245 252", // #edf5fc
+		"--color-surface-300": "227 239 251", // #e3effb
+		"--color-surface-400": "205 226 247", // #cde2f7
+		"--color-surface-500": "184 214 244", // #b8d6f4
+		"--color-surface-600": "166 193 220", // #a6c1dc
+		"--color-surface-700": "138 161 183", // #8aa1b7
+		"--color-surface-800": "110 128 146", // #6e8092
+		"--color-surface-900": "90 105 120", // #5a6978
+		
 	}
 }

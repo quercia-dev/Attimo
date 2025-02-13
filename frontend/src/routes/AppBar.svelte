@@ -14,7 +14,7 @@
 	}
 </script>
 
-<AppBar background="bg-primary-400 dark:bg-primary-800">
+<AppBar background="bg-primary-400 dark:bg-primary-900">
 	{#snippet lead()}
 	
 			<button
