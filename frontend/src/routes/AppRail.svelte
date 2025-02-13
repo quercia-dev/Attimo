@@ -15,9 +15,9 @@
 	When adding a new element, ensure that the value attribute is set to +1 of the largest number so far,
 	irrespective of where it is placed in the list. This ensures that each element has a unique and sequential value.
 -->
-<div class="app-rail-wrapper">
+<div class="app-rail-wrapper ">
 	{#if $showAppRail}
-		<AppRail>
+		<AppRail background="bg-primary-300 dark:bg-primary-800">
 			<AppRailTile bind:group={currentTile} name="home" value={0} title="home" on:click={() => handleTileClick(0)}>
 				{#snippet lead()}
 							
@@ -118,8 +118,8 @@
 							{/snippet}
 			</AppRailTile>
 			{#snippet trail()}
-					
-					<AppRailAnchor href="/" target="_blank" title="SETTINGS">
+			<AppRailTile bind:group={currentTile} name="settings" value={5} title="settings" on:click={() => handleTileClick(5)}>					
+
 						<div style="display: flex; justify-content: center;">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -137,7 +137,7 @@
 								></path></svg
 							>
 						</div>
-					</AppRailAnchor>
+					</AppRailTile>
 				
 					{/snippet}
 		</AppRail>

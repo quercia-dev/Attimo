@@ -14,14 +14,14 @@
 	}
 </script>
 
-<AppBar background="bg-surface-400 dark:bg-primary-800">
+<AppBar background="bg-primary-400 dark:bg-primary-900">
 	{#snippet lead()}
 	
 			<button
 				type="button"
 				onclick={() => showAppRail.update(value => !value)}
 				aria-label="Open drawer"
-				class="icon-button hover:bg-surface-200 dark:hover:bg-primary-600"
+				class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +55,7 @@
 	      href="mailto:example@example.com"
 	      target="_blank"
 	      aria-label="Send email"
-	      class="icon-button hover:bg-primary-400"
+	      class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
 	      onclick={() => openMailto(linkElement.href)}
 	    >
 	      <svg

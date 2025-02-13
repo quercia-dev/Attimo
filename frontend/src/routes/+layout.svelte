@@ -19,7 +19,7 @@
 
 		<div style="flex: 1; display: flex; flex-direction: column;">
 			<main
-				class="bg-surface-500 dark:bg-inherit p-4 flex flex-col h-[calc(100vh-8rem)] overflow-hidden no-select"
+				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-[calc(100vh-8rem)] overflow-hidden no-select"
 			>
 				{#if $tileState === 0}
 					<Home />
@@ -35,7 +35,7 @@
 			</main>
 
 			<footer
-				class="dark:bg-surface-500"
+				class="bg-primary-400 dark:bg-primary-900"
 				style="display: flex; justify-content: flex-end; align-items: center;"
 			>
 				<span style="margin-right: 10px;">Quercia development team</span>
@@ -49,6 +49,7 @@
 			</footer>
 		</div>
 	</div>
+	<slot />
 </div>
 
 <style>

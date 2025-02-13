@@ -6,6 +6,7 @@
 	import List from '@event-calendar/list';
 	import DayGrid from '@event-calendar/day-grid';
 	import TimeGrid from '@event-calendar/time-grid';
+	import SimplePane from '../../components/SimplePane.svelte';
 
 	let plugins = [TimeGrid, List, DayGrid];
 	let options = {
@@ -27,8 +28,8 @@
 	};
 </script>
 
-<div class="bg-white text-gray-900 p-4 rounded-md shadow-xl flex-1 overflow-auto">
-	<div class="calendar-container h-full w-full">
-		<Calendar {plugins} {options} />
-	</div>
-</div>
+<SimplePane>
+		<div class="calendar-container">
+			<Calendar {plugins} {options} />
+		</div>
+</SimplePane>
