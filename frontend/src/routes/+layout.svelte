@@ -9,6 +9,7 @@
 	import Calendar from './calendar/+page.svelte';
 	import SimplePane from '../components/SimplePane.svelte';
 	import { tileState } from '../stores/appStore';
+	import Dashboard from './dashboard/+page.svelte';
 </script>
 
 <div style="display: flex; flex-direction: column; height: 100vh; no-select">
@@ -27,6 +28,8 @@
 					<Calendar />
 				{:else if $tileState == 4}
 					<Table />
+				{:else if $tileState ==5}
+					<Dashboard />
 				{:else}
 					<SimplePane>
 						<p>Page not found</p>
