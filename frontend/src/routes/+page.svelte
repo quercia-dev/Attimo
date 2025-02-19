@@ -64,7 +64,7 @@
 	</div>
 
 	<div
-		class="slider flex-shrink-0 no-select"
+		class="slider flex-shrink-0"
 		role="slider"
 		tabindex="0"
 		aria-valuenow={topDivHeight}

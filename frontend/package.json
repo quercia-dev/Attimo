@@ -11,6 +11,7 @@
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
     "tauri:dev": "vite dev & tauri dev",
+    "td": "vite dev & tauri dev",
     "tauri:build": "tauri build"
   },
   "devDependencies": {

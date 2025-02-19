@@ -11,7 +11,7 @@
 	import Dashboard from './dashboard/+page.svelte';
 </script>
 
-<div style="display: flex; flex-direction: column; height: 100vh; no-select">
+<div style="no-select display: flex; flex-direction: column; height: 100vh;">
 	<AppBar />
 
 	<div style="display: flex; flex: 1;">
@@ -41,8 +41,3 @@
 	</div>
 </div>
 
-<style>
-	.no-select {
-		user-select: none;
-	}
-</style>
