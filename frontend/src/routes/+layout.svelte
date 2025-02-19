@@ -27,9 +27,17 @@
 					<Calendar />
 				{:else if $tileState == 4}
 					<Table />
-				{:else}
+				{:else if $tileState == 2}
 					<SimplePane>
-						<p>Page not found</p>
+						<p>Open Page not found</p>
+					</SimplePane>
+				{:else if $tileState == 3}
+					<SimplePane>
+						<p>Close not found</p>
+					</SimplePane>
+				{:else if $tileState == 5}
+					<SimplePane>
+						<p>Settings Page not found</p>
 					</SimplePane>
 				{/if}
 			</main>
