@@ -14,7 +14,7 @@
 	}
 </script>
 
-<AppBar background="bg-primary-400 dark:bg-primary-900">
+<AppBar background="bg-primary-400 dark:bg-primary-900" padding="p-2">
 	{#snippet lead()}
 	
 			<button
@@ -23,22 +23,9 @@
 				aria-label="Open drawer"
 				class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
 			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="32"
-					height="32"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="3"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					class="feather feather-menu"
-				>
-					<line x1="3" y1="12" x2="21" y2="12"></line>
-					<line x1="3" y1="6" x2="21" y2="6"></line>
-					<line x1="3" y1="18" x2="21" y2="18"></line>
-				</svg>
+			<svg class="feather">
+				<use href="/icons/feather-sprite.svg#menu" />
+			  </svg>
 			</button>
 		
 	{/snippet}
@@ -58,36 +45,12 @@
 	      class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
 	      onclick={() => openMailto(linkElement.href)}
 	    >
-	      <svg
-	        xmlns="http://www.w3.org/2000/svg"
-	        width="32"
-	        height="32"
-	        viewBox="0 0 24 24"
-	        fill="none"
-	        stroke="currentColor"
-	        stroke-width="3"
-	        stroke-linecap="round"
-	        stroke-linejoin="round"
-	        class="feather feather-message-square"
-	      >
-	        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-	      </svg>
+		<svg class="feather">
+			<use href="/icons/feather-sprite.svg#message-square" />
+		  </svg>
 	    </a>
 	  </div>
 
 	{/snippet}
 
 </AppBar>
-
-<style>
-	.icon-container {
-	  display: flex;
-	  align-items: center; 
-	  gap: 10px;
-	}
-  
-	.icon-button {
-	  display: inline-flex;
-	  align-items: center;
-	}
-  </style>

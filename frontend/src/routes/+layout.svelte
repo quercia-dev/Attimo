@@ -4,11 +4,11 @@
 
 	import AppRail from './AppRail.svelte';
 	import AppBar from './AppBar.svelte';
-	import Home from './home/+page.svelte';
-	import Table from './table/+page.svelte';
+	import Table from './data/+page.svelte';
 	import Calendar from './calendar/+page.svelte';
 	import SimplePane from '../components/SimplePane.svelte';
 	import { tileState } from '../stores/appStore';
+	import Dashboard from './dashboard/+page.svelte';
 </script>
 
 <div style="display: flex; flex-direction: column; height: 100vh; no-select">
@@ -19,19 +19,9 @@
 
 		<div style="flex: 1; display: flex; flex-direction: column;">
 			<main
-				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-[calc(100vh-8rem)] overflow-hidden no-select"
+				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-full overflow-hidden no-select"
 			>
-				{#if $tileState === 0}
-					<Home />
-				{:else if $tileState === 1}
-					<Calendar />
-				{:else if $tileState == 4}
-					<Table />
-				{:else}
-					<SimplePane>
-						<p>Page not found</p>
-					</SimplePane>
-				{/if}
+				<slot />
 			</main>
 
 			<footer
@@ -49,7 +39,6 @@
 			</footer>
 		</div>
 	</div>
-	<slot />
 </div>
 
 <style>
