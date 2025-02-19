@@ -18,7 +18,7 @@
 
 		<div style="flex: 1; display: flex; flex-direction: column;">
 			<main
-				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-[calc(100vh-8rem)] overflow-hidden no-select"
+				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-full overflow-hidden no-select"
 			>
 				<slot />
 			</main>
