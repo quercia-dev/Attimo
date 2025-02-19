@@ -4,8 +4,7 @@
 
 	import AppRail from './AppRail.svelte';
 	import AppBar from './AppBar.svelte';
-	import Home from './home/+page.svelte';
-	import Table from './table/+page.svelte';
+	import Table from './data/+page.svelte';
 	import Calendar from './calendar/+page.svelte';
 	import SimplePane from '../components/SimplePane.svelte';
 	import { tileState } from '../stores/appStore';
@@ -21,25 +20,7 @@
 			<main
 				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-[calc(100vh-8rem)] overflow-hidden no-select"
 			>
-				{#if $tileState === 0}
-					<Home />
-				{:else if $tileState === 1}
-					<Calendar />
-				{:else if $tileState == 4}
-					<Table />
-				{:else if $tileState == 2}
-					<SimplePane>
-						<p>Open Page not found</p>
-					</SimplePane>
-				{:else if $tileState == 3}
-					<SimplePane>
-						<p>Close not found</p>
-					</SimplePane>
-				{:else if $tileState == 5}
-					<SimplePane>
-						<p>Settings Page not found</p>
-					</SimplePane>
-				{/if}
+				<slot />
 			</main>
 
 			<footer
@@ -57,7 +38,6 @@
 			</footer>
 		</div>
 	</div>
-	<slot />
 </div>
 
 <style>

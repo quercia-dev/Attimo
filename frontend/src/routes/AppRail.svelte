@@ -1,14 +1,9 @@
 <script lang="ts">
 	import '../app.postcss';
-	import { AppRail, AppRailTile, AppRailAnchor } from '@skeletonlabs/skeleton';
+	import { AppRail, AppRailAnchor } from '@skeletonlabs/skeleton';
 	import { fade, slide } from 'svelte/transition';
-	import { tileState, showAppRail } from '../stores/appStore';
+	import { showAppRail } from '../stores/appStore';
 
-	let currentTile: number = $state(0);
-
-	function handleTileClick(value: number) {
-		tileState.set(value);
-	}
 </script>
 
 <!--
@@ -18,96 +13,89 @@
 <div class="app-rail-wrapper">
 	{#if $showAppRail}
 		<AppRail background="bg-primary-300 dark:bg-primary-800">
-			<AppRailTile
-				bind:group={currentTile}
-				name="home"
-				value={0}
+			<AppRailAnchor
+				href="/"
 				title="home"
-				on:click={() => handleTileClick(0)}
+				selected={true}
 			>
-				{#snippet lead()}
 					<div style="display: flex; justify-content: center;">
 						<svg class="feather">
 							<use href="/icons/feather-sprite.svg#home" />
 						</svg>
 					</div>
-				{/snippet}
-			</AppRailTile>
-			<AppRailTile
-				bind:group={currentTile}
-				name="calendar"
-				value={1}
+				
+				<span>Home</span>
+			</AppRailAnchor>
+			<AppRailAnchor
+				href="/calendar"
 				title="calendar"
-				on:click={() => handleTileClick(1)}
+				selected={false}
 			>
-				{#snippet lead()}
+				
 					<div style="display: flex; justify-content: center;">
 						<svg class="feather">
 							<use href="/icons/feather-sprite.svg#calendar" />
 						</svg>
 					</div>
-				{/snippet}
-			</AppRailTile>
-			<AppRailTile
-				bind:group={currentTile}
-				name="data"
-				value={4}
+				
+				<span>Calendar</span>
+			</AppRailAnchor>
+			<AppRailAnchor
+				href="/data"
 				title="data"
-				on:click={() => handleTileClick(4)}
+				selected={false}
 			>
-				<svelte:fragment slot="lead">
+				
 					<div style="display: flex; justify-content: center;">
 						<svg class="feather">
 							<use href="/icons/feather-sprite.svg#list" />
 						</svg>
 					</div>
-				</svelte:fragment>
-			</AppRailTile>
-			<AppRailTile
-				bind:group={currentTile}
-				name="open"
-				value={2}
+				
+				<span>Data</span>
+			</AppRailAnchor>
+			<AppRailAnchor
+				href="/open"
 				title="open"
-				on:click={() => handleTileClick(2)}
+				selected={false}
 			>
-				{#snippet lead()}
+				
 					<div style="display: flex; justify-content: center;">
 						<svg class="feather">
 							<use href="/icons/feather-sprite.svg#plus" />
 						</svg>
 					</div>
-				{/snippet}
-			</AppRailTile>
-			<AppRailTile
-				bind:group={currentTile}
-				name="close"
-				value={3}
+				
+				<span>Open</span>
+			</AppRailAnchor>
+			<AppRailAnchor
+				href="/close"
 				title="close"
-				on:click={() => handleTileClick(3)}
+				selected={false}
 			>
-				{#snippet lead()}
+				
 					<div style="display: flex; justify-content: center;">
 						<svg class="feather">
 							<use href="/icons/feather-sprite.svg#minus" />
 						</svg>
 					</div>
-				{/snippet}
-			</AppRailTile>
-			{#snippet trail()}
-				<AppRailTile
-					bind:group={currentTile}
-					name="settings"
-					value={5}
-					title="settings"
-					on:click={() => handleTileClick(5)}
-				>
+					<span>Close</span>
+				</AppRailAnchor>
+			
+			<svelte:fragment slot="trail">
+			<AppRailAnchor
+				href="/settings"
+				title="settings"
+				selected={false}
+			>
 					<div style="display: flex; justify-content: center;">
 						<svg class="feather">
 							<use href="/icons/feather-sprite.svg#settings" />
 						</svg>
 					</div>
-				</AppRailTile>
-			{/snippet}
+					<span>Settings</span>
+				</AppRailAnchor>
+			</svelte:fragment>
 		</AppRail>
 	{/if}
 </div>
