@@ -19,7 +19,7 @@
 
 		<div style="flex: 1; display: flex; flex-direction: column;">
 			<main
-				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-full overflow-hidden no-select"
+				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-[calc(100vh-6rem)] overflow-hidden"
 			>
 				<slot />
 			</main>
@@ -28,7 +28,7 @@
 				class="bg-primary-400 dark:bg-primary-900"
 				style="display: flex; justify-content: flex-end; align-items: center;"
 			>
-				<span style="margin-right: 10px;">Quercia development team</span>
+				<span style="margin-right: 1rem;">Quercia development team</span>
 				<a
 					href="https://github.com/quercia-dev/Attimo"
 					target="_blank"

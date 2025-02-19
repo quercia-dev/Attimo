@@ -1,10 +1,11 @@
 <script>
 	let searchQuery = $state('');
-	let topDivHeight = $state(150);
+	let topDivHeight = $state(400);
 
 	import Calendar from '@event-calendar/core';
 	import TimeGrid from '@event-calendar/time-grid';
 	import SimplePane from '../components/SimplePane.svelte';
+	import QuickTable from './quicktable.svelte'
 
 	let plugins = [TimeGrid];
 	let options = {
@@ -41,9 +42,7 @@
 	}
 </script>
 
-<main
-	class="flex flex-col h-[calc(100vh-8rem)] overflow-hidden"
->
+<main class="flex flex-col overflow-hidden">
 	<div
 		class="bg-surface-50 dark:bg-primary-500 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
 		style="height: {topDivHeight}px; min-height: 110px;"
@@ -56,10 +55,16 @@
 			oninput={() => console.log(searchQuery)}
 			class="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-surface-50 placeholder:text-surface-500 mt-1 block w-4/5 rounded-md shadow-sm"
 		/>
+
+		<div style="height: calc(100% - 2rem); overflow-y: auto;">
+			<QuickTable/>
+		</div>
+
+
 	</div>
 
 	<div
-		class="slider flex-shrink-0"
+		class="slider flex-shrink-0 no-select"
 		role="slider"
 		tabindex="0"
 		aria-valuenow={topDivHeight}
