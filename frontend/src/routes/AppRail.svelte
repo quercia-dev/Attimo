@@ -4,6 +4,8 @@
 	import { page } from '$app/stores';
 	import { fade, slide } from 'svelte/transition';
 	import { showAppRail } from '../stores/appStore';
+
+	$: pane = $page.url.pathname;
 </script>
 
 <!--
@@ -13,7 +15,7 @@
 <div class="app-rail-wrapper">
 	{#if $showAppRail}
 		<AppRail background="bg-primary-300 dark:bg-primary-800">
-			<AppRailAnchor href="/" title="home" selected={$page.url.pathname == '/'}>
+			<AppRailAnchor href="/" title="home" selected={pane == '/'}>
 				<div style="display: flex; justify-content: center;">
 					<svg class="feather">
 						<use href="/icons/feather-sprite.svg#home" />
@@ -22,7 +24,7 @@
 
 				<span>Home</span>
 			</AppRailAnchor>
-			<AppRailAnchor href="/calendar" title="calendar" selected={$page.url.pathname == '/calendar'}>
+			<AppRailAnchor href="/calendar" title="calendar" selected={pane == '/calendar'}>
 				<div style="display: flex; justify-content: center;">
 					<svg class="feather">
 						<use href="/icons/feather-sprite.svg#calendar" />
@@ -31,7 +33,7 @@
 
 				<span>Calendar</span>
 			</AppRailAnchor>
-			<AppRailAnchor href="/data" title="data" selected={$page.url.pathname == '/data'}>
+			<AppRailAnchor href="/data" title="data" selected={pane == '/data'}>
 				<div style="display: flex; justify-content: center;">
 					<svg class="feather">
 						<use href="/icons/feather-sprite.svg#list" />
@@ -40,7 +42,16 @@
 
 				<span>Data</span>
 			</AppRailAnchor>
-			<AppRailAnchor href="/open" title="open" selected={$page.url.pathname == '/open'}>
+			<AppRailAnchor href="/dashboard" title="data" selected={pane == '/dashboard'}>
+				<div style="display: flex; justify-content: center;">
+					<svg class="feather">
+						<use href="/icons/feather-sprite.svg#bar-chart-2" />
+					</svg>
+				</div>
+
+				<span>Dashboard</span>
+			</AppRailAnchor>
+			<AppRailAnchor href="/open" title="open" selected={pane == '/open'}>
 				<div style="display: flex; justify-content: center;">
 					<svg class="feather">
 						<use href="/icons/feather-sprite.svg#plus" />
@@ -49,7 +60,7 @@
 
 				<span>Open</span>
 			</AppRailAnchor>
-			<AppRailAnchor href="/close" title="close" selected={$page.url.pathname == '/close'}>
+			<AppRailAnchor href="/close" title="close" selected={pane == '/close'}>
 				<div style="display: flex; justify-content: center;">
 					<svg class="feather">
 						<use href="/icons/feather-sprite.svg#minus" />

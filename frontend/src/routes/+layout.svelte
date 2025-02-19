@@ -8,6 +8,7 @@
 	import Calendar from './calendar/+page.svelte';
 	import SimplePane from '../components/SimplePane.svelte';
 	import { tileState } from '../stores/appStore';
+	import Dashboard from './dashboard/+page.svelte';
 </script>
 
 <div style="display: flex; flex-direction: column; height: 100vh; no-select">
