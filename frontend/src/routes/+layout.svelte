@@ -9,6 +9,7 @@
 	import Calendar from './calendar/+page.svelte';
 	import SimplePane from '../components/SimplePane.svelte';
 	import { tileState } from '../stores/appStore';
+	import Open from './open/+page.svelte';
 </script>
 
 <div style="display: flex; flex-direction: column; height: 100vh; no-select">
@@ -22,7 +23,7 @@
 				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-[calc(100vh-8rem)] overflow-hidden no-select"
 			>
 				{#if $tileState === 0}
-					<Home />
+					<Open />
 				{:else if $tileState === 1}
 					<Calendar />
 				{:else if $tileState == 4}
