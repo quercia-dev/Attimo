@@ -47,18 +47,21 @@
         </div>
     </div>
 
+    <div class="p-2">
+        <p>This button is here for TESTING purposes- not part of final build</p>
     <!-- Category Selection -->
     <select 
         bind:value={selectedCategory}
-        class="p-2 rounded border dark:bg-gray-700 dark:text-white"
+        class="select w-full max-w-32"
+        size="3"
     >
         {#each $categories as category}
             <option value={category.id}>{category.name}</option>
         {/each}
     </select>
-
+    </div>
     <!-- Dynamic Form -->
-    <div class="space-y-4">
+    <div class="p-4 space-y-4">
         {#each filteredFields as field (field.id)}
             <div class="form-group">
                 <label 
@@ -74,7 +77,7 @@
                 {#if field.type === 'select'}
                     <select
                         id={field.id}
-                        class="w-full p-2 rounded border"
+                        class="select"
                     >
                         <option value="">Select an option</option>
                         {#each field.options || [] as option}
@@ -83,22 +86,23 @@
                     </select>
                 {:else if field.type === 'textarea'}
                     <textarea
+                        class="textarea"
+                        rows="4"
                         id={field.id}
                         placeholder={field.placeholder}
-                        class="w-full p-2 rounded border"
                     ></textarea>
                 {:else if field.type === 'file'}
                     <input
-                        id={field.id}
+                        class="input"
                         type="file"
-                        class="w-full p-2"
+                        id={field.id}
                     />
                 {:else}
                     <input
+                        class="input"
                         id={field.id}
                         type={field.type}
                         placeholder={field.placeholder}
-                        class="w-full p-2 rounded border"
                     />
                 {/if}
             </div>
