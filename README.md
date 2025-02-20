@@ -2,11 +2,14 @@
 
 **Attimo** is a personal productivity app designed to store all your lists and records of activities in a single, easy-to-access place. It helps you track, manage, and connect various aspects of your daily life, providing insights into your habits and time management.
 
-<img src="assets/home-pane.png" alt="Home Pane" width="45%" style="height: auto;">
-<img src="assets/calendar-pane.png" alt="Calendar Pane" width="45%" style="height: auto;">
+<br>
+
+<p float="left" align="center">
+  <img src="assets/home-pane.png" alt="Home Pane" width="47%" align="left"/>
+  <img src="assets/calendar-pane.png" alt="Calendar Pane" width="47%" align="right"/> 
 </p>
 
-You can get a sense of our vision as: combining spreadsheet functionalities, analytics and calendars into one, unified, app.
+<em>You can get a sense of our vision as: combining spreadsheet functionalities, analytics and calendars into one, unified, app.</em>
 
 ## Project mission
 
@@ -36,4 +39,4 @@ The project was born as the replacement for [Tommaso Ferracina](https://github.c
 Studying Mathematics for AI inspired us to experiment with [Quantified Self](https://quantifiedself.com/), which ultimately inspired us to start the project.
 
 ### Active developers
-Attimo is primarily developed by [Tommaso Ferracina](https://github.com/tferracina/) and [Tebe Nigrelli](https://github.com/tebe-nigrelli).
+Attimo is primarily developed by [Tebe Nigrelli](https://github.com/tebe-nigrelli) and [Tommaso Ferracina](https://github.com/tferracina/).
