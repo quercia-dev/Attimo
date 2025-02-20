@@ -42,9 +42,9 @@
 	}
 </script>
 
-<main class="flex flex-col overflow-hidden">
+<main class="no-select flex flex-col overflow-hidden">
 	<div
-		class="bg-surface-50 dark:bg-primary-500 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
+		class="bg-surface-50 dark:bg-primary-700 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
 		style="height: {topDivHeight}px; min-height: 110px;"
 	>
 		<input

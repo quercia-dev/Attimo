@@ -19,7 +19,7 @@
 
 		<div style="flex: 1; display: flex; flex-direction: column;">
 			<main
-				class="bg-surface-600 dark:bg-surface-900 p-4 flex flex-col h-[calc(100vh-6rem)] overflow-hidden"
+				class="bg-primary-500 p-4 flex flex-col h-[calc(100vh-6rem)] overflow-hidden"
 			>
 				<slot />
 			</main>
