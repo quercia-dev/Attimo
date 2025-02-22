@@ -3,6 +3,7 @@
     import { categories, formFields } from "../../stores/formStore";
     import type { FormField } from '../../types/types';
     import SimplePane from "../../components/SimplePane.svelte";
+    import SearchBar from '../../components/SearchBar.svelte';
     
     let searchQuery = '';
     let selectedCategory = "general"; //default
@@ -28,40 +29,22 @@
 </script>
 
 <SimplePane>
-<main class="p-4">
+
     <div class="flex flex-col space-y-4">
-        <!-- Search and Add buttons -->
-        <div class="flex items-center gap-2">
-            <input
-                id="search"
-                type="search"
-                placeholder="Dammi un Attimo..."
-                bind:value={searchQuery}
-                class="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-surface-50 placeholder:text-surface-800 mt-1 block w-4/5 rounded-md shadow-sm"
-            />
+        <div style="display: flex; align-items: center;">
+            <SearchBar bind:value={searchQuery} />
             <button
-            type="button"
-            onclick={() => console.log('search dashboard')}
-            aria-label="Open drawer"
-            class="icon-button hover:bg-surface-400 dark:hover:bg-primary-600"
-        >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="feather feather-plus"
-                    >
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                type="button"
+                onclick={() => console.log('Plus clicked')}
+                aria-label="Open drawer"
+                class="small-icon-button bg-green-300 dark:bg-green-700"
+                style="margin-left: 8px;"
+            >
+                <svg class="feather">
+                    <use href="/icons/feather-sprite.svg#plus" />
                 </svg>
             </button>
-        </div>
+        </div>    
     </div>
 
     <div class="p-2">
@@ -125,5 +108,5 @@
             </div>
         {/each}
     </div>
-</main>
+
 </SimplePane>

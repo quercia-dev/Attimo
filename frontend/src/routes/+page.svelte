@@ -1,10 +1,12 @@
 <script>
 	let searchQuery = $state('');
-	let topDivHeight = $state(150);
+	let topDivHeight = $state(400);
 
 	import Calendar from '@event-calendar/core';
 	import TimeGrid from '@event-calendar/time-grid';
 	import SimplePane from '../components/SimplePane.svelte';
+	import SearchBar from '../components/SearchBar.svelte';
+	import QuickTable from './home/quicktable.svelte'
 
 	let plugins = [TimeGrid];
 	let options = {
@@ -39,23 +41,26 @@
 		window.addEventListener('mousemove', onMouseMove);
 		window.addEventListener('mouseup', onMouseUp);
 	}
+
+	let entriesNumber = 100
 </script>
 
-<main
-	class="flex flex-col h-[calc(100vh-8rem)] overflow-hidden"
->
+<main class="no-select flex flex-col overflow-hidden">
 	<div
-		class="bg-surface-50 dark:bg-primary-500 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
+		class="bg-surface-50 dark:bg-primary-700 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
 		style="height: {topDivHeight}px; min-height: 110px;"
 	>
-		<input
-			id="search"
-			type="search"
-			placeholder="Dammi un Attimo..."
-			bind:value={searchQuery}
-			oninput={() => console.log(searchQuery)}
-			class="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-surface-50 placeholder:text-surface-500 mt-1 block w-4/5 rounded-md shadow-sm"
-		/>
+		<div style="display: flex; align-items: center;">
+			<SearchBar bind:value={searchQuery} />
+			<button type="button" 
+					class="icon-button bg-primary-300 dark:bg-surface-900 ml-4"> 
+				Added {entriesNumber} new entries this week</button>
+		</div>
+			
+		<div style="height: calc(100% - 3rem); overflow: auto;">
+			<QuickTable/>
+		</div>
+
 	</div>
 
 	<div
