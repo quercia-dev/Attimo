@@ -15,7 +15,7 @@
 <div class="app-rail-wrapper">
 	{#if $showAppRail}
 		<AppRail background="bg-primary-300 dark:bg-primary-800">
-			<AppRailAnchor href="/home" title="home" selected={pane == '/home'}>
+			<AppRailAnchor href="/" title="home" selected={pane == '/'}>
 				<div style="display: flex; justify-content: center;">
 					<svg class="feather">
 						<use href="/icons/feather-sprite.svg#home" />

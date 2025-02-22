@@ -4,9 +4,9 @@
 
 	import Calendar from '@event-calendar/core';
 	import TimeGrid from '@event-calendar/time-grid';
-	import SimplePane from '../../components/SimplePane.svelte';
-	import SearchBar from '../../components/SearchBar.svelte';
-	import QuickTable from './quicktable.svelte'
+	import SimplePane from '../components/SimplePane.svelte';
+	import SearchBar from '../components/SearchBar.svelte';
+	import QuickTable from './home/quicktable.svelte'
 
 	let plugins = [TimeGrid];
 	let options = {

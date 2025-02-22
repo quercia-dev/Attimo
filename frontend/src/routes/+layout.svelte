@@ -4,11 +4,6 @@
 
 	import AppRail from './AppRail.svelte';
 	import AppBar from './AppBar.svelte';
-	import Table from './data/+page.svelte';
-	import Calendar from './calendar/+page.svelte';
-	import SimplePane from '../components/SimplePane.svelte';
-	import { tileState } from '../stores/appStore';
-	import Dashboard from './dashboard/+page.svelte';
 </script>
 
 <div style="no-select display: flex; flex-direction: column; height: 100vh;">
@@ -18,9 +13,7 @@
 		<AppRail />
 
 		<div style="flex: 1; display: flex; flex-direction: column;">
-			<main
-				class="bg-primary-500 p-4 flex flex-col h-[calc(100vh-6rem)] overflow-hidden"
-			>
+			<main class="bg-primary-500 p-4 flex flex-col h-[calc(100vh-6rem)] overflow-hidden">
 				<slot />
 			</main>
 
@@ -40,4 +33,3 @@
 		</div>
 	</div>
 </div>
-
