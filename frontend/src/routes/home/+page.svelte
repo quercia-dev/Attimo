@@ -5,6 +5,7 @@
 	import Calendar from '@event-calendar/core';
 	import TimeGrid from '@event-calendar/time-grid';
 	import SimplePane from '../../components/SimplePane.svelte';
+	import SearchBar from '../../components/SearchBar.svelte';
 	import QuickTable from './quicktable.svelte'
 
 	let plugins = [TimeGrid];
@@ -47,14 +48,7 @@
 		class="bg-surface-50 dark:bg-primary-700 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
 		style="height: {topDivHeight}px; min-height: 110px;"
 	>
-		<input
-			id="search"
-			type="search"
-			placeholder="Dammi un Attimo..."
-			bind:value={searchQuery}
-			oninput={() => console.log(searchQuery)}
-			class="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-surface-50 placeholder:text-surface-500 mt-1 block w-4/5 rounded-md shadow-sm"
-		/>
+		<SearchBar bind:value={searchQuery} />
 
 		<div style="height: calc(100% - 3rem); overflow-y: auto;">
 			<QuickTable/>
