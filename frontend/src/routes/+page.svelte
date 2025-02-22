@@ -56,7 +56,7 @@
 			class="bg-surface-100 dark:bg-surface-700 text-surface-900 dark:text-surface-50 placeholder:text-surface-500 mt-1 block w-4/5 rounded-md shadow-sm"
 		/>
 
-		<div style="height: calc(100% - 2rem); overflow-y: auto;">
+		<div style="height: calc(100% - 3rem); overflow-y: auto;">
 			<QuickTable/>
 		</div>
 
