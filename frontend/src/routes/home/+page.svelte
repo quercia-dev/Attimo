@@ -4,7 +4,7 @@
 
 	import Calendar from '@event-calendar/core';
 	import TimeGrid from '@event-calendar/time-grid';
-	import SimplePane from '../components/SimplePane.svelte';
+	import SimplePane from '../../components/SimplePane.svelte';
 	import QuickTable from './quicktable.svelte'
 
 	let plugins = [TimeGrid];

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { TableHandler, Datatable, ThSort, ThFilter } from '@vincjo/datatables';
 	import { writable } from 'svelte/store';
-	import { showAppRail } from '../stores/appStore';
+	import { showAppRail } from '../../stores/appStore';
 
 	const tableArr = [
 		{ id: 1, name: 'Todo', total: 100, continuative: false, ongoing: 70, lastWeek: 50, lastMonth: 80 },
