@@ -16,7 +16,7 @@
 
 <div class="table-container">
 	
-	<table class="table table-hover table-cell-fit">
+	<table class="table table-hover table-cell-fit bg-primary-200">
 		<thead>
 			<tr>
 				<th>Name</th>

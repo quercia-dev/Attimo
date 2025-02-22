@@ -41,6 +41,8 @@
 		window.addEventListener('mousemove', onMouseMove);
 		window.addEventListener('mouseup', onMouseUp);
 	}
+
+	let entriesNumber = 100
 </script>
 
 <main class="no-select flex flex-col overflow-hidden">
@@ -48,12 +50,16 @@
 		class="bg-surface-50 dark:bg-primary-700 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
 		style="height: {topDivHeight}px; min-height: 110px;"
 	>
-		<SearchBar bind:value={searchQuery} />
-
-		<div style="height: calc(100% - 3rem); overflow-y: auto;">
+		<div style="display: flex; align-items: center;">
+			<SearchBar bind:value={searchQuery} />
+			<button type="button" 
+					class="icon-button bg-primary-300 dark:bg-surface-900 ml-4"> 
+				Added {entriesNumber} new entries this week</button>
+		</div>
+			
+		<div style="height: calc(100% - 3rem); overflow: auto;">
 			<QuickTable/>
 		</div>
-
 
 	</div>
 
