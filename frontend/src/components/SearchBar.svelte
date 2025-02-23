@@ -1,6 +1,9 @@
 <script lang="ts">
+	export let value
+	
 	function handleInput(event) {
-		console.log(event.target.value);
+		value = event.target.value;
+		console.log(value);
 	}
 </script>
 
@@ -8,6 +11,7 @@
 	id="search"
 	type="search"
 	placeholder="Dammi un Attimo..."
+	bind:value={value}
 	oninput={handleInput}
 	class="search-bar bg-surface-100 dark:bg-surface-700"
 />

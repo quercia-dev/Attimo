@@ -6,7 +6,7 @@
 	import TimeGrid from '@event-calendar/time-grid';
 	import SimplePane from '../components/SimplePane.svelte';
 	import SearchBar from '../components/SearchBar.svelte';
-	import QuickTable from './home/quicktable.svelte'
+	import QuickTable from './home/quicktable.svelte';
 
 	let plugins = [TimeGrid];
 	let options = {
@@ -42,38 +42,32 @@
 		window.addEventListener('mouseup', onMouseUp);
 	}
 
-	let entriesNumber = 100
+	let entriesNumber = 100;
 </script>
 
-<main class="no-select flex flex-col overflow-hidden">
-	<div
-		class="bg-surface-50 dark:bg-primary-700 text-color-black p-4 space-y-2 rounded-md shadow-xl flex-shrink-0"
-		style="height: {topDivHeight}px; min-height: 110px;"
-	>
-		<div style="display: flex; align-items: center;">
-			<SearchBar bind:value={searchQuery} />
-			<button type="button" 
-					class="icon-button bg-primary-300 dark:bg-surface-900 ml-4"> 
-				Added {entriesNumber} new entries this week</button>
-		</div>
-			
-		<div style="height: calc(100% - 3rem); overflow: auto;">
-			<QuickTable/>
-		</div>
-
+<div class="bg-surface-50 dark:bg-primary-700 p-4 space-y-2 rounded-md shadow-xl overflow-hidden flex-shrink-0" style="height: {topDivHeight}px; min-height: 110px;">
+	<div style="display: flex; align-items: center;">
+		<SearchBar bind:value={searchQuery} />
+		<button type="button" class="button bg-primary-300 dark:bg-surface-900 ml-4">
+			{entriesNumber} new entries this week</button
+		>
 	</div>
 
-	<div
-		class="slider flex-shrink-0"
-		role="slider"
-		tabindex="0"
-		aria-valuenow={topDivHeight}
-		onmousedown={startResizing}
-	></div>
+	<div style="height: calc(100% - 3rem); overflow: auto;">
+		<QuickTable />
+	</div>
+</div>
 
-	<SimplePane>
-		<div class="calendar-container">
-			<Calendar {plugins} {options} />
-		</div>
-	</SimplePane>
-</main>
+<div
+	class="slider flex-shrink-0"
+	role="slider"
+	tabindex="0"
+	aria-valuenow={topDivHeight}
+	onmousedown={startResizing}
+></div>
+
+<SimplePane>
+	<div class="calendar-container">
+		<Calendar {plugins} {options} />
+	</div>
+</SimplePane>

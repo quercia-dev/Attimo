@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { TableHandler, Datatable, ThSort, ThFilter } from '@vincjo/datatables';
-	import { writable } from 'svelte/store';
 	import { showAppRail } from '../../stores/appStore';
 
 	const tableArr = [
@@ -19,28 +17,46 @@
 	<table class="table table-hover table-cell-fit bg-primary-200">
 		<thead>
 			<tr>
-				<th>Name</th>
-				<th>Number</th>
-				<th></th>
+				<th>Table</th>
+				<th>Entries</th>
 				<th>Open</th>
-				<th></th>
+				<th>Ongoing</th>
+				<th>Close</th>
 				<th>Activity Graph</th>
-				<th>Last week</th>
-				<th>Last month</th>
+				<th>Week</th>
+				<th>Month</th>
 			</tr>
 		</thead>
 		<tbody>
 			{#each tableArr as row, i}
             <tr>
-                <td>{row.name}</td>
-				<td style="text-align: center;">{row.total}</td>
+				<td>
+					<button
+						type="button"
+						aria-label="Open drawer"
+						class="button"
+						style="white-space: nowrap;"
+					>
+						{row.name}
+					</button>
+				</td>
+				<td>
+					<button
+						type="button"
+						aria-label="Open drawer"
+						class="button"
+						style="white-space: nowrap;"
+					>
+						{row.total}
+					</button>
+				</td>
 
                 <td>
 					<button
 						type="button"
 						onclick={() => showAppRail.update(value => !value)}
 						aria-label="Open drawer"
-						class="small-icon-button bg-green-300 dark:bg-green-700"
+						class="small-button bg-green-300 dark:bg-green-700"
 					>
 						<svg class="feather">
 							<use href="/icons/feather-sprite.svg#plus" />
@@ -48,14 +64,23 @@
 					</button>
                 </td>
 				{#if row.continuative}
-				<td style="text-align: center;">{row.ongoing}</td>
+				<td>
+					<button
+						type="button"
+						aria-label="Open drawer"
+						class="button"
+						style="white-space: nowrap;"
+					>
+						{row.ongoing}
+					</button>
+				</td>
 
                 <td>
                     <button
                         type="button"
                         onclick={() => showAppRail.update(value => !value)}
                         aria-label="Open drawer"
-                        class="small-icon-button bg-red-300 dark:bg-red-900"
+                        class="small-button bg-red-300 dark:bg-red-900"
                     >
                         <svg class="feather">
                             <use href="/icons/feather-sprite.svg#minus" />
@@ -68,15 +93,28 @@
 				{/if}
 				<td style="text-align: center; width: 100%;">|___/\___/\_____</td>
 
-				<td style="text-align: center;">{row.lastWeek}</td>
-				<td style="text-align: center;">{row.lastMonth}</td>
+				<td>
+					<button
+						type="button"
+						aria-label="Open drawer"
+						class="button"
+						style="white-space: nowrap;"
+					>
+						{row.lastWeek}
+					</button>
+				</td>
+				<td>
+					<button
+						type="button"
+						aria-label="Open drawer"
+						class="button"
+						style="white-space: nowrap;"
+					>
+						{row.lastMonth}
+					</button>
+				</td>
 			</tr>
 			{/each}
 		</tbody>
 	</table>
 </div>
-
-
-<style>
-
-</style>

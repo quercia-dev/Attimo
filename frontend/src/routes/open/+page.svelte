@@ -37,7 +37,7 @@
                 type="button"
                 onclick={() => console.log('Plus clicked')}
                 aria-label="Open drawer"
-                class="small-icon-button bg-green-300 dark:bg-green-700"
+                class="small-button bg-green-300 dark:bg-green-700"
                 style="margin-left: 8px;"
             >
                 <svg class="feather">
