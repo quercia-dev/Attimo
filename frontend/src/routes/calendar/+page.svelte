@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	let searchQuery = '';
 	let topDivHeight = 150;
 
@@ -29,7 +29,7 @@
 </script>
 
 <SimplePane>
-		<div class="calendar-container">
-			<Calendar {plugins} {options} />
-		</div>
+	<div class="calendar-container">
+		<Calendar {plugins} {options} />
+	</div>
 </SimplePane>

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	let searchQuery = $state('');
 	let topDivHeight = $state(400);
 
@@ -23,11 +23,11 @@
 		]
 	};
 
-	function startResizing(event) {
+	function startResizing(event: MouseEvent) {
 		const startY = event.clientY;
 		const startHeight = topDivHeight;
 
-		function onMouseMove(e) {
+		function onMouseMove(e: MouseEvent) {
 			const newHeight = startHeight + (e.clientY - startY);
 			const maxHeight = window.innerHeight - 200; // Leave space for calendar
 			topDivHeight = Math.max(50, Math.min(newHeight, maxHeight));
