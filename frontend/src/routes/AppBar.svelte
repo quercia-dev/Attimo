@@ -16,41 +16,33 @@
 
 <AppBar background="bg-primary-400 dark:bg-primary-900" padding="p-2">
 	{#snippet lead()}
-	
-			<button
-				type="button"
-				onclick={() => showAppRail.update(value => !value)}
-				aria-label="Open drawer"
-				class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
-			>
+		<button
+			type="button"
+			onclick={() => showAppRail.update((value) => !value)}
+			aria-label="Open drawer"
+			class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
+		>
 			<svg class="feather">
 				<use href="/icons/feather-sprite.svg#menu" />
-			  </svg>
-			</button>
-		
+			</svg>
+		</button>
 	{/snippet}
 	{#snippet trail()}
-	
-	  <!-- Container to hold LightSwitch and the link icon side by side -->
-	  <div class="icon-container">
-	    <!-- LightSwitch component -->
-	    <LightSwitch />
-	    
-	    <!-- Mail link with icon -->
-	    <a
-	      bind:this={linkElement}
-	      href="mailto:example@example.com"
-	      target="_blank"
-	      aria-label="Send email"
-	      class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
-	      onclick={() => openMailto(linkElement.href)}
-	    >
-		<svg class="feather">
-			<use href="/icons/feather-sprite.svg#message-square" />
-		  </svg>
-	    </a>
-	  </div>
+		<div class="icon-container">
+			<LightSwitch />
 
+			<a
+				bind:this={linkElement}
+				href="mailto:example@example.com"
+				target="_blank"
+				aria-label="Send email"
+				class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
+				onclick={() => openMailto(linkElement.href)}
+			>
+				<svg class="feather">
+					<use href="/icons/feather-sprite.svg#message-square" />
+				</svg>
+			</a>
+		</div>
 	{/snippet}
-
 </AppBar>

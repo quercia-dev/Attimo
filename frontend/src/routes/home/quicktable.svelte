@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { TableHandler, Datatable, ThSort, ThFilter } from '@vincjo/datatables';
-	import { writable } from 'svelte/store';
 	import { showAppRail } from '../../stores/appStore';
 
 	const tableArr = [
@@ -75,8 +73,3 @@
 		</tbody>
 	</table>
 </div>
-
-
-<style>
-
-</style>
