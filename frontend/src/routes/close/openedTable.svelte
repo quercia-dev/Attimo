@@ -11,6 +11,7 @@ export let tableArr = [];
                 <th>Table</th>
                 <th>First Created</th>
                 <th>Edited last</th>
+                <th>Principal Value</th>
                 <th>Discard</th>
             </tr>
         </thead>
@@ -56,6 +57,16 @@ export let tableArr = [];
                             style="white-space: nowrap;"
                         >
                             {row.lastEdit}
+                        </button>
+                    </td>
+                    <td>
+                        <button
+                            type="button"
+                            aria-label="Open drawer"
+                            class="icon-button"
+                            style="white-space: nowrap;"
+                        >
+                            {row.valueSummary}
                         </button>
                     </td>
                     <td>
