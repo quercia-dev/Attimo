@@ -45,18 +45,18 @@
 	let entriesNumber = 100;
 </script>
 
-<SimplePane style="height: {topDivHeight}px; min-height: 50rem;">
+<div class="bg-surface-50 dark:bg-primary-700 p-4 space-y-2 rounded-md shadow-xl overflow-hidden flex-shrink-0" style="height: {topDivHeight}px; min-height: 110px;">
 	<div style="display: flex; align-items: center;">
 		<SearchBar bind:value={searchQuery} />
 		<button type="button" class="button bg-primary-300 dark:bg-surface-900 ml-4">
-			Added {entriesNumber} new entries this week</button
+			{entriesNumber} new entries this week</button
 		>
 	</div>
 
 	<div style="height: calc(100% - 3rem); overflow: auto;">
 		<QuickTable />
 	</div>
-</SimplePane>
+</div>
 
 <div
 	class="slider flex-shrink-0"

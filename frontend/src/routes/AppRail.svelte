@@ -12,7 +12,7 @@
 	When adding a new element, ensure that the value attribute is set to +1 of the largest number so far,
 	irrespective of where it is placed in the list. This ensures that each element has a unique and sequential value.
 -->
-<div class="app-rail-wrapper">
+<div class="app-rail-wrapper no-select">
 	{#if $showAppRail}
 		<AppRail background="bg-primary-300 dark:bg-primary-800">
 			<AppRailAnchor href="/" title="home" selected={pane == '/'}>

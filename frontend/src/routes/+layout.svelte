@@ -13,7 +13,7 @@
 		<AppRail />
 
 		<div style="flex: 1; display: flex; flex-direction: column;">
-			<main class="bg-primary-500 p-4 flex flex-col h-[calc(100vh-6rem)] overflow-hidden">
+			<main class="bg-primary-500 p-2 flex flex-col h-[calc(100vh-6rem)] overflow-hidden no-select">
 				<slot />
 			</main>
 
