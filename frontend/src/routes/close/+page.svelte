@@ -23,7 +23,7 @@
             <button
                 type="button"
                 aria-label="Open drawer"
-                class="icon-button bg-secondary-300 dark:bg-secondary-700"
+                class="button bg-secondary-300 dark:bg-secondary-700"
             >
                 <svg class="feather">
                     <use href="/icons/feather-sprite.svg#trash-2" />

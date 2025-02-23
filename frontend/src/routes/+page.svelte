@@ -48,7 +48,7 @@
 <SimplePane style="height: {topDivHeight}px; min-height: 50rem;">
 	<div style="display: flex; align-items: center;">
 		<SearchBar bind:value={searchQuery} />
-		<button type="button" class="icon-button bg-primary-300 dark:bg-surface-900 ml-4">
+		<button type="button" class="button bg-primary-300 dark:bg-surface-900 ml-4">
 			Added {entriesNumber} new entries this week</button
 		>
 	</div>

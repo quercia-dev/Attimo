@@ -34,7 +34,7 @@
 					<button
 						type="button"
 						aria-label="Open drawer"
-						class="icon-button"
+						class="button"
 						style="white-space: nowrap;"
 					>
 						{row.name}
@@ -44,7 +44,7 @@
 					<button
 						type="button"
 						aria-label="Open drawer"
-						class="icon-button"
+						class="button"
 						style="white-space: nowrap;"
 					>
 						{row.total}
@@ -56,7 +56,7 @@
 						type="button"
 						onclick={() => showAppRail.update(value => !value)}
 						aria-label="Open drawer"
-						class="small-icon-button bg-green-300 dark:bg-green-700"
+						class="small-button bg-green-300 dark:bg-green-700"
 					>
 						<svg class="feather">
 							<use href="/icons/feather-sprite.svg#plus" />
@@ -68,7 +68,7 @@
 					<button
 						type="button"
 						aria-label="Open drawer"
-						class="icon-button"
+						class="button"
 						style="white-space: nowrap;"
 					>
 						{row.ongoing}
@@ -80,7 +80,7 @@
                         type="button"
                         onclick={() => showAppRail.update(value => !value)}
                         aria-label="Open drawer"
-                        class="small-icon-button bg-red-300 dark:bg-red-900"
+                        class="small-button bg-red-300 dark:bg-red-900"
                     >
                         <svg class="feather">
                             <use href="/icons/feather-sprite.svg#minus" />
@@ -97,7 +97,7 @@
 					<button
 						type="button"
 						aria-label="Open drawer"
-						class="icon-button"
+						class="button"
 						style="white-space: nowrap;"
 					>
 						{row.lastWeek}
@@ -107,7 +107,7 @@
 					<button
 						type="button"
 						aria-label="Open drawer"
-						class="icon-button"
+						class="button"
 						style="white-space: nowrap;"
 					>
 						{row.lastMonth}

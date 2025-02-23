@@ -22,7 +22,7 @@ export let tableArr = [];
                         <button
                             type="button"
                             aria-label="Open drawer"
-                            class="small-icon-button bg-green-300 dark:bg-green-700"
+                            class="small-button bg-green-300 dark:bg-green-700"
                         >
                             <svg class="feather">
                                 <use href="/icons/feather-sprite.svg#minus" />
@@ -33,7 +33,7 @@ export let tableArr = [];
                         <button
                             type="button"
                             aria-label="Open drawer"
-                            class="icon-button"
+                            class="button"
                             style="white-space: nowrap;"
                         >
                             {row.tableName}
@@ -43,7 +43,7 @@ export let tableArr = [];
                         <button
                             type="button"
                             aria-label="Open drawer"
-                            class="icon-button"
+                            class="button"
                             style="white-space: nowrap;"
                         >
                             {row.openDate}
@@ -53,7 +53,7 @@ export let tableArr = [];
                         <button
                             type="button"
                             aria-label="Open drawer"
-                            class="icon-button"
+                            class="button"
                             style="white-space: nowrap;"
                         >
                             {row.lastEdit}
@@ -63,7 +63,7 @@ export let tableArr = [];
                         <button
                             type="button"
                             aria-label="Open drawer"
-                            class="icon-button"
+                            class="button"
                             style="white-space: nowrap;"
                         >
                             {row.valueSummary}
@@ -73,7 +73,7 @@ export let tableArr = [];
                         <button
                             type="button"
                             aria-label="Open drawer"
-                            class="small-icon-button bg-red-300 dark:bg-red-900"
+                            class="small-button bg-red-300 dark:bg-red-900"
                         >
                             <svg class="feather">
                                 <use href="/icons/feather-sprite.svg#trash-2" />

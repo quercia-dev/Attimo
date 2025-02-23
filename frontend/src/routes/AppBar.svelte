@@ -20,7 +20,7 @@
 			type="button"
 			onclick={() => showAppRail.update((value) => !value)}
 			aria-label="Open drawer"
-			class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
+			class="button hover:bg-primary-300 dark:hover:bg-primary-900"
 		>
 			<svg class="feather">
 				<use href="/icons/feather-sprite.svg#menu" />
@@ -36,7 +36,7 @@
 				href="mailto:example@example.com"
 				target="_blank"
 				aria-label="Send email"
-				class="icon-button hover:bg-primary-300 dark:hover:bg-primary-900"
+				class="button hover:bg-primary-300 dark:hover:bg-primary-900"
 				onclick={() => openMailto(linkElement.href)}
 			>
 				<svg class="feather">
