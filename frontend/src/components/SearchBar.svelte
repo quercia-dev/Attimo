@@ -2,6 +2,7 @@
 	function handleInput(event) {
 		console.log(event.target.value);
 	}
+	export let value: string
 </script>
 
 <input
