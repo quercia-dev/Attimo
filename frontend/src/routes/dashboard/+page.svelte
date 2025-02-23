@@ -1,6 +1,7 @@
 <script lang="ts">
 	import SimplePane from '../../components/SimplePane.svelte';
 	import SearchBar from '../../components/SearchBar.svelte';
+    import Card from './card.svelte'
 
 	let searchQuery = $state('');
 
@@ -22,6 +23,8 @@
             return opts;
         });
     }
+
+    let chips = ['TODO', 'People', 'Projects'];
 </script>
 
 <SimplePane>
@@ -54,6 +57,7 @@
                 type="button"
                 aria-label="Open drawer"
                 class="button bg-secondary-300 dark:bg-secondary-600 flex items-center"
+                style="box-shadow: 0 0 0 1px;"
             >
                 Export
                 <svg class="feather ml-2">
@@ -63,8 +67,8 @@
         </div>
     </div>
 
-    <div class="bg-red-500" style="height: calc(100% - 3rem); overflow: auto;">
-       
+    <div class="h-[calc(100%-3rem)] overflow-auto">
+        <Card {chips}/>
     </div>
 
 </SimplePane>
