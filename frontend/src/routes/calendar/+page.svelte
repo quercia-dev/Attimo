@@ -36,18 +36,18 @@
 	<div class="flex-shrink-0 flex items-center w-auto h-auto space-x-4">
 		<SearchBar bind:value={searchQuery} />
 
-		<RadioGroup rounded="rounded-md">
-			<RadioItem class="button" bind:group={value} name="justify" value={0}>
+		<RadioGroup class= "thin-border" rounded="rounded-md" border="border-black" hover="hover:bg-surface-500 dark:hover:bg-surface-800">
+			<RadioItem class="button" bind:group={value} name="time of day" value={0}>
 				<svg class="feather">
 					<use href="/icons/feather-sprite.svg#clock" />
 				</svg>
 			</RadioItem>
-			<RadioItem class="button" bind:group={value} name="justify" value={1}>
+			<RadioItem class="button" bind:group={value} name="duration" value={1}>
 				<svg class="feather">
 					<use href="/icons/feather-sprite.svg#move" />
 				</svg>
 			</RadioItem>
-			<RadioItem class="button" bind:group={value} name="justify" value={2}>
+			<RadioItem class="button" bind:group={value} name="label" value={2}>
 				<svg class="feather">
 					<use href="/icons/feather-sprite.svg#tag" />
 				</svg>
