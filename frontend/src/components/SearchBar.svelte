@@ -1,8 +1,9 @@
 <script lang="ts">
-	export let value
+	export let value: string;
 	
-	function handleInput(event) {
-		value = event.target.value;
+	function handleInput(event: Event) {
+		const target = event.target as HTMLInputElement;
+		value = target.value;
 		console.log(value);
 	}
 </script>
