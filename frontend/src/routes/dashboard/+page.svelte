@@ -13,8 +13,8 @@
     import { writable } from 'svelte/store';
 
     let options = writable<Record<string, Option>>({
-        hideSources: { value: false, description: 'Sources' },
-        hideEditLogo: { value: true, description: 'Edit' },
+        showChips: { value: true, description: 'Sources' },
+        showEdit: { value: true, description: 'Edit' },
     });
 
     function toggle(key: string): void {
@@ -68,7 +68,7 @@
     </div>
 
     <div class="h-[calc(100%-3rem)] overflow-auto">
-        <Card {chips}/>
+        <Card showChips={($options.showChips).value} chips={chips} showEdit={($options.showEdit).value}/>
     </div>
 
 </SimplePane>
