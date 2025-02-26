@@ -2,6 +2,7 @@
 	import SimplePane from '../../components/SimplePane.svelte';
 	import SearchBar from '../../components/SearchBar.svelte';
     import Card from './card.svelte'
+    import { writable } from 'svelte/store';
 
 	let searchQuery = $state('');
 
@@ -10,7 +11,6 @@
         description: string;
     };
 
-    import { writable } from 'svelte/store';
 
     let options = writable<Record<string, Option>>({
         showChips: { value: true, description: 'Sources' },
