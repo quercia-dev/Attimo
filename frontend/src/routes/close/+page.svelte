@@ -24,8 +24,10 @@
                 type="button"
                 aria-label="Open drawer"
                 class="button bg-secondary-300 dark:bg-secondary-600"
+                style="box-shadow: 0 0 0 1px;"
             >
-                <svg class="feather">
+                History
+                <svg class="feather ml-2">
                     <use href="/icons/feather-sprite.svg#trash-2" />
                 </svg>
             </button>

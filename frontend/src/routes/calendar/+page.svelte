@@ -1,12 +1,14 @@
-<script>
-	let searchQuery = '';
-	let topDivHeight = 150;
-
+<script lang="ts">
 	import Calendar from '@event-calendar/core';
 	import List from '@event-calendar/list';
 	import DayGrid from '@event-calendar/day-grid';
 	import TimeGrid from '@event-calendar/time-grid';
+	import { RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+
 	import SimplePane from '../../components/SimplePane.svelte';
+	import SearchBar from '../../components/SearchBar.svelte';
+
+	let searchQuery = '';
 
 	let plugins = [TimeGrid, List, DayGrid];
 	let options = {
@@ -26,10 +28,34 @@
 			end: 'dayGridMonth, timeGridWeek, timeGridDay, listMonth'
 		}
 	};
+
+	let value: number = 0;
 </script>
 
 <SimplePane>
-		<div class="calendar-container">
-			<Calendar {plugins} {options} />
-		</div>
+	<div class="flex-shrink-0 flex items-center w-auto h-auto space-x-4">
+		<SearchBar bind:value={searchQuery} />
+
+		<RadioGroup class= "thin-border" rounded="rounded-md" border="border-black" hover="hover:bg-surface-500 dark:hover:bg-surface-800">
+			<RadioItem class="button" bind:group={value} name="time of day" value={0}>
+				<svg class="feather">
+					<use href="/icons/feather-sprite.svg#clock" />
+				</svg>
+			</RadioItem>
+			<RadioItem class="button" bind:group={value} name="duration" value={1}>
+				<svg class="feather">
+					<use href="/icons/feather-sprite.svg#move" />
+				</svg>
+			</RadioItem>
+			<RadioItem class="button" bind:group={value} name="label" value={2}>
+				<svg class="feather">
+					<use href="/icons/feather-sprite.svg#tag" />
+				</svg>
+			</RadioItem>
+		</RadioGroup>
+	</div>
+
+	<div class="calendar-container">
+		<Calendar {plugins} {options} />
+	</div>
 </SimplePane>
