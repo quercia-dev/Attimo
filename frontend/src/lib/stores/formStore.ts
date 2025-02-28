@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { FormField, Category } from '../types/types';
+import type { FormField, Category } from '$lib/types/types';
 
 export const categories = writable<Category[]>([
     { id: 'general', name: 'General' },

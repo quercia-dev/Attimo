@@ -6,16 +6,8 @@
 		<meta name="viewport" content="width=device-width" />
 		<title>Attimo</title>
 		%sveltekit.head%
-		<script>
-			(function () {
-				const savedTheme = localStorage.getItem('theme') || 'quercus';
-				console.log("Theme loaded from localStorage:", savedTheme);
-				document.body.setAttribute('data-theme', savedTheme);
-				console.log("Theme applied:", document.body.getAttribute('data-theme'));
-			})();
-		</script>
 	</head>
-	<body data-sveltekit-preload-data="hover">
+	<body data-sveltekit-preload-data="hover" data-theme="earth">
 		<div style="display: contents" class="h-full overflow-hidden">%sveltekit.body%</div>
 	</body>
 </html>

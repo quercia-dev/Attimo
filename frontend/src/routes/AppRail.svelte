@@ -3,7 +3,7 @@
 	import { AppRail, AppRailAnchor } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { fade, slide } from 'svelte/transition';
-	import { showAppRail } from '../stores/appStore';
+	import { showAppRail } from '$lib/stores/appStore';
 
 	$: pane = $page.url.pathname;
 </script>

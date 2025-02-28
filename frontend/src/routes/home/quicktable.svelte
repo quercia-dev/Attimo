@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { showAppRail } from '../../stores/appStore';
+	import { showAppRail } from '$lib/stores/appStore';
 
 	const tableArr = [
 		{ id: 1, name: 'Todo', total: 100, continuative: false, ongoing: 70, lastWeek: 50, lastMonth: 80 },

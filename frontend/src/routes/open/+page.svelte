@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { categories, formFields } from "../../stores/formStore";
-    import type { FormField } from '../../types/types';
+    import { categories, formFields } from "$lib/stores/formStore";
+    import type { FormField } from '$lib/types/types';
     import SimplePane from "../../components/SimplePane.svelte";
     import SearchBar from '../../components/SearchBar.svelte';
     

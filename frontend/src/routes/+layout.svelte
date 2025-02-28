@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.postcss';
 	import { LightSwitch, Avatar } from '@skeletonlabs/skeleton';
+	import { theme } from '$lib/stores/themeStore';
 
 	import AppRail from './AppRail.svelte';
 	import AppBar from './AppBar.svelte';
