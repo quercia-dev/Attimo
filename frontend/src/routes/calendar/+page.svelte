@@ -55,7 +55,7 @@
 		</RadioGroup>
 	</div>
 
-	<div class="calendar-container">
+	<div style="height: calc(100% - 3rem); overflow: auto;">
 		<Calendar {plugins} {options} />
 	</div>
 </SimplePane>

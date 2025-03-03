@@ -1,16 +1,14 @@
 <script lang="ts">
-	let searchQuery = $state('');
-	let topDivHeight = $state(400);
-
 	import Calendar from '@event-calendar/core';
 	import TimeGrid from '@event-calendar/time-grid';
 	import SimplePane from '../components/SimplePane.svelte';
 	import SearchBar from '../components/SearchBar.svelte';
 	import QuickTable from './home/quicktable.svelte';
 
+	let searchQuery = $state('');
 	let plugins = [TimeGrid];
 	let options = {
-		view: 'timeGridWeek',
+		view: 'timeGridDay',
 		slotMinTime: '08:00:00',
 		slotMaxTime: '20:00:00',
 		slotWidth: 10,
@@ -23,51 +21,26 @@
 		]
 	};
 
-	function startResizing(event: MouseEvent) {
-		const startY = event.clientY;
-		const startHeight = topDivHeight;
-
-		function onMouseMove(e: MouseEvent) {
-			const newHeight = startHeight + (e.clientY - startY);
-			const maxHeight = window.innerHeight - 200; // Leave space for calendar
-			topDivHeight = Math.max(50, Math.min(newHeight, maxHeight));
-		}
-
-		function onMouseUp() {
-			window.removeEventListener('mousemove', onMouseMove);
-			window.removeEventListener('mouseup', onMouseUp);
-		}
-
-		window.addEventListener('mousemove', onMouseMove);
-		window.addEventListener('mouseup', onMouseUp);
-	}
-
 	let entriesNumber = 100;
 </script>
 
-<div class="bg-surface-50 dark:bg-primary-700 p-4 space-y-2 rounded-md shadow-xl overflow-hidden flex-shrink-0" style="height: {topDivHeight}px; min-height: 110px;">
-	<div style="display: flex; align-items: center;">
-		<SearchBar bind:value={searchQuery} />
-		<button class="button ml-2">
-			{entriesNumber} new entries this week</button
-		>
-	</div>
+<div class="space-x-2" style="display: flex; height: 100%;">
+	<SimplePane>
+		<div style="display: flex; align-items: center;">
+			<SearchBar bind:value={searchQuery} />
+			<button class="button ml-2">
+				{entriesNumber} new entries this week
+			</button>
+		</div>
 
-	<div style="height: calc(100% - 3rem); overflow: auto;">
-		<QuickTable />
+		<div style="height: calc(100% - 3rem); overflow: auto;">
+			<QuickTable />
+		</div>
+	</SimplePane>
+	
+	<div class="bg-surface-50 dark:bg-primary-700 dark:text-white p-4 space-y-2 rounded-md shadow-xl overflow-hidden">
+		<div style="height: 100%; overflow: auto;">
+			<Calendar {plugins} {options} />
+		</div>
 	</div>
 </div>
-
-<div
-	class="slider flex-shrink-0"
-	role="slider"
-	tabindex="0"
-	aria-valuenow={topDivHeight}
-	onmousedown={startResizing}
-></div>
-
-<SimplePane>
-	<div class="calendar-container">
-		<Calendar {plugins} {options} />
-	</div>
-</SimplePane>
