@@ -17,14 +17,13 @@
 </script>
 
 <SimplePane>
-	<div class="flex-shrink-0 flex items-center w-auto h-auto space-x-4">
+	<div class="flex-shrink-0 flex items-center w-auto h-auto">
 		<SearchBar bind:value={searchQuery} />
 		<button
 			type="button"
 			onclick={() => console.log('Plus clicked')}
 			aria-label="create new entry"
-			class="small-button bg-green-300 dark:bg-green-700"
-			style="margin-left: 8px;"
+			class="small-button bg-green-300 dark:bg-green-700 ml-2"
 		>
 			<svg class="feather">
 				<use href="/icons/feather-sprite.svg#plus" />
@@ -32,7 +31,7 @@
 		</button>
 
 		<RadioGroup
-			class="thin-border"
+			class="ml-2 thin-border"
 			rounded="rounded-md"
 			border="border-black"
 			hover="hover:bg-surface-500 dark:hover:bg-surface-800"

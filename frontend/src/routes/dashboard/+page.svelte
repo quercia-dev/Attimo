@@ -28,14 +28,13 @@
 </script>
 
 <SimplePane>
-	<div class="flex-shrink-0 flex items-center w-auto h-auto">
+	<div class="flex items-center">
 		<SearchBar bind:value={searchQuery} />
-		<button
-			type="button"
-			onclick={() => console.log('Plus clicked')}
-			aria-label="Open drawer"
-			class="small-button bg-green-300 dark:bg-green-700"
-			style="margin-left: 8px;"
+        <button
+            type="button"
+            onclick={() => console.log('Plus clicked')}
+            aria-label="Open drawer"
+            class="small-button bg-green-300 dark:bg-green-700 ml-2"
 		>
 			<svg class="feather">
 				<use href="/icons/feather-sprite.svg#file-plus" />
@@ -44,11 +43,10 @@
 
 		{#each Object.entries($options) as [key, option]}
 			<button
-				class={`small-button p-1 ${option.value ? 'bg-surface-600 dark:bg-surface-900' : 'bg-inherit'}`}
+				class={`small-button p-1 ml-2 ${option.value ? 'bg-surface-600 dark:bg-surface-900' : 'bg-inherit'}`}
 				onclick={() => {
 					toggle(key);
 				}}
-				style="margin-left: 8px;"
 			>
 				{option.description}
 			</button>

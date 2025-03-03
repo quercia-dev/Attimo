@@ -48,7 +48,7 @@
 <div class="bg-surface-50 dark:bg-primary-700 p-4 space-y-2 rounded-md shadow-xl overflow-hidden flex-shrink-0" style="height: {topDivHeight}px; min-height: 110px;">
 	<div style="display: flex; align-items: center;">
 		<SearchBar bind:value={searchQuery} />
-		<button type="button" class="button bg-primary-300 dark:bg-surface-900 ml-4">
+		<button class="button ml-2">
 			{entriesNumber} new entries this week</button
 		>
 	</div>
