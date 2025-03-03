@@ -28,7 +28,6 @@
 </script>
 
 <SimplePane>
-
     <div class="flex flex-col space-y-4">
         <div style="display: flex; align-items: center;">
             <SearchBar bind:value={searchQuery} />

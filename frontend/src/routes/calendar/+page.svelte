@@ -33,7 +33,7 @@
 </script>
 
 <SimplePane>
-	<div class="flex-shrink-0 flex w-auto h-auto">
+	<div class="flex-shrink-0 flex items-center w-auto h-auto">
 		<SearchBar bind:value={searchQuery} />
 
 		<RadioGroup class= "ml-2 thin-border" rounded="rounded-md" border="border-black" hover="hover:bg-surface-500 dark:hover:bg-surface-800">
