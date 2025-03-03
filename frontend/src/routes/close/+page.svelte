@@ -2,6 +2,7 @@
 	import SimplePane from '../../components/SimplePane.svelte';
 	import SearchBar from '../../components/SearchBar.svelte';
 	import OpenedTable from './openedTable.svelte';
+	import SecondaryButton from '../../components/SecondaryButton.svelte';
 
 	const tableArr = [
         { id: 1, tableName: 'Todo', openDate: '2025-01-02 10:30', lastEdit: '2025-01-15 11:18', valueSummary: 'Personal' },
@@ -20,17 +21,12 @@
         <SearchBar bind:value={searchQuery} />
 
         <div style="margin-left: auto;">
-            <button
-                type="button"
-                aria-label="Open drawer"
-                class="button bg-secondary-300 dark:bg-secondary-600"
-                style="box-shadow: 0 0 0 1px;"
-            >
+            <SecondaryButton>
                 History
-                <svg class="feather ml-2">
+            	<svg class="feather ml-2">
                     <use href="/icons/feather-sprite.svg#trash-2" />
                 </svg>
-            </button>
+            </SecondaryButton>
         </div>
     </div>
 
