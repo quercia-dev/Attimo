@@ -2,7 +2,7 @@
 	import { openPath } from '@tauri-apps/plugin-opener';
 	import { AppBar } from '@skeletonlabs/skeleton';
 	import { LightSwitch } from '@skeletonlabs/skeleton';
-	import { showAppRail } from '../stores/appStore';
+	import { showAppRail } from '$lib/stores/appStore';
 
 	let linkElement: HTMLAnchorElement = $state();
 	async function openMailto(mailtoLink: string) {
