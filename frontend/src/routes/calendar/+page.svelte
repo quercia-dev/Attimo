@@ -33,10 +33,10 @@
 </script>
 
 <SimplePane>
-	<div class="flex-shrink-0 flex items-center w-auto h-auto space-x-4">
+	<div class="flex-shrink-0 flex items-center w-auto h-auto">
 		<SearchBar bind:value={searchQuery} />
 
-		<RadioGroup class= "thin-border" rounded="rounded-md" border="border-black" hover="hover:bg-surface-500 dark:hover:bg-surface-800">
+		<RadioGroup class= "ml-2 thin-border" rounded="rounded-md" border="border-black" hover="hover:bg-surface-500 dark:hover:bg-surface-800">
 			<RadioItem class="button" bind:group={value} name="time of day" value={0}>
 				<svg class="feather">
 					<use href="/icons/feather-sprite.svg#clock" />
@@ -55,7 +55,7 @@
 		</RadioGroup>
 	</div>
 
-	<div class="calendar-container">
+	<div style="height: calc(100% - 3rem); overflow: auto;">
 		<Calendar {plugins} {options} />
 	</div>
 </SimplePane>
