@@ -13,6 +13,7 @@ frontend/.output/
 frontend/.vercel/
 frontend/.svelte-kit/
 frontend/build/
+node_modules/
 
 # Env files
 .env
