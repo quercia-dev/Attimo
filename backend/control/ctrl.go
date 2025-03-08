@@ -18,21 +18,21 @@ func New(data *database.Database, logger *log.Logger) (*Controller, error) {
 			data:   data,
 		}
 
-	ctrl.setupServer(logger)
+	ctrl.setupServer()
 
 	return ctrl, nil
 }
 
-func (c *Controller) GetCategories(logger *log.Logger) ([]string, error) {
-	if logger == nil {
+func (c *Controller) GetCategories() ([]string, error) {
+	if c.logger == nil {
 		return nil, fmt.Errorf(log.LoggerNilString)
 	}
 
 	return c.data.GetCategories()
 }
 
-func (c *Controller) GetCategoryColumns(logger *log.Logger, category string, condition *ColumnCondition) ([]string, error) {
-	if logger == nil {
+func (c *Controller) GetCategoryColumns(category string, condition *ColumnCondition) ([]string, error) {
+	if c.logger == nil {
 		return nil, fmt.Errorf(log.LoggerNilString)
 	}
 
@@ -87,7 +87,7 @@ func (c *Controller) GetCategoryColumns(logger *log.Logger, category string, con
 		// get datattpe information for column
 		datatype, err := database.GetDatatypeByName(tx, column)
 		if err != nil {
-			logger.LogWarn("Failed to get datatype for column %s: %v", column, err)
+			c.logger.LogWarn("Failed to get datatype for column %s: %v", column, err)
 			continue
 		}
 
@@ -129,8 +129,8 @@ func (c *Controller) GetCategoryColumns(logger *log.Logger, category string, con
 	return filteredColumns, nil
 }
 
-func (c *Controller) OpenItem(logger *log.Logger, request OpenItemRequest) OpenItemResponse {
-	if logger == nil {
+func (c *Controller) OpenItem(request OpenItemRequest) OpenItemResponse {
+	if c.logger == nil {
 		return OpenItemResponse{Success: false, Error: fmt.Errorf(log.LoggerNilString)}
 	}
 
@@ -145,7 +145,7 @@ func (c *Controller) OpenItem(logger *log.Logger, request OpenItemRequest) OpenI
 		FillBehavior: "open",
 	}
 
-	columns, err := c.GetCategoryColumns(logger, request.Category, condition)
+	columns, err := c.GetCategoryColumns(request.Category, condition)
 	if err != nil {
 		return OpenItemResponse{Success: false, Error: fmt.Errorf("failed to get columns: %w", err)}
 	}
@@ -164,18 +164,18 @@ func (c *Controller) OpenItem(logger *log.Logger, request OpenItemRequest) OpenI
 	}
 
 	for column, value := range rowData {
-		datatype, err := c.GetColumnDatatype(logger, request.Category, column)
+		datatype, err := c.GetColumnDatatype(request.Category, column)
 		if err != nil {
 			return OpenItemResponse{Success: false, Error: fmt.Errorf("failed to get datatype for column %s: %w", column, err)}
 		}
 
-		if !datatype.ValidateCheck(value, logger) {
+		if !datatype.ValidateCheck(value, c.logger) {
 			return OpenItemResponse{Success: false, Error: fmt.Errorf("invalid value for column %s: %v", column, value)}
 		}
 	}
 
 	// create row
-	err = c.CreateRow(logger, request.Category, rowData)
+	err = c.CreateRow(request.Category, rowData)
 	if err != nil {
 		return OpenItemResponse{Success: false, Error: fmt.Errorf("failed to create row: %w", err)}
 	}
@@ -183,16 +183,16 @@ func (c *Controller) OpenItem(logger *log.Logger, request OpenItemRequest) OpenI
 	return OpenItemResponse{Success: true, Error: nil}
 }
 
-func (c *Controller) CreateRow(logger *log.Logger, category string, values database.RowData) error {
-	if logger == nil {
+func (c *Controller) CreateRow(category string, values database.RowData) error {
+	if c.logger == nil {
 		return fmt.Errorf(log.LoggerNilString)
 	}
 
 	return c.data.CreateRow(category, values)
 }
 
-func (c *Controller) ListRows(logger *log.Logger, opts ListRowsOptions) (*ListRowsResult, error) {
-	if logger == nil {
+func (c *Controller) ListRows(opts ListRowsOptions) (*ListRowsResult, error) {
+	if c.logger == nil {
 		return nil, fmt.Errorf(log.LoggerNilString)
 	}
 
@@ -214,7 +214,7 @@ func (c *Controller) ListRows(logger *log.Logger, opts ListRowsOptions) (*ListRo
 	// Get rows from database with pagination
 	rows, total, err := c.data.ListRows(opts.Category, opts.Filters, opts.Page, opts.PageSize)
 	if err != nil {
-		logger.LogErr("Failed to list rows for category %s: %v", opts.Category, err)
+		c.logger.LogErr("Failed to list rows for category %s: %v", opts.Category, err)
 		return nil, fmt.Errorf("failed to list rows: %w", err)
 	}
 
@@ -229,14 +229,14 @@ func (c *Controller) ListRows(logger *log.Logger, opts ListRowsOptions) (*ListRo
 		PageSize:    opts.PageSize,
 	}
 
-	logger.LogInfo("Listed %d rows (page %d of %d) for category %s",
+	c.logger.LogInfo("Listed %d rows (page %d of %d) for category %s",
 		len(rows), opts.Page, totalPages, opts.Category)
 
 	return result, nil
 }
 
-func (c *Controller) GetColumnDatatype(logger *log.Logger, category, column string) (*database.Datatype, error) {
-	if logger == nil {
+func (c *Controller) GetColumnDatatype(category, column string) (*database.Datatype, error) {
+	if c.logger == nil {
 		return nil, fmt.Errorf("logger is nil")
 	}
 
@@ -258,20 +258,17 @@ func (c *Controller) BeginTransaction() (*sql.Tx, error) {
 	return c.data.DB.Begin()
 }
 
-func (c *Controller) CloseItem(logger *log.Logger, category string, itemID int, closeDate string) error {
+func (c *Controller) CloseItem(category string, itemID int, closeDate string) error {
 	return c.data.CloseItem(category, itemID, closeDate)
 }
 
-func (c *Controller) GetPendingPointers(logger *log.Logger) ([]string, error) {
+func (c *Controller) GetPendingPointers() ([]string, error) {
 	return c.data.GetPendingPointers()
 }
 
-func (c *Controller) GetData(logger *log.Logger, category string) ([]string, []map[string]string, error) {
-
-	if logger == nil {
-
+func (c *Controller) GetData(category string) ([]string, []map[string]string, error) {
+	if c.logger == nil {
 		return nil, nil, fmt.Errorf(log.LoggerNilString)
-
 	}
 
 	// TODO add loop to get rows further down
@@ -282,7 +279,7 @@ func (c *Controller) GetData(logger *log.Logger, category string) ([]string, []m
 
 	if err != nil {
 
-		logger.LogErr("Failed to list rows for category %s: %v", category, err)
+		c.logger.LogErr("Failed to list rows for category %s: %v", category, err)
 
 		return nil, nil, fmt.Errorf("failed to list rows: %w", err)
 
