@@ -12,10 +12,15 @@ func New(data *database.Database, logger *log.Logger) (*Controller, error) {
 		return nil, fmt.Errorf("data or logger is nil")
 	}
 
-	return &Controller{
-		logger: logger,
-		data:   data,
-	}, nil
+	ctrl :=
+		&Controller{
+			logger: logger,
+			data:   data,
+		}
+
+	ctrl.setupServer(logger)
+
+	return ctrl, nil
 }
 
 func (c *Controller) GetCategories(logger *log.Logger) ([]string, error) {

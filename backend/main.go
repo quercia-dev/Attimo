@@ -2,16 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
 	"path/filepath"
-	"syscall"
-	"time"
 
+	ctrl "Attimo/control"
 	data "Attimo/database"
 	log "Attimo/logging"
-
-	"github.com/gofiber/fiber/v3"
 )
 
 func main() {
@@ -25,35 +20,16 @@ func main() {
 		return
 	}
 
-	_, err = data.SetupDatabase(dbPath, logger)
+	var db *data.Database
+	db, err = data.SetupDatabase(dbPath, logger)
 	if err != nil {
 		logger.LogErr("Could not create database %v", err)
 		return
 	}
 
-	app := fiber.New()
-
-	app.Get("/", func(c fiber.Ctx) error {
-		return c.SendString("Hello, World 👋!")
-	})
-
-	go func() {
-		if err := app.Listen(":0"); err != nil {
-			fmt.Printf("Error starting app: %v\n", err)
-		}
-
-	}()
-
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-
-	<-sigCh
-
-	fmt.Println("\nBackend Shutdown...")
-	if err := app.ShutdownWithTimeout(5 * time.Second); err != nil {
-		fmt.Printf("Error during graceful shutdown: %v\n", err)
-	} else {
-		fmt.Println("Server shut down gracefully.")
+	_, err = ctrl.New(db, logger)
+	if err != nil {
+		logger.LogErr("Could not create controller %v", err)
+		return
 	}
-
 }
