@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // createCategoryTables creates tables for each category
@@ -90,10 +91,10 @@ func toSQLiteType(goType string) (string, error) {
 	}
 }
 
-func (data *Database) GetCategories() ([]string, error) {
+func (data *Database) GetCategories() ([]Category, error) {
 	// Query for table names
 	rows, err := data.DB.Query(`
-		SELECT name
+		SELECT name 
 		FROM sqlite_master
 		WHERE type = 'table'
 		  AND name NOT LIKE 'sqlite_%'
@@ -106,8 +107,16 @@ func (data *Database) GetCategories() ([]string, error) {
 	}
 	defer rows.Close()
 
-	var categories []string
+	var categories []Category
 	for rows.Next() {
+
+		created := time.Now()    // TEMPORARY
+		updated := time.Now()    // TEMPORARY
+		deleted := sql.NullTime{ // TEMPORARY
+			Time:  time.Time{},
+			Valid: false,
+		}
+
 		var name string
 		if err := rows.Scan(&name); err != nil {
 			return nil, fmt.Errorf("failed to scan table name: %w", err)
@@ -115,7 +124,9 @@ func (data *Database) GetCategories() ([]string, error) {
 		if name == "pending" {
 			continue
 		}
-		categories = append(categories, name)
+		time := Timestamp{CreatedAt: created, UpdatedAt: updated, DeletedAt: deleted}
+		cat := Category{CategoryTemplate: CategoryTemplate{Name: name}, Timestamp: time}
+		categories = append(categories, cat)
 	}
 
 	if err = rows.Err(); err != nil {

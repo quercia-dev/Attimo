@@ -22,7 +22,7 @@ type Metadata struct {
 	Version   int
 }
 
-// Datatype struct holds the columns information.
+// Datatype struct holds the columns metadata.
 type Datatype struct {
 	ID              int
 	Name            string
@@ -33,8 +33,8 @@ type Datatype struct {
 	FillBehavior    string
 }
 
-// Category struct holds the category information.
-type Category struct {
+// Entry struct holds the Entry information.
+type Entry struct {
 	ID        int
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -42,19 +42,30 @@ type Category struct {
 	Datatypes RowData
 }
 
-// Pending struct holds the pointer of unclosed rows.
-type Pending struct {
-	ID        int
+type Timestamp struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt sql.NullTime
-	Pointer   string // Format: "Category:ID", e.g., "General:123"
 }
 
+// Pending struct holds the pointer of an unclosed row.
+type Pending struct {
+	ID      int
+	Pointer string // Format: "Category:ID", e.g., "General:123"
+	Timestamp
+}
+
+// CategoryTemplate stores information to construct a new Category
 type CategoryTemplate struct {
 	Name string
 	// contains a list of numerical IDs for the rows of the datatypes
 	ColumnsID []int
+}
+
+// Category stores location and description of an existing Category
+type Category struct {
+	CategoryTemplate
+	Timestamp
 }
 
 type RowData map[string]interface{}

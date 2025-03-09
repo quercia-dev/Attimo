@@ -23,7 +23,7 @@ func New(data *database.Database, logger *log.Logger) (*Controller, error) {
 	return ctrl, nil
 }
 
-func (c *Controller) GetCategories() ([]string, error) {
+func (c *Controller) GetCategories() ([]database.Category, error) {
 	if c.logger == nil {
 		return nil, fmt.Errorf(log.LoggerNilString)
 	}
